@@ -1,0 +1,2371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Georgia Parenting Time Calculator</title>
+    <style>
+h3,h4,p{margin-top: 10px;margin-bottom:1px}
+.summer-schedule-options {
+  display: flex;
+  flex-wrap: wrap;
+}
+td{min-width:35px;}
+.date-picker {
+  margin-top: 1px;
+}
+.date-picker.exchange, .parent-selection-FirstSplit {
+    display: none;
+}
+.parent-selection {
+  margin-bottom: 1px;
+}
+        .options-container, .option-section, .two-column > div {
+            border: 1px solid #ccc;
+            padding: 5px;
+            margin-bottom: 1px;
+        }
+        .two-column {
+            display: flex;
+            justify-content: space-between;
+        }
+        .two-column > div {
+            width: 48%;
+        }
+       .calendar-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+.month {
+    width: 32%; /* Change from 16% to 32% */
+    margin-bottom: 20px;
+}
+        }
+        .month table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .month th, .month td {
+            border: 1px solid #ddd;
+            padding: 2px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .month input[type="number"] {
+            width: 30px;
+            font-size: 10px;
+        }
+    #ParentBpct,#total-days {
+        margin-left: 10px;
+        width: 60px;
+    }
+    @media print {
+        #calendar {
+            page-break-before: always;
+        }
+        
+        .two-column,.calendar-row {
+            page-break-inside: avoid;
+        }
+    }
+    </style>
+</head>
+<body>
+    <h1>Georgia Parenting Time (PT) Adjustment Calculator</h1>
+    <h3>Based upon OCGA § 19-6-15(b)(5.1)(non-binding until January 1, 2026)</h3>
+    <h4>Developed by Russell Taylor @ Daniels & Taylor, P.C. The most advanced and efficient family law firm in Gwinnett County, GA. <a href="https://www.danielstaylor.com">www.danielstaylor.com</a> </h4>
+
+    <div class="options-container">
+        <div class="option-column">
+            <h2>STEP 1: SELECT THE APPROPRIATE OPTIONS BELOW</h2>
+            <p>The child is assumed to be with Parent A (the custodial parent) unless specified otherwise. Parent B is the non-custodial parent with <50% PT (or the parent with higher income if the parties excercise PT equally)</p>
+
+            <div class="option-section two-column">
+                <div>
+                    <h3>Regular Weekly Schedule</h3>
+                    <p>Weekend overnights spent with Parent B (Choose one):</p>
+                    <label><input type="radio" name="weekly-schedule" value="first-third"> First and third monthly periods(every month)</label><br>
+                    <label><input type="radio" name="weekly-schedule" value="second-fourth"> Second and fourth monthly periods</label><br>
+                    <label><input type="radio" name="weekly-schedule" value="alternating-odd"> Alternating odd periods</label><br>
+                    <label><input type="radio" name="weekly-schedule" value="alternating-even"> Alternating even periods</label><br>
+                    <label><input type="radio" name="weekly-schedule" value="every"> Every</label><br>
+                    <label><input type="radio" name="weekly-schedule" value="Omit" checked> Omit</label><br>
+<div id="regular-begin-end">
+                    <p>Beginning 
+                        <select name="begin-day">
+                            <option value="wednesday">Wednesday</option>
+                            <option value="thursday">Thursday</option>
+                            <option value="friday" selected>Friday</option>
+                            <option value="saturday">Saturday</option>
+                            <option value="sunday">Sunday</option>
+                            <option value="monday">Monday</option>
+                            <option value="tuesday">Tuesday</option>
+                        </select> 
+                    </p>
+                    <p>Ending 
+                        <select name="end-day">
+                            <option value="saturday">Saturday</option>
+                            <option value="sunday" selected>Sunday</option>
+                            <option value="monday">Monday</option>
+                            <option value="tuesday">Tuesday</option>
+                            <option value="wednesday">Wednesday</option>
+                            <option value="thursday">Thursday</option>
+                            <option value="friday">Friday</option>
+                        </select> 
+                    </p>
+                </div>
+		</div>
+                <div>
+                    <h3>Regular and Recurring Daytime Periods</h3>
+                    <p>Select the appropriate options for regular and recurring daytime periods.</p>
+                    <label><input type="radio" name="recurring-frequency" value="first-third-recurring"> First and third</label>
+                    <label><input type="radio" name="recurring-frequency" value="second-fourth-recurring"> Second and fourth</label>
+<br>
+                    <label><input type="radio" name="recurring-frequency" value="every"> Every</label>
+                    <label><input type="radio" name="recurring-frequency" value="every-other"> Every Other</label>
+
+                    <label><input type="radio" name="recurring-frequency" value="Omit" checked> Omit</label>
+
+                    <div id="every-other-options" style="display: none;">
+                        <label><input type="radio" name="every-other-type" value="odd"> Odd Week</label>
+                        <label><input type="radio" name="every-other-type" value="even"> Even Week</label>
+                    </div>
+<div id="recurring-days">
+                    <div class="day-row">
+                        <label><input type="checkbox" name="recurring-day" value="monday"> Monday</label> for <input type="number" name="recurring-hours-monday" min="0" max="24" step="0.5" class="disabled" disabled> hours
+                    </div>
+                    <div class="day-row">
+                        <label><input type="checkbox" name="recurring-day" value="tuesday"> Tuesday</label> for <input type="number" name="recurring-hours-tuesday" min="0" max="24" step="0.5" class="disabled" disabled> hours
+                    </div>
+                    <div class="day-row">
+                        <label><input type="checkbox" name="recurring-day" value="wednesday"> Wednesday</label> for <input type="number" name="recurring-hours-wednesday" min="0" max="24" step="0.5" class="disabled" disabled> hours
+                    </div>
+                    <div class="day-row">
+                        <label><input type="checkbox" name="recurring-day" value="thursday"> Thursday</label> for <input type="number" name="recurring-hours-thursday" min="0" max="24" step="0.5" class="disabled" disabled> hours
+                    </div>
+                    <div class="day-row">
+                        <label><input type="checkbox" name="recurring-day" value="friday"> Friday</label> for <input type="number" name="recurring-hours-friday" min="0" max="24" step="0.5" class="disabled" disabled> hours
+                    </div>
+                    <div class="day-row">
+                        <label><input type="checkbox" name="recurring-day" value="saturday"> Saturday</label> for <input type="number" name="recurring-hours-saturday" min="0" max="24" step="0.5" class="disabled" disabled> hours
+                    </div>
+                    <div class="day-row">
+                        <label><input type="checkbox" name="recurring-day" value="sunday"> Sunday</label> for <input type="number" name="recurring-hours-sunday" min="0" max="24" step="0.5" class="disabled" disabled> hours
+                    </div>
+</div>
+                </div>
+            </div>
+
+<!-- Spring Break Section -->
+<div class="option-section two-column">
+  <div>
+    <p>The following takes priority over the regular weekly schedule.</p>
+    <h3>Spring Break - EVEN YEARS</h3>
+        <h4>Spring Break takes priority over Easter</h4>
+    
+    <div class="parent-selection">
+      <input type="radio" id="evenSpringBreakParentA" name="evenSpringBreakParent" value="A">
+      <label for="evenSpringBreakParentA">Parent A</label>
+      
+      <input type="radio" id="evenSpringBreakParentB" name="evenSpringBreakParent" value="B">
+      <label for="evenSpringBreakParentB">Parent B</label>
+      
+      <input type="radio" id="evenSpringBreakOmit" name="evenSpringBreakParent" value="Omit" checked>
+      <label for="evenSpringBreakOmit">Omit</label>
+    </div>
+    
+    <div class="date-selection" id="evenSpringDates">
+    <div class="date-picker">
+      <label for="evenSpringBreakStart">Beginning:</label>
+      <input type="date" id="evenSpringBreakStart" name="evenSpringBreakStart">
+    </div>
+    
+    <div class="date-picker">
+      <label for="evenSpringBreakEnd">Ending:</label>
+      <input type="date" id="evenSpringBreakEnd" name="evenSpringBreakEnd">
+    </div>
+  </div>
+  </div>
+  <div>
+    <p>The following takes priority over the regular weekly schedule.</p>
+    <h3>Spring Break - ODD YEARS</h3>
+        <h4>Spring Break takes priority over Easter</h4>
+    <div class="parent-selection">
+      <input type="radio" id="oddSpringBreakParentA" name="oddSpringBreakParent" value="A">
+      <label for="oddSpringBreakParentA">Parent A</label>
+      
+      <input type="radio" id="oddSpringBreakParentB" name="oddSpringBreakParent" value="B">
+      <label for="oddSpringBreakParentB">Parent B</label>
+      
+      <input type="radio" id="oddSpringBreakOmit" name="oddSpringBreakParent" value="Omit" checked>
+      <label for="oddSpringBreakOmit">Omit</label>
+    </div>
+    
+    <div class="date-selection" id="oddSpringDates">
+    <div class="date-picker">
+      <label for="oddSpringBreakStart">Beginning:</label>
+      <input type="date" id="oddSpringBreakStart" name="oddSpringBreakStart">
+    </div>
+    
+    <div class="date-picker">
+      <label for="oddSpringBreakEnd">Ending:</label>
+      <input type="date" id="oddSpringBreakEnd" name="oddSpringBreakEnd">
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Fall Break Section -->
+<div class="option-section two-column">
+  <div>
+    <h3>Fall Break - EVEN YEARS</h3>
+    
+    <div class="parent-selection">
+      <input type="radio" id="evenFallBreakParentA" name="evenFallBreakParent" value="A">
+      <label for="evenFallBreakParentA">Parent A</label>
+      
+      <input type="radio" id="evenFallBreakParentB" name="evenFallBreakParent" value="B">
+      <label for="evenFallBreakParentB">Parent B</label>
+      
+      <input type="radio" id="evenFallBreakOmit" name="evenFallBreakParent" value="Omit" checked>
+      <label for="evenFallBreakOmit">Omit</label>
+    </div>
+    
+    <div class="date-selection" id="evenFallDates">
+    <div class="date-picker">
+      <label for="evenFallBreakStart">Beginning:</label>
+      <input type="date" id="evenFallBreakStart" name="evenFallBreakStart">
+    </div>
+    
+    <div class="date-picker">
+      <label for="evenFallBreakEnd">Ending:</label>
+      <input type="date" id="evenFallBreakEnd" name="evenFallBreakEnd">
+    </div>
+  </div>
+  </div>
+  <div>
+    <h3>Fall Break - ODD YEARS</h3>
+    
+    <div class="parent-selection">
+      <input type="radio" id="oddFallBreakParentA" name="oddFallBreakParent" value="A">
+      <label for="oddFallBreakParentA">Parent A</label>
+      
+      <input type="radio" id="oddFallBreakParentB" name="oddFallBreakParent" value="B">
+      <label for="oddFallBreakParentB">Parent B</label>
+      
+      <input type="radio" id="oddFallBreakOmit" name="oddFallBreakParent" value="Omit" checked>
+      <label for="oddFallBreakOmit">Omit</label>
+    </div>
+    
+    <div class="date-selection" id="oddFallDates">
+    <div class="date-picker">
+      <label for="oddFallBreakStart">Beginning:</label>
+      <input type="date" id="oddFallBreakStart" name="oddFallBreakStart">
+    </div>
+    
+    <div class="date-picker">
+      <label for="oddFallBreakEnd">Ending:</label>
+      <input type="date" id="oddFallBreakEnd" name="oddFallBreakEnd">
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- Thanksgiving Break Section -->
+<div class="option-section two-column">
+  <div>
+    <h3>Thanksgiving Break - EVEN YEARS</h3>
+    
+    <div class="parent-selection">
+      <input type="radio" id="evenThanksgivingBreakParentA" name="evenThanksgivingBreakParent" value="A">
+      <label for="evenThanksgivingBreakParentA">Parent A</label>
+      
+      <input type="radio" id="evenThanksgivingBreakParentB" name="evenThanksgivingBreakParent" value="B">
+      <label for="evenThanksgivingBreakParentB">Parent B</label>
+      
+      <input type="radio" id="evenThanksgivingBreakOmit" name="evenThanksgivingBreakParent" value="Omit" checked>
+      <label for="evenThanksgivingBreakOmit">Omit</label>
+      
+      <input type="radio" id="evenThanksgivingBreakSplit" name="evenThanksgivingBreakParent" value="Split">
+      <label for="evenThanksgivingBreakSplit">Split</label>
+    </div>
+    
+    <div class="date-selection" id="evenThanksgivingDates">
+    <div class="date-picker">
+      <label for="evenThanksgivingBreakStart">Beginning:</label>
+      <input type="date" id="evenThanksgivingBreakStart" name="evenThanksgivingBreakStart">
+    </div>
+    
+    <div class="date-picker exchange">
+      <label for="evenThanksgivingBreakExchange">Exchange:</label>
+      <input type="date" id="evenThanksgivingBreakExchange" name="evenThanksgivingBreakExchange">
+    </div>
+    
+    <div class="date-picker">
+      <label for="evenThanksgivingBreakEnd">Ending:</label>
+      <input type="date" id="evenThanksgivingBreakEnd" name="evenThanksgivingBreakEnd">
+    </div>
+  </div>
+    <div class="parent-selection-FirstSplit">
+      First Period with: <input type="radio" id="evenThanksgivingBreakParentAFirstSplit" name="evenThanksgivingBreakParentFirstSplit" value="A">
+      <label for="evenThanksgivingBreakParentAFirstSplit">Parent A</label>
+      
+      <input type="radio" id="evenThanksgivingBreakParentBFirstSplit" name="evenThanksgivingBreakParentFirstSplit" value="B">
+      <label for="evenThanksgivingBreakParentBFirstSplit">Parent B</label>
+      
+    </div>
+  </div>
+  <div>
+    <h3>Thanksgiving Break - ODD YEARS</h3>
+    
+    <div class="parent-selection">
+      <input type="radio" id="oddThanksgivingBreakParentA" name="oddThanksgivingBreakParent" value="A">
+      <label for="oddThanksgivingBreakParentA">Parent A</label>
+      
+      <input type="radio" id="oddThanksgivingBreakParentB" name="oddThanksgivingBreakParent" value="B">
+      <label for="oddThanksgivingBreakParentB">Parent B</label>
+      
+      <input type="radio" id="oddThanksgivingBreakOmit" name="oddThanksgivingBreakParent" value="Omit" checked>
+      <label for="oddThanksgivingBreakOmit">Omit</label>
+      
+      <input type="radio" id="oddThanksgivingBreakSplit" name="oddThanksgivingBreakParent" value="Split">
+      <label for="oddThanksgivingBreakSplit">Split</label>
+    </div>
+    
+    <div class="date-selection" id="oddThanksgivingDates">
+    <div class="date-picker">
+      <label for="oddThanksgivingBreakStart">Beginning:</label>
+      <input type="date" id="oddThanksgivingBreakStart" name="oddThanksgivingBreakStart">
+    </div>
+    
+    <div class="date-picker exchange">
+      <label for="oddThanksgivingBreakExchange">Exchange:</label>
+      <input type="date" id="oddThanksgivingBreakExchange" name="oddThanksgivingBreakExchange">
+    </div>
+    
+    <div class="date-picker">
+      <label for="oddThanksgivingBreakEnd">Ending:</label>
+      <input type="date" id="oddThanksgivingBreakEnd" name="oddThanksgivingBreakEnd">
+    </div>
+  </div>
+    <div class="parent-selection-FirstSplit">
+      First Period with: <input type="radio" id="oddThanksgivingBreakParentAFirstSplit" name="oddThanksgivingBreakParentFirstSplit" value="A">
+      <label for="oddThanksgivingBreakParentAFirstSplit">Parent A</label>
+      
+      <input type="radio" id="oddThanksgivingBreakParentBFirstSplit" name="oddThanksgivingBreakParentFirstSplit" value="B">
+      <label for="oddThanksgivingBreakParentBFirstSplit">Parent B</label>
+      
+    </div>
+</div>
+</div>
+
+<!-- Christmas Break Section -->
+<div class="option-section two-column">
+  <div>
+    <h3>Christmas Break - EVEN YEARS</h3>
+    
+    <div class="parent-selection">
+      <input type="radio" id="evenChristmasBreakParentA" name="evenChristmasBreakParent" value="A">
+      <label for="evenChristmasBreakParentA">Parent A</label>
+      
+      <input type="radio" id="evenChristmasBreakParentB" name="evenChristmasBreakParent" value="B">
+      <label for="evenChristmasBreakParentB">Parent B</label>
+      
+      <input type="radio" id="evenChristmasBreakOmit" name="evenChristmasBreakParent" value="Omit" checked>
+      <label for="evenChristmasBreakOmit">Omit</label>
+      
+      <input type="radio" id="evenChristmasBreakSplit" name="evenChristmasBreakParent" value="Split">
+      <label for="evenChristmasBreakSplit">Split</label>
+    </div>
+    
+    <div class="date-selection" id="evenChristmasDates">
+    <div class="date-picker">
+      <label for="evenChristmasBreakStart">Beginning:</label>
+      <input type="date" id="evenChristmasBreakStart" name="evenChristmasBreakStart">
+    </div>
+    
+    <div class="date-picker exchange">
+      <label for="evenChristmasBreakExchange">Exchange:</label>
+      <input type="date" id="evenChristmasBreakExchange" name="evenChristmasBreakExchange">
+    </div>
+    
+    <div class="date-picker">
+      <label for="evenChristmasBreakEnd">Ending:</label>
+      <input type="date" id="evenChristmasBreakEnd" name="evenChristmasBreakEnd">
+    </div>
+  </div>
+    <div class="parent-selection-FirstSplit">
+      First Period with: <input type="radio" id="evenChristmasBreakParentAFirstSplit" name="evenChristmasBreakParentFirstSplit" value="A">
+      <label for="evenChristmasBreakParentAFirstSplit">Parent A</label>
+      
+      <input type="radio" id="evenChristmasBreakParentBFirstSplit" name="evenChristmasBreakParentFirstSplit" value="B">
+      <label for="evenChristmasBreakParentBFirstSplit">Parent B</label>
+      
+    </div>
+  </div>
+  <div>
+    <h3>Christmas Break - ODD YEARS</h3>
+    
+    <div class="parent-selection">
+      <input type="radio" id="oddChristmasBreakParentA" name="oddChristmasBreakParent" value="A">
+      <label for="oddChristmasBreakParentA">Parent A</label>
+      
+      <input type="radio" id="oddChristmasBreakParentB" name="oddChristmasBreakParent" value="B">
+      <label for="oddChristmasBreakParentB">Parent B</label>
+      
+      <input type="radio" id="oddChristmasBreakOmit" name="oddChristmasBreakParent" value="Omit" checked>
+      <label for="oddChristmasBreakOmit">Omit</label>
+      
+      <input type="radio" id="oddChristmasBreakSplit" name="oddChristmasBreakParent" value="Split">
+      <label for="oddChristmasBreakSplit">Split</label>
+    </div>
+    
+    <div class="date-selection" id="oddChristmasDates">
+    <div class="date-picker">
+      <label for="oddChristmasBreakStart">Beginning:</label>
+      <input type="date" id="oddChristmasBreakStart" name="oddChristmasBreakStart">
+    </div>
+    
+    <div class="date-picker exchange">
+      <label for="oddChristmasBreakExchange">Exchange:</label>
+      <input type="date" id="oddChristmasBreakExchange" name="oddChristmasBreakExchange">
+    </div>
+    
+    <div class="date-picker">
+      <label for="oddChristmasBreakEnd">Ending:</label>
+      <input type="date" id="oddChristmasBreakEnd" name="oddChristmasBreakEnd">
+    </div>
+  </div>
+    <div class="parent-selection-FirstSplit">
+      First Period with: <input type="radio" id="oddChristmasBreakParentAFirstSplit" name="oddChristmasBreakParentFirstSplit" value="A">
+      <label for="oddChristmasBreakParentAFirstSplit">Parent A</label>
+      
+      <input type="radio" id="oddChristmasBreakParentBFirstSplit" name="oddChristmasBreakParentFirstSplit" value="B">
+      <label for="oddChristmasBreakParentBFirstSplit">Parent B</label>
+      
+    </div>
+</div>
+</div>
+
+<!-- Winter Break Section -->
+<div class="option-section two-column">
+  <div>
+    <h3>Winter Break - EVEN YEARS</h3>
+    
+    <div class="parent-selection">
+      <input type="radio" id="evenWinterBreakParentA" name="evenWinterBreakParent" value="A">
+      <label for="evenWinterBreakParentA">Parent A</label>
+      
+      <input type="radio" id="evenWinterBreakParentB" name="evenWinterBreakParent" value="B">
+      <label for="evenWinterBreakParentB">Parent B</label>
+      
+      <input type="radio" id="evenWinterBreakOmit" name="evenWinterBreakParent" value="Omit" checked>
+      <label for="evenWinterBreakOmit">Omit</label>
+    </div>
+    
+    <div class="date-selection" id="evenWinterDates">
+    <div class="date-picker">
+      <label for="evenWinterBreakStart">Beginning:</label>
+      <input type="date" id="evenWinterBreakStart" name="evenWinterBreakStart">
+    </div>
+    
+    <div class="date-picker">
+      <label for="evenWinterBreakEnd">Ending:</label>
+      <input type="date" id="evenWinterBreakEnd" name="evenWinterBreakEnd">
+    </div>
+  </div>
+  </div>
+  <div>
+    <h3>Winter Break - ODD YEARS</h3>
+    
+    <div class="parent-selection">
+      <input type="radio" id="oddWinterBreakParentA" name="oddWinterBreakParent" value="A">
+      <label for="oddWinterBreakParentA">Parent A</label>
+      
+      <input type="radio" id="oddWinterBreakParentB" name="oddWinterBreakParent" value="B">
+      <label for="oddWinterBreakParentB">Parent B</label>
+      
+      <input type="radio" id="oddWinterBreakOmit" name="oddWinterBreakParent" value="Omit" checked>
+      <label for="oddWinterBreakOmit">Omit</label>
+    </div>
+    
+    <div class="date-selection" id="oddWinterDates">
+    <div class="date-picker">
+      <label for="oddWinterBreakStart">Beginning:</label>
+      <input type="date" id="oddWinterBreakStart" name="oddWinterBreakStart">
+    </div>
+    
+    <div class="date-picker">
+      <label for="oddWinterBreakEnd">Ending:</label>
+      <input type="date" id="oddWinterBreakEnd" name="oddWinterBreakEnd">
+    </div>
+  </div>
+</div>
+</div>
+<!-- Other Break Section -->
+<div class="option-section two-column">
+  <div>
+    <h3>Other Break - EVEN YEARS</h3>
+    
+    <div class="parent-selection">
+      <input type="radio" id="evenOtherBreakParentA" name="evenOtherBreakParent" value="A">
+      <label for="evenOtherBreakParentA">Parent A</label>
+      
+      <input type="radio" id="evenOtherBreakParentB" name="evenOtherBreakParent" value="B">
+      <label for="evenOtherBreakParentB">Parent B</label>
+      
+      <input type="radio" id="evenOtherBreakOmit" name="evenOtherBreakParent" value="Omit" checked>
+      <label for="evenOtherBreakOmit">Omit</label>
+    </div>
+    
+    <div class="date-selection" id="evenOtherDates">
+    <div class="date-picker">
+      <label for="evenOtherBreakStart">Beginning:</label>
+      <input type="date" id="evenOtherBreakStart" name="evenOtherBreakStart">
+    </div>
+    
+    <div class="date-picker">
+      <label for="evenOtherBreakEnd">Ending:</label>
+      <input type="date" id="evenOtherBreakEnd" name="evenOtherBreakEnd">
+    </div>
+  </div>
+  </div>
+  <div>
+    <h3>Other Break - ODD YEARS</h3>
+    
+    <div class="parent-selection">
+      <input type="radio" id="oddOtherBreakParentA" name="oddOtherBreakParent" value="A">
+      <label for="oddOtherBreakParentA">Parent A</label>
+      
+      <input type="radio" id="oddOtherBreakParentB" name="oddOtherBreakParent" value="B">
+      <label for="oddOtherBreakParentB">Parent B</label>
+      
+      <input type="radio" id="oddOtherBreakOmit" name="oddOtherBreakParent" value="Omit" checked>
+      <label for="oddOtherBreakOmit">Omit</label>
+    </div>
+    
+    <div class="date-selection" id="oddOtherDates">
+    <div class="date-picker">
+      <label for="oddOtherBreakStart">Beginning:</label>
+      <input type="date" id="oddOtherBreakStart" name="oddOtherBreakStart">
+    </div>
+    
+    <div class="date-picker">
+      <label for="oddOtherBreakEnd">Ending:</label>
+      <input type="date" id="oddOtherBreakEnd" name="oddOtherBreakEnd">
+    </div>
+  </div>
+</div>
+</div>
+<!-- Summer Schedule Section -->
+<div class="option-section two-column">
+  <div>
+    <h3>Summer Schedule - EVEN YEARS</h3>
+    <p> Enter the weeks each parent has parenting time. The summer schedule will take priority over the regular weekly schedule and Fourth of July but does not take priority over Father's day</p>
+    
+    <div class="summer-schedule-options">
+<label>
+        <input type="radio" id="evenSummer1Week" name="evenSummerSchedule" value="1week">
+        <label for="evenSummer1Week">1 week</label>
+        
+        <input type="radio" id="evenSummer2Weeks" name="evenSummerSchedule" value="2weeks">
+        <label for="evenSummer2Weeks">2 weeks</label>
+        
+        <input type="radio" id="evenSummer3Weeks" name="evenSummerSchedule" value="3weeks">
+        <label for="evenSummer3Weeks">3 weeks</label>
+
+        <input type="radio" id="evenSummer4Weeks" name="evenSummerSchedule" value="4weeks">
+        <label for="evenSummer4Weeks">4 weeks</label><label>
+        <input type="radio" id="evenSummerAlternating" name="evenSummerSchedule" value="alternating">
+        <label for="evenSummerAlternating">Alternating weeks</label>
+
+        <input type="radio" id="evenSummerOmit" name="evenSummerSchedule" value="Omit" checked>
+        <label for="evenSummerOmit">Omit</label>
+</label>
+</label><br><label>
+        <input type="radio" id="evenSummerAll" name="evenSummerSchedule" value="All">
+        <label for="evenSummer5Weeks">Parent B only from the first Saturday after school is released until the last Sunday before school resumes.</label>
+</label>
+    </div>
+  </div>
+  
+  <div>
+    <h3>Summer Schedule - ODD YEARS</h3>
+    <p>The summer schedule will take priority over the regular weekly schedule during the months of June, July and August only when a selection is made.</p>
+    
+    <div class="summer-schedule-options">
+<label>
+        <input type="radio" id="oddSummer1Week" name="oddSummerSchedule" value="1week">
+        <label for="oddSummer1Week">1 week</label>
+        
+        <input type="radio" id="oddSummer2Weeks" name="oddSummerSchedule" value="2weeks">
+        <label for="oddSummer2Weeks">2 weeks</label>
+        
+        <input type="radio" id="oddSummer3Weeks" name="oddSummerSchedule" value="3weeks">
+        <label for="oddSummer3Weeks">3 weeks</label>
+
+        <input type="radio" id="oddSummer4Weeks" name="oddSummerSchedule" value="4weeks">
+        <label for="oddSummer4Weeks">4 weeks</label>
+
+</label><br><label>
+        <input type="radio" id="oddSummerAlternating" name="oddSummerSchedule" value="alternating">
+        <label for="oddSummerAlternating">Alternating weeks</label><label>
+
+</label>
+        <input type="radio" id="oddSummerOmit" name="oddSummerSchedule" value="Omit" checked>
+        <label for="oddSummerOmit">Omit</label>
+</label><br><label>
+        <input type="radio" id="oddSummerAll" name="oddSummerSchedule" value="All">
+        <label for="oddSummerAll">Parent B only from the first Saturday after school is released until the last Sunday before school resumes.</label>
+</label>
+    </div>
+  </div>
+</div>
+
+<div class="option-section two-column">
+  <div class="schedule even-years">
+    <h3>Holiday Schedule - EVEN YEARS</h3>
+    <p>The following holiday schedule will take priority over the regular weekly and summer schedules. Select the parent with whom the child will spend each holiday.</p>
+<table>
+      <tr>
+        <th>Holiday</th>
+        <th>Parent A</th>
+        <th>Parent B</th>
+        <th>Omit</th>
+        <th>Beginning</th>
+        <th>Ending</th>
+      </tr>
+      <tr>
+        <td>Martin Luther King Jr. Day Weekend</td>
+        <td><input type="radio" name="mlk-even" value="parent-a"></td>
+        <td><input type="radio" name="mlk-even" value="parent-b"></td>
+        <td><input type="radio" name="mlk-even" value="omit" checked></td>
+        <td><input type="date" id="evenBeginMLK"></td>
+        <td><input type="date" id="evenEndMLK"></td>
+      </tr>
+      <tr>
+        <td>Presidents' Day Weekend</td>
+        <td><input type="radio" name="presidents-even" value="parent-a"></td>
+        <td><input type="radio" name="presidents-even" value="parent-b"></td>
+        <td><input type="radio" name="presidents-even" value="omit" checked></td>
+        <td><input type="date" id="evenBeginPresidents"></td>
+        <td><input type="date" id="evenEndPresidents"></td>
+      </tr>
+      <tr>
+        <td>Easter Weekend</td>
+        <td><input type="radio" name="easter-even" value="parent-a"></td>
+        <td><input type="radio" name="easter-even" value="parent-b"></td>
+        <td><input type="radio" name="easter-even" value="omit" checked></td>
+        <td><input type="date" id="evenBeginEaster"></td>
+        <td><input type="date" id="evenEndEaster"></td>
+      </tr>
+      <tr>
+        <td>Mother's Day Weekend</td>
+        <td><input type="radio" name="mothers-day-even" value="parent-a"></td>
+        <td><input type="radio" name="mothers-day-even" value="parent-b"></td>
+        <td><input type="radio" name="mothers-day-even" value="omit" checked></td>
+        <td><input type="date" id="evenBeginMothers"></td>
+        <td><input type="date" id="evenEndMothers"></td>
+      </tr>
+      <tr>
+        <td>Memorial Day Weekend</td>
+        <td><input type="radio" name="memorial-day-even" value="parent-a"></td>
+        <td><input type="radio" name="memorial-day-even" value="parent-b"></td>
+        <td><input type="radio" name="memorial-day-even" value="omit" checked></td>
+        <td><input type="date" id="evenBeginMemorial"></td>
+        <td><input type="date" id="evenEndMemorial"></td>
+      </tr>
+      <tr>
+        <td>Father's Day Weekend</td>
+        <td><input type="radio" name="fathers-day-even" value="A"></td>
+        <td><input type="radio" name="fathers-day-even" value="B"></td>
+        <td><input type="radio" name="fathers-day-even" value="omit" checked></td>
+        <td><input type="date" id="evenBeginFathers"></td>
+        <td><input type="date" id="evenEndFathers"></td>
+      </tr>
+
+      <tr>
+        <td>Fourth of July Holiday</td>
+        <td><input type="radio" name="july-fourth-even" value="parent-a"></td>
+        <td><input type="radio" name="july-fourth-even" value="parent-b"></td>
+        <td><input type="radio" name="july-fourth-even" value="omit" checked></td>
+        <td><input type="date" id="evenBeginJuly4"></td>
+        <td><input type="date" id="evenEndJuly4"></td>
+      </tr>
+      <tr>
+        <td>Labor Day Weekend</td>
+        <td><input type="radio" name="labor-day-even" value="parent-a"></td>
+        <td><input type="radio" name="labor-day-even" value="parent-b"></td>
+        <td><input type="radio" name="labor-day-even" value="omit" checked></td>
+        <td><input type="date" id="evenBeginLabor"></td>
+        <td><input type="date" id="evenEndLabor"></td>
+      </tr>
+      <tr>
+        <td>Halloween Day</td>
+        <td><input type="radio" name="halloween-even" value="parent-a"></td>
+        <td><input type="radio" name="halloween-even" value="parent-b"></td>
+        <td><input type="radio" name="halloween-even" value="omit" checked></td>
+        <td><input type="date" id="evenBeginHalloween"></td>
+        <td><input type="date" id="evenEndHalloween"></td>
+      </tr>
+      <tr>
+        <td>Veterans Day</td>
+        <td><input type="radio" name="veterans-day-even" value="parent-a"></td>
+        <td><input type="radio" name="veterans-day-even" value="parent-b"></td>
+        <td><input type="radio" name="veterans-day-even" value="omit" checked></td>
+        <td><input type="date" id="evenBeginVeterans"></td>
+        <td><input type="date" id="evenEndVeterans"></td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="schedule odd-years">
+    <h3>Holiday Schedule - ODD YEARS</h3>
+    <p>The following holiday schedule will take priority over the regular weekly and summer schedules. Select the parent with whom the child will spend each holiday.</p>
+    <table>
+      <tr>
+        <th>Holiday</th>
+        <th>Parent A</th>
+        <th>Parent B</th>
+        <th>Omit</th>
+        <th>Beginning</th>
+        <th>Ending</th>
+      </tr>
+      <tr>
+        <td>Martin Luther King Jr. Day Weekend</td>
+        <td><input type="radio" name="mlk-odd" value="parent-a"></td>
+        <td><input type="radio" name="mlk-odd" value="parent-b"></td>
+        <td><input type="radio" name="mlk-odd" value="omit" checked></td>
+        <td><input type="date" id="oddBeginMLK"></td>
+        <td><input type="date" id="oddEndMLK"></td>
+      </tr>
+      <tr>
+        <td>Presidents' Day Weekend</td>
+        <td><input type="radio" name="presidents-odd" value="parent-a"></td>
+        <td><input type="radio" name="presidents-odd" value="parent-b"></td>
+        <td><input type="radio" name="presidents-odd" value="omit" checked></td>
+        <td><input type="date" id="oddBeginPresidents"></td>
+        <td><input type="date" id="oddEndPresidents"></td>
+      </tr>
+      <tr>
+        <td>Easter Weekend</td>
+        <td><input type="radio" name="easter-odd" value="parent-a"></td>
+        <td><input type="radio" name="easter-odd" value="parent-b"></td>
+        <td><input type="radio" name="easter-odd" value="omit" checked></td>
+        <td><input type="date" id="oddBeginEaster"></td>
+        <td><input type="date" id="oddEndEaster"></td>
+      </tr>
+      <tr>
+        <td>Mother's Day Weekend</td>
+        <td><input type="radio" name="mothers-day-odd" value="parent-a"></td>
+        <td><input type="radio" name="mothers-day-odd" value="parent-b"></td>
+        <td><input type="radio" name="mothers-day-odd" value="omit" checked></td>
+        <td><input type="date" id="oddBeginMothers"></td>
+        <td><input type="date" id="oddEndMothers"></td>
+      </tr>
+      <tr>
+        <td>Memorial Day Weekend</td>
+        <td><input type="radio" name="memorial-day-odd" value="parent-a"></td>
+        <td><input type="radio" name="memorial-day-odd" value="parent-b"></td>
+        <td><input type="radio" name="memorial-day-odd" value="omit" checked></td>
+        <td><input type="date" id="oddBeginMemorial"></td>
+        <td><input type="date" id="oddEndMemorial"></td>
+      </tr>
+      <tr>
+        <td>Father's Day Weekend</td>
+        <td><input type="radio" name="fathers-day-odd" value="A"></td>
+        <td><input type="radio" name="fathers-day-odd" value="B"></td>
+        <td><input type="radio" name="fathers-day-odd" value="omit" checked></td>
+        <td><input type="date" id="oddBeginFathers"></td>
+        <td><input type="date" id="oddEndFathers"></td>
+      </tr>
+      <tr>
+      <tr>
+        <td>Fourth of July Holiday</td>
+        <td><input type="radio" name="july-fourth-odd" value="parent-a"></td>
+        <td><input type="radio" name="july-fourth-odd" value="parent-b"></td>
+        <td><input type="radio" name="july-fourth-odd" value="omit" checked></td>
+        <td><input type="date" id="oddBeginJuly4"></td>
+        <td><input type="date" id="oddEndJuly4"></td>
+      </tr>
+      <tr>
+        <td>Labor Day Weekend</td>
+        <td><input type="radio" name="labor-day-odd" value="parent-a"></td>
+        <td><input type="radio" name="labor-day-odd" value="parent-b"></td>
+        <td><input type="radio" name="labor-day-odd" value="omit" checked></td>
+        <td><input type="date" id="oddBeginLabor"></td>
+        <td><input type="date" id="oddEndLabor"></td>
+      </tr>
+      <tr>
+        <td>Halloween Day</td>
+        <td><input type="radio" name="halloween-odd" value="parent-a"></td>
+        <td><input type="radio" name="halloween-odd" value="parent-b"></td>
+        <td><input type="radio" name="halloween-odd" value="omit" checked></td>
+        <td><input type="date" id="oddBeginHalloween"></td>
+        <td><input type="date" id="oddEndHalloween"></td>
+      </tr>
+      <tr>
+        <td>Veterans Day</td>
+        <td><input type="radio" name="veterans-day-odd" value="parent-a"></td>
+        <td><input type="radio" name="veterans-day-odd" value="parent-b"></td>
+        <td><input type="radio" name="veterans-day-odd" value="omit" checked></td>
+        <td><input type="date" id="oddBeginVeterans"></td>
+        <td><input type="date" id="oddEndVeterans"></td>
+      </tr>
+    </table>
+  </div>
+</div>
+<div class="option-section two-column">
+    <div class="button-section">
+    <h4>Step 2: Click on the 'POPULATE CALENDARS' button to have the dates marked above automatically filled in by the computer.</h4>
+    <button id="populate-button">POPULATE CALENDARS</button>
+    <button id="reset-button">RESET</button>
+<br>
+
+    <h4>Step 3: Click 'Add Days' to sum all of the days over a two year period.</h4>
+    <button id="add-days">Add Days</button>
+<br>
+    <input type="number" id="total-days" step=".1" readonly>
+    <label for="total-days">Total Days of Parenting Time for Parent B (Non-custodial) Over 24 months</label>
+<br>
+    <input type="number" id="ParentBpct" step=".1" readonly>
+    <label for="ParentBpct">% PT for the Noncustodial Parent</label>
+    </div>
+
+    <div class="button-section">
+    <h4>Step 4: Create a worksheet at https://csconlinecalc.georgiacourts.gov/frontend/web/index.php . Then, enter data from Line 5 of the CSW below and click "Calc. PT Adjustment" button.</h4>
+    <input type="number" min="0.00" max="10000.00" step="0.01" id="parentA-L5" >
+    <label for="parentA-L5">Custodial Line 5</label>
+<br>
+    <input type="number" min="0.00" max="10000.00" step="0.01" id="parentB-L5" >
+    <label for="parentB-L5">Non-Cust  Line 5</label>
+<br>
+    <button id="calculate-button">Calc. PT Adjustment</button>
+<br>
+    <input type="number" min="0.00" max="10000.00" step="0.01" id="final-adjustment" readonly>
+    <label for="final-adjustment">Statutory Adjustment</label>
+    </div>
+
+</div>
+<div>
+<p>Notes: </p>
+<p>To create a "50/50" alternating weeks schedule, set the Beginning and Ending as the same day of the week in the Regular Weekly Schedule.</p>
+<p>The text of any court order takes precidence over this calendar even if this calendar is attached as an exhibit. The calendar is a visualization aid and is non-binding.</p>
+<p>Dates of breaks may vary by school. All default dates are calculated by a computer formula and may not reflect actual break periods for any particular school. They are approximate dates only and based on some historical Gwinnett County school calendars.</p>
+<p>This tool does not account for alternating 5th weekends. Those must be added by you manually by typing a "1" on appropriate date on the calendar below. You should manually check the first and last week of the calendar if the calendar begins or ends in the middle of a custody period.</p>
+<p>Because exact summer vacation dates are often undetermined until closer to summer, this tool assigns June weeks to Parent B and July weeks to Parent A. Selecting the option "Parent B only from the first Saturday after school is released until the last Sunday before school resumes." will block out only 8 weeks. You will need to manually add additional days based on your child's school calendar.</p>
+<p>This tool gives the Summer Schedule priority over the Holiday Schedule. This may impact Father's Day and July 4th if your case's Parenting Plan sets a different priority order. Adjust the numbers manually as necessary.</p>
+<p>The formula for the final PT adjustment is ((CB<sup>2.5</sup>-DA<sup>2.5</sup>)/(B<sup>2.5</sup>+A<sup>2.5</sup>))+D ; Where: A=Custodial Days, B=Noncustodial Days, C=Custodial Line 5 from CSW and, D=Noncustodial Line 5 from CSW.</p>
+<p>Fractional days may show up in the calendar as a decimal rounded to the nearest tenth of an hour. However, on the software's back-end, that number is not rounded. This eliminates rounding error when all the values are summed in Step 3.</p><br>
+</div>
+    <div id="calendar" class="calendar-container"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    generateCalendar();
+    populateHolidayDates();
+    document.getElementById('populate-button').addEventListener('click', function() {
+        handlePopulateCalendars();
+	updateTotalDays();
+    });
+    document.getElementById('add-days').addEventListener('click', updateTotalDays);
+    document.getElementById('reset-button').addEventListener('click', resetAllSpinBoxes);
+    document.getElementById('calculate-button').addEventListener('click', calculatePTAdjustment);
+
+    // Show or hide the every-other options based on the selected frequency
+    document.querySelectorAll('input[name="recurring-frequency"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const everyOtherOptions = document.getElementById('every-other-options');
+            if (this.value === 'every-other') {
+                everyOtherOptions.style.display = 'block';
+            } else {
+                everyOtherOptions.style.display = 'none';
+            }
+        });
+    });
+
+    // Enable or disable the hours input based on the corresponding checkbox
+    document.querySelectorAll('input[name="recurring-day"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const hoursInput = document.querySelector(`input[name="recurring-hours-${this.value}"]`);
+            if (this.checked) {
+                hoursInput.classList.remove('disabled');
+                hoursInput.disabled = false;
+            } else {
+                hoursInput.classList.add('disabled');
+                hoursInput.disabled = true;
+            }
+        });
+    });
+    ['even', 'odd'].forEach(year => {
+        ['Thanksgiving', 'Christmas'].forEach(holiday => {
+            const radioButtons = document.querySelectorAll(`input[name="${year}${holiday}BreakParent"]`);
+            const exchangeDatePicker = document.querySelector(`#${year}${holiday}BreakExchange`).parentNode;
+
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'Split') {
+                        exchangeDatePicker.style.display = 'block';
+                    } else {
+                        exchangeDatePicker.style.display = 'none';
+                    }
+                });
+            });
+        });
+    });
+    ['even', 'odd'].forEach(year => {
+        ['Thanksgiving', 'Christmas'].forEach(holiday => {
+            const radioButtons = document.querySelectorAll(`input[name="${year}${holiday}BreakParent"]`);
+            const exchangeDatePicker = document.querySelector(`#${year}${holiday}BreakExchange`).parentNode;
+            const firstSplitDiv = document.querySelector(`.parent-selection-FirstSplit input[name="${year}${holiday}BreakParentFirstSplit"]`).parentNode;
+
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'Split') {
+                        exchangeDatePicker.style.display = 'block';
+                        firstSplitDiv.style.display = 'block';
+                    } else {
+                        exchangeDatePicker.style.display = 'none';
+                        firstSplitDiv.style.display = 'none';
+                    }
+                });
+            });
+        });
+    });
+    toggleVisibility('weekly-schedule', 'regular-begin-end');
+    toggleVisibility('recurring-frequency', 'recurring-days');
+    toggleVisibility('evenSpringBreakParent', 'evenSpringDates');
+    toggleVisibility('oddSpringBreakParent', 'oddSpringDates');
+    toggleVisibility('evenFallBreakParent', 'evenFallDates');
+    toggleVisibility('oddFallBreakParent', 'oddFallDates');
+    toggleVisibility('evenThanksgivingBreakParent', 'evenThanksgivingDates');
+    toggleVisibility('oddThanksgivingBreakParent', 'oddThanksgivingDates');
+    toggleVisibility('evenChristmasBreakParent', 'evenChristmasDates');
+    toggleVisibility('oddChristmasBreakParent', 'oddChristmasDates');
+    toggleVisibility('evenWinterBreakParent', 'evenWinterDates');
+    toggleVisibility('oddWinterBreakParent', 'oddWinterDates');
+    toggleVisibility('evenOtherBreakParent', 'evenOtherDates');
+    toggleVisibility('oddOtherBreakParent', 'oddOtherDates');
+});
+function calculatePTAdjustment() {
+    const parentAL5 = parseFloat(document.getElementById('parentA-L5').value);
+    const parentBL5 = parseFloat(document.getElementById('parentB-L5').value);
+    const totalDays = parseFloat(document.getElementById('total-days').value);
+    const finalAdjustment = document.getElementById('final-adjustment');
+
+    // Clear previous error messages
+    clearErrorMessages();
+
+    // Check for missing inputs
+    if (isNaN(parentAL5)) {
+        showErrorMessage('Custodial Line 5 is missing');
+        return;
+    }
+    if (isNaN(parentBL5)) {
+        showErrorMessage('Non-Cust Line 5 is missing');
+        return;
+    }
+    if (isNaN(totalDays)) {
+        showErrorMessage('Total Days is missing');
+        return;
+    }
+
+    // Perform calculation
+    const result = 
+        ((((parentAL5 * Math.pow(totalDays/2, 2.5)) - 
+           (parentBL5 * Math.pow(365 - totalDays/2, 2.5))) / 
+          (Math.pow(totalDays/2, 2.5) + Math.pow(365 - totalDays/2, 2.5))) + 
+         parentBL5);
+
+    // Update final adjustment field
+    finalAdjustment.value = result.toFixed(2);
+}
+
+function showErrorMessage(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.textContent = message;
+    errorDiv.style.color = 'red';
+    errorDiv.className = 'error-message';
+    document.getElementById('calculate-button').insertAdjacentElement('afterend', errorDiv);
+}
+
+function clearErrorMessages() {
+    const errorMessages = document.querySelectorAll('.error-message');
+    errorMessages.forEach(msg => msg.remove());
+}
+function updateTotalDays() {
+    const inputs = document.querySelectorAll('#calendar input[type="number"]');
+    let total = 0;
+    inputs.forEach(input => {
+        total += parseFloat(input.value) || 0;
+    });
+    document.getElementById('total-days').value = total.toFixed(2);
+    
+    // Calculate and update ParentBpct
+    const parentBpct = (total / 730) * 100; // Convert to percentage
+    document.getElementById('ParentBpct').value = parentBpct.toFixed(2);
+}
+
+function resetAllSpinBoxes() {
+    const spinBoxes = document.querySelectorAll('#calendar input[type="number"]');
+    spinBoxes.forEach(box => {
+        box.value = 0;
+    });
+}
+function handlePopulateCalendars() {
+    resetAllSpinBoxes();
+
+    const recurringFrequency = document.querySelector('input[name="recurring-frequency"]:checked');
+    if (recurringFrequency) {
+        const beginDay = document.querySelector('select[name="begin-day"]').value;
+        if (recurringFrequency.value === 'every') {
+            assignRecurringDaytimePeriods(false, true); // Every week
+        } else if (recurringFrequency.value === 'every-other') {
+            const everyOtherType = document.querySelector('input[name="every-other-type"]:checked');
+            if (everyOtherType) {
+                assignRecurringDaytimePeriods(everyOtherType.value === 'even', false); // Alternating weeks
+            } else {
+                alert('Please select Odd or Even for Every Other weeks.');
+            }
+        } else if (recurringFrequency.value === 'first-third-recurring') {
+            assignRecurringDaytimePeriodsForSpecificWeeks(beginDay, isFirstOrThirdWeek);
+        } else if (recurringFrequency.value === 'second-fourth-recurring') {
+            assignRecurringDaytimePeriodsForSpecificWeeks(beginDay, isSecondOrFourthWeek);
+        }
+    }
+    var selectedSchedule = document.querySelector('input[name="weekly-schedule"]:checked');
+    if (selectedSchedule) {
+        var beginDay = document.querySelector('select[name="begin-day"]').value;
+        var endDay = document.querySelector('select[name="end-day"]').value;
+
+        if (selectedSchedule.value == 'first-third') {
+            assignFirstThirdOccurrences(beginDay, endDay);
+        } else if (selectedSchedule.value == 'second-fourth') {
+            assignSecondFourthOccurrences(beginDay, endDay);
+        } else if (selectedSchedule.value == 'alternating-odd') {
+            assignAlternatingOddOccurrences(beginDay, endDay);
+        } else if (selectedSchedule.value == 'alternating-even') {
+            assignAlternatingEvenOccurrences(beginDay, endDay);
+        } else if (selectedSchedule.value == 'every') {
+	    assignEveryOccurrence(beginDay, endDay);
+    	}
+    }
+
+    // Spring Break - Even Years
+    handleBreak('evenSpringBreakStart', 'evenSpringBreakEnd', 'evenSpringBreakParent');
+
+    // Spring Break - Odd Years
+    handleBreak('oddSpringBreakStart', 'oddSpringBreakEnd', 'oddSpringBreakParent');
+
+    // Fall Break - Even Years
+    handleBreak('evenFallBreakStart', 'evenFallBreakEnd', 'evenFallBreakParent');
+
+    // Fall Break - Odd Years
+    handleBreak('oddFallBreakStart', 'oddFallBreakEnd', 'oddFallBreakParent');
+
+    // Thanksgiving Break - Even Years
+    handleSplitBreak('evenThanksgivingBreak');
+
+    // Thanksgiving Break - Odd Years
+    handleSplitBreak('oddThanksgivingBreak');
+
+    // Christmas Break - Even Years
+    handleSplitBreak('evenChristmasBreak');
+
+    // Christmas Break - Odd Years
+    handleSplitBreak('oddChristmasBreak');
+
+    // Winter Break - Even Years
+    handleBreak('evenWinterBreakStart', 'evenWinterBreakEnd', 'evenWinterBreakParent');
+
+    // Winter Break - Odd Years
+    handleBreak('oddWinterBreakStart', 'oddWinterBreakEnd', 'oddWinterBreakParent');
+
+    // Other Break - Even Years
+    handleBreak('evenOtherBreakStart', 'evenOtherBreakEnd', 'evenOtherBreakParent');
+
+    // Other Break - Odd Years
+    handleBreak('oddOtherBreakStart', 'oddOtherBreakEnd', 'oddOtherBreakParent');
+
+    // Holiday Break
+    handleHolidaySchedule();
+
+    // Summer Break
+    handleSummerSchedule();
+
+document.querySelectorAll('#calendar input[type="number"]').forEach(input => updateCellBackground(input));
+}
+function assignEveryOccurrence(beginDay, endDay) {
+    const beginDayIndex = getDayIndex(beginDay);
+    const endDayIndex = getDayIndex(endDay);
+    const calendarInputs = document.querySelectorAll('#calendar input[type="number"]');
+    
+    calendarInputs.forEach(input => {
+        const date = new Date(input.id.split('-').slice(1).join('-'));
+        if (date.getDay() === beginDayIndex) {
+            updateConsecutiveDays(date, beginDayIndex, endDayIndex);
+        }
+    });
+}
+function assignAlternatingEvenOccurrences(beginDay, endDay) {
+    const beginDayIndex = getDayIndex(beginDay);
+    const endDayIndex = getDayIndex(endDay);
+    const calendarInputs = document.querySelectorAll('#calendar input[type="number"]');
+    
+    let isEvenWeek = false;
+    
+    calendarInputs.forEach(input => {
+        const date = new Date(input.id.split('-').slice(1).join('-'));
+        if (date.getDay() === beginDayIndex && isEvenWeek) {
+            updateConsecutiveDays(date, beginDayIndex, endDayIndex);
+        }
+        if (date.getDay() === beginDayIndex) {
+            isEvenWeek = !isEvenWeek;
+        }
+    });
+}
+function assignAlternatingOddOccurrences(beginDay, endDay) {
+    const beginDayIndex = getDayIndex(beginDay);
+    const endDayIndex = getDayIndex(endDay);
+    const calendarInputs = document.querySelectorAll('#calendar input[type="number"]');
+    
+    let isOddWeek = true;
+    
+    calendarInputs.forEach(input => {
+const dateParts = input.id.split('-').slice(1);
+const year = parseInt(dateParts[0], 10);
+const month = parseInt(dateParts[1], 10) - 1; // JavaScript months are 0-indexed
+const day = parseInt(dateParts[2], 10);
+const date = new Date(year, month, day);
+        if (date.getDay() === beginDayIndex && isOddWeek) {
+            updateConsecutiveDays(date, beginDayIndex, endDayIndex);
+        }
+        if (date.getDay() === beginDayIndex) {
+            isOddWeek = !isOddWeek;
+        }
+    });
+}
+function assignFirstThirdOccurrences(beginDay, endDay) {
+    const beginDayIndex = getDayIndex(beginDay);
+    const endDayIndex = getDayIndex(endDay);
+    const calendarInputs = document.querySelectorAll('#calendar input[type="number"]');
+
+    calendarInputs.forEach(input => {
+        const date = new Date(input.id.split('-').slice(1).join('-'));
+        if (isFirstOrThirdOccurrence(date, beginDayIndex)) {
+            updateConsecutiveDays(date, beginDayIndex, endDayIndex);
+        }
+    });
+}
+function isFirstOrThirdOccurrence(date, beginDayIndex) {
+    const day = date.getDay();
+    const dateOfMonth = date.getDate();
+
+    if (day !== beginDayIndex) return false;
+
+    const firstOccurrence = new Date(date.getFullYear(), date.getMonth(), 1);
+
+    // Find the first occurrence
+    while (firstOccurrence.getDay() !== beginDayIndex) {
+        firstOccurrence.setDate(firstOccurrence.getDate() + 1);
+    }
+
+    const thirdOccurrence = new Date(firstOccurrence);
+    thirdOccurrence.setDate(thirdOccurrence.getDate() + 14);
+
+    return (dateOfMonth === firstOccurrence.getDate() || dateOfMonth === thirdOccurrence.getDate());
+}
+function assignSecondFourthOccurrences(beginDay, endDay) {
+    const beginDayIndex = getDayIndex(beginDay);
+    const endDayIndex = getDayIndex(endDay);
+    const calendarInputs = document.querySelectorAll('#calendar input[type="number"]');
+
+    calendarInputs.forEach(input => {
+        const date = new Date(input.id.split('-').slice(1).join('-'));
+        if (isSecondOrFourthOccurrence(date, beginDayIndex)) {
+            updateConsecutiveDays(date, beginDayIndex, endDayIndex);
+        }
+    });
+}
+function isSecondOrFourthOccurrence(date, beginDayIndex) {
+    const day = date.getDay();
+    const dateOfMonth = date.getDate();
+
+    if (day !== beginDayIndex) return false;
+
+    const secondOccurrence = new Date(date.getFullYear(), date.getMonth(), 1);
+
+    // Find the second occurrence
+    while (secondOccurrence.getDay() !== beginDayIndex) {
+        secondOccurrence.setDate(secondOccurrence.getDate() + 1);
+    }
+    secondOccurrence.setDate(secondOccurrence.getDate() + 7);
+
+    const fourthOccurrence = new Date(secondOccurrence);
+    fourthOccurrence.setDate(fourthOccurrence.getDate() + 14);
+
+    return (dateOfMonth === secondOccurrence.getDate() || dateOfMonth === fourthOccurrence.getDate());
+}
+function updateConsecutiveDays(startDate, beginDayIndex, endDayIndex) {
+    let currentDate = new Date(startDate);
+    const endDate = new Date(startDate);
+
+    // Calculate the end date based on the end day index
+    const dayDiff = (endDayIndex - beginDayIndex + 7) % 7;
+    endDate.setDate(startDate.getDate() + dayDiff);
+
+    // Handle the case where begin-day and end-day are the same
+    const daysToUpdate = beginDayIndex === endDayIndex ? 7 : dayDiff;
+
+for (let i = 0; i < daysToUpdate; i++) {
+    const year = currentDate.getFullYear();
+    const month = padToTwoDigits(currentDate.getMonth() + 1);
+    const day = padToTwoDigits(currentDate.getDate());
+
+    const input = document.getElementById(`day-${year}-${month}-${day}`);
+    if (input) {
+        input.value = 1;
+    }
+    currentDate.setDate(currentDate.getDate() + 1);
+}
+}
+function handleSplitBreak(breakId) {
+    const parentSelection = document.querySelector(`input[name="${breakId}Parent"]:checked`);
+    
+    if (parentSelection && parentSelection.value === 'Split') {
+        const firstSplitParent = document.querySelector(`input[name="${breakId}ParentFirstSplit"]:checked`);
+        const startDate = document.getElementById(`${breakId}Start`).value;
+        const exchangeDate = document.getElementById(`${breakId}Exchange`).value;
+        const endDate = document.getElementById(`${breakId}End`).value;
+
+        if (firstSplitParent) {
+            if (firstSplitParent.value === 'A') {
+                assignDateRange(startDate, exchangeDate, 0);
+                assignDateRange(exchangeDate, endDate, 1);
+            } else {
+                assignDateRange(startDate, exchangeDate, 1);
+                assignDateRange(exchangeDate, endDate, 0);
+            }
+        }
+    } else {
+        handleBreak(`${breakId}Start`, `${breakId}End`, `${breakId}Parent`);
+    }
+}
+function handleHolidaySchedule() {
+    // MLK Day (even years)
+    const mlkEvenSelection = document.querySelector('input[name="mlk-even"]:checked');
+    if (mlkEvenSelection && mlkEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginMLK', 'evenEndMLK');
+    }
+
+    // Presidents' Day (even years)
+    const presidentsEvenSelection = document.querySelector('input[name="presidents-even"]:checked');
+    if (presidentsEvenSelection && presidentsEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginPresidents', 'evenEndPresidents');
+    }
+
+    // Easter (even years)
+    const easterEvenSelection = document.querySelector('input[name="easter-even"]:checked');
+    if (easterEvenSelection && easterEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginEaster', 'evenEndEaster');
+    }
+
+    // Mother's Day (even years)
+    const mothersEvenSelection = document.querySelector('input[name="mothers-day-even"]:checked');
+    if (mothersEvenSelection && mothersEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginMothers', 'evenEndMothers');
+    }
+
+    // Memorial Day (even years)
+    const memorialEvenSelection = document.querySelector('input[name="memorial-day-even"]:checked');
+    if (memorialEvenSelection && memorialEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginMemorial', 'evenEndMemorial');
+    }
+
+    // Father's Day (even years)
+    const fathersEvenSelection = document.querySelector('input[name="fathers-day-even"]:checked');
+    if (fathersEvenSelection && fathersEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginFathers', 'evenEndFathers');
+    }
+
+    // Juneteenth (even years)
+    const juneteenthEvenSelection = document.querySelector('input[name="juneteenth-even"]:checked');
+    if (juneteenthEvenSelection && juneteenthEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginJuneteenth', 'evenEndJuneteenth');
+    }
+
+    // Fourth of July (even years)
+    const julyFourthEvenSelection = document.querySelector('input[name="july-fourth-even"]:checked');
+    if (julyFourthEvenSelection && julyFourthEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginJuly4', 'evenEndJuly4');
+    }
+
+    // Labor Day (even years)
+    const laborEvenSelection = document.querySelector('input[name="labor-day-even"]:checked');
+    if (laborEvenSelection && laborEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginLabor', 'evenEndLabor');
+    }
+
+    // Halloween (even years)
+    const halloweenEvenSelection = document.querySelector('input[name="halloween-even"]:checked');
+    if (halloweenEvenSelection && halloweenEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginHalloween', 'evenEndHalloween');
+    }
+
+    // Veterans Day (even years)
+    const veteransEvenSelection = document.querySelector('input[name="veterans-day-even"]:checked');
+    if (veteransEvenSelection && veteransEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginVeterans', 'evenEndVeterans');
+    }
+
+    // MLK Day (odd years)
+    const mlkOddSelection = document.querySelector('input[name="mlk-odd"]:checked');
+    if (mlkOddSelection && mlkOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginMLK', 'oddEndMLK');
+    }
+
+    // Presidents' Day (odd years)
+    const presidentsOddSelection = document.querySelector('input[name="presidents-odd"]:checked');
+    if (presidentsOddSelection && presidentsOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginPresidents', 'oddEndPresidents');
+    }
+
+    // Easter (odd years)
+    const easterOddSelection = document.querySelector('input[name="easter-odd"]:checked');
+    if (easterOddSelection && easterOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginEaster', 'oddEndEaster');
+    }
+
+    // Mother's Day (odd years)
+    const mothersOddSelection = document.querySelector('input[name="mothers-day-odd"]:checked');
+    if (mothersOddSelection && mothersOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginMothers', 'oddEndMothers');
+    }
+
+    // Memorial Day (odd years)
+    const memorialOddSelection = document.querySelector('input[name="memorial-day-odd"]:checked');
+    if (memorialOddSelection && memorialOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginMemorial', 'oddEndMemorial');
+    }
+
+    // Father's Day (odd years)
+    const fathersOddSelection = document.querySelector('input[name="fathers-day-odd"]:checked');
+    if (fathersOddSelection && fathersOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginFathers', 'oddEndFathers');
+    }
+
+    // Juneteenth (odd years)
+    const juneteenthOddSelection = document.querySelector('input[name="juneteenth-odd"]:checked');
+    if (juneteenthOddSelection && juneteenthOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginJuneteenth', 'oddEndJuneteenth');
+    }
+
+    // Fourth of July (odd years)
+    const julyFourthOddSelection = document.querySelector('input[name="july-fourth-odd"]:checked');
+    if (julyFourthOddSelection && julyFourthOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginJuly4', 'oddEndJuly4');
+    }
+
+    // Labor Day (odd years)
+    const laborOddSelection = document.querySelector('input[name="labor-day-odd"]:checked');
+    if (laborOddSelection && laborOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginLabor', 'oddEndLabor');
+    }
+
+    // Halloween (odd years)
+    const halloweenOddSelection = document.querySelector('input[name="halloween-odd"]:checked');
+    if (halloweenOddSelection && halloweenOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginHalloween', 'oddEndHalloween');
+    }
+
+    // Veterans Day (odd years)
+    const veteransOddSelection = document.querySelector('input[name="veterans-day-odd"]:checked');
+    if (veteransOddSelection && veteransOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginVeterans', 'oddEndVeterans');
+    }
+
+    function updateCalendar(beginInputId, endInputId) {
+        const beginDate = new Date(document.getElementById(beginInputId).value + 'T00:00:00');
+        const endDate = new Date(document.getElementById(endInputId).value + 'T00:00:00');
+        
+        let currentDate = new Date(beginDate.getFullYear(), beginDate.getMonth(), beginDate.getDate());
+        
+        while (currentDate < endDate) {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth() + 1;
+            const day = currentDate.getDate();
+            
+            const input = document.getElementById(`day-${year}-${month}-${day}`);
+            if (input) {
+                input.value = 1;
+            }
+            
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+    }
+}
+function populateHolidayDates() {
+    const holidays = [
+        { name: 'MLK', month: 0, dayOfWeek: 1, weekOfMonth: 3 },
+        { name: 'Presidents', month: 1, dayOfWeek: 1, weekOfMonth: 3 },
+        { name: 'Easter', month: -1, dayOfWeek: 0, weekOfMonth: 0 }, // Special case
+        { name: 'Mothers', month: 4, dayOfWeek: 0, weekOfMonth: 2 },
+        { name: 'Memorial', month: 4, dayOfWeek: 1, weekOfMonth: -1 },
+        { name: 'Fathers', month: 5, dayOfWeek: 0, weekOfMonth: 3 },
+        { name: 'July4', month: 6, day: 4 }, // Fixed date
+        { name: 'Labor', month: 8, dayOfWeek: 1, weekOfMonth: 1 },
+        { name: 'Halloween', month: 9, day: 31 }, // Fixed date
+        { name: 'Veterans', month: 10, day: 11 } // Fixed date
+    ];
+
+    const today = new Date();
+    
+    holidays.forEach(holiday => {
+        let nextDate = findNextHolidayDate(holiday, today);
+        updateHolidayInput(holiday.name, nextDate);
+        
+        // Find the date for the following year
+        let followingDate = findNextHolidayDate(holiday, new Date(nextDate.getFullYear() + 1, 0, 1));
+        updateHolidayInput(holiday.name, followingDate);
+    });
+
+    // Additional logic for Spring Break dates
+    const firstApril = findFirstAprilAfterToday(today);
+    const secondApril = findFirstAprilAfterToday(new Date(firstApril.getFullYear() + 1, 0, 1));
+
+    setSpringBreakDates(firstApril);
+    setSpringBreakDates(secondApril);
+
+    // Additional logic for Fall, Thanksgiving, Christmas, and Winter Breaks
+    setFallBreakDates(today);
+    setThanksgivingBreakDates(today);
+    setChristmasBreakDates(today);
+    setWinterBreakDates(today);
+}
+
+function findFirstAprilAfterToday(today) {
+    const year = today.getMonth() > 3 ? today.getFullYear() + 1 : today.getFullYear();
+    return new Date(year, 3, 1); // April is month 3 (0-indexed)
+}
+
+function getFirstMondayInApril(year) {
+    const firstApril = new Date(year, 3, 1);
+    const dayOfWeek = firstApril.getDay();
+    const firstMonday = dayOfWeek === 0 ? 2 : 8 - dayOfWeek; // Adjust to get the first Monday
+    return new Date(year, 3, firstMonday);
+}
+
+function setSpringBreakDates(april) {
+    const year = april.getFullYear();
+    const firstMonday = getFirstMondayInApril(year);
+    const fridayBefore = new Date(firstMonday);
+    fridayBefore.setDate(firstMonday.getDate() - 3); // Friday before the first Monday
+    const sundayAfter = new Date(firstMonday);
+    sundayAfter.setDate(firstMonday.getDate() + 6); // Sunday after the first Monday
+
+    if (year % 2 === 0) {
+        document.getElementById('evenSpringBreakStart').value = fridayBefore.toISOString().split('T')[0];
+        document.getElementById('evenSpringBreakEnd').value = sundayAfter.toISOString().split('T')[0];
+    } else {
+        document.getElementById('oddSpringBreakStart').value = fridayBefore.toISOString().split('T')[0];
+        document.getElementById('oddSpringBreakEnd').value = sundayAfter.toISOString().split('T')[0];
+    }
+}
+
+function setFallBreakDates(today) {
+    const currentYear = today.getFullYear();
+    const nextYear = currentYear + 1;
+
+    // Set dates for the current year
+    const secondThursdayInOctober = getSecondThursdayInOctober(currentYear);
+    const mondayAfter = new Date(secondThursdayInOctober);
+    mondayAfter.setDate(secondThursdayInOctober.getDate() + 4); // Monday after the second Thursday
+
+    if (currentYear % 2 === 0) {
+        document.getElementById('evenFallBreakStart').value = secondThursdayInOctober.toISOString().split('T')[0];
+        document.getElementById('evenFallBreakEnd').value = mondayAfter.toISOString().split('T')[0];
+    } else {
+        document.getElementById('oddFallBreakStart').value = secondThursdayInOctober.toISOString().split('T')[0];
+        document.getElementById('oddFallBreakEnd').value = mondayAfter.toISOString().split('T')[0];
+    }
+
+    // Set dates for the next year
+    const secondThursdayInOctoberNextYear = getSecondThursdayInOctober(nextYear);
+    const mondayAfterNextYear = new Date(secondThursdayInOctoberNextYear);
+    mondayAfterNextYear.setDate(secondThursdayInOctoberNextYear.getDate() + 4); // Monday after the second Thursday
+
+    if (nextYear % 2 === 0) {
+        document.getElementById('evenFallBreakStart').value = secondThursdayInOctoberNextYear.toISOString().split('T')[0];
+        document.getElementById('evenFallBreakEnd').value = mondayAfterNextYear.toISOString().split('T')[0];
+    } else {
+        document.getElementById('oddFallBreakStart').value = secondThursdayInOctoberNextYear.toISOString().split('T')[0];
+        document.getElementById('oddFallBreakEnd').value = mondayAfterNextYear.toISOString().split('T')[0];
+    }
+}
+
+function getSecondThursdayInOctober(year) {
+    const firstOctober = new Date(year, 9, 1);
+    const dayOfWeek = firstOctober.getDay();
+    const firstThursday = dayOfWeek === 4 ? 1 : (11 - dayOfWeek) % 7;
+    return new Date(year, 9, firstThursday + 8); // Second Thursday in October
+}
+
+function setThanksgivingBreakDates(today) {
+    const currentYear = today.getFullYear();
+    const nextYear = currentYear + 1;
+
+    // Set dates for the current year
+    const lastThursdayInNovember = getLastThursdayInNovember(currentYear);
+    const fridayBefore = new Date(lastThursdayInNovember);
+    fridayBefore.setDate(lastThursdayInNovember.getDate() - 6); // Friday before the last Thursday
+    const sundayAfter = new Date(lastThursdayInNovember);
+    sundayAfter.setDate(lastThursdayInNovember.getDate() + 3); // Sunday after the last Thursday
+
+    if (currentYear % 2 === 0) {
+        document.getElementById('evenThanksgivingBreakStart').value = fridayBefore.toISOString().split('T')[0];
+        document.getElementById('evenThanksgivingBreakEnd').value = sundayAfter.toISOString().split('T')[0];
+    } else {
+        document.getElementById('oddThanksgivingBreakStart').value = fridayBefore.toISOString().split('T')[0];
+        document.getElementById('oddThanksgivingBreakEnd').value = sundayAfter.toISOString().split('T')[0];
+    }
+
+    // Set dates for the next year
+    const lastThursdayInNovemberNextYear = getLastThursdayInNovember(nextYear);
+    const fridayBeforeNextYear = new Date(lastThursdayInNovemberNextYear);
+    fridayBeforeNextYear.setDate(lastThursdayInNovemberNextYear.getDate() - 6); // Friday before the last Thursday
+    const sundayAfterNextYear = new Date(lastThursdayInNovemberNextYear);
+    sundayAfterNextYear.setDate(lastThursdayInNovemberNextYear.getDate() + 3); // Sunday after the last Thursday
+
+    if (nextYear % 2 === 0) {
+        document.getElementById('evenThanksgivingBreakStart').value = fridayBeforeNextYear.toISOString().split('T')[0];
+        document.getElementById('evenThanksgivingBreakEnd').value = sundayAfterNextYear.toISOString().split('T')[0];
+    } else {
+        document.getElementById('oddThanksgivingBreakStart').value = fridayBeforeNextYear.toISOString().split('T')[0];
+        document.getElementById('oddThanksgivingBreakEnd').value = sundayAfterNextYear.toISOString().split('T')[0];
+    }
+}
+
+function getLastThursdayInNovember(year) {
+    const lastNovember = new Date(year, 10, 30);
+    const dayOfWeek = lastNovember.getDay();
+    const lastThursday = dayOfWeek === 4 ? 30 : 30 - (dayOfWeek + 3) % 7;
+    return new Date(year, 10, lastThursday); // Last Thursday in November
+}
+
+function setChristmasBreakDates(today) {
+    const currentYear = today.getFullYear();
+    const nextYear = currentYear + 1;
+
+    // Set dates for the current year
+    const fridayBeforeChristmas = getFridayBeforeChristmas(currentYear);
+    const sundayAfterNewYear = getFirstSundayAfterNewYear(currentYear + 1);
+
+    if (currentYear % 2 === 0) {
+        document.getElementById('evenChristmasBreakStart').value = fridayBeforeChristmas.toISOString().split('T')[0];
+        document.getElementById('evenChristmasBreakEnd').value = sundayAfterNewYear.toISOString().split('T')[0];
+    } else {
+        document.getElementById('oddChristmasBreakStart').value = fridayBeforeChristmas.toISOString().split('T')[0];
+        document.getElementById('oddChristmasBreakEnd').value = sundayAfterNewYear.toISOString().split('T')[0];
+    }
+
+    // Set dates for the next year
+    const fridayBeforeChristmasNextYear = getFridayBeforeChristmas(nextYear);
+    const sundayAfterNewYearNextYear = getFirstSundayAfterNewYear(nextYear + 1);
+
+    if (nextYear % 2 === 0) {
+        document.getElementById('evenChristmasBreakStart').value = fridayBeforeChristmasNextYear.toISOString().split('T')[0];
+        document.getElementById('evenChristmasBreakEnd').value = sundayAfterNewYearNextYear.toISOString().split('T')[0];
+    } else {
+        document.getElementById('oddChristmasBreakStart').value = fridayBeforeChristmasNextYear.toISOString().split('T')[0];
+        document.getElementById('oddChristmasBreakEnd').value = sundayAfterNewYearNextYear.toISOString().split('T')[0];
+    }
+}
+
+function getFirstSundayAfterNewYear(year) {
+    const newYear = new Date(year, 0, 1); // January 1st of the given year
+    const daysUntilSunday = (7 - newYear.getDay()) % 7; // Days until the next Sunday
+    return new Date(year, 0, 1 + daysUntilSunday);
+}
+
+function getFridayBeforeChristmas(year) {
+    const christmas = new Date(year, 11, 25);
+    const dayOfWeek = christmas.getDay();
+    const fridayBefore = dayOfWeek === 5 ? 25 : 25 - ((dayOfWeek + 2) % 7);
+    return new Date(year, 11, fridayBefore); // Friday before December 25
+}
+
+function setWinterBreakDates(today) {
+    const currentYear = today.getFullYear();
+    const nextYear = currentYear + 1;
+
+    // Set dates for the current year
+    const secondToLastMondayInFebruary = getSecondToLastMondayInFebruary(currentYear);
+    const fridayBefore = new Date(secondToLastMondayInFebruary);
+    fridayBefore.setDate(secondToLastMondayInFebruary.getDate() - 3); // Friday before the second-to-last Monday
+    const sundayAfter = new Date(secondToLastMondayInFebruary);
+    sundayAfter.setDate(secondToLastMondayInFebruary.getDate() + 6); // Sunday after the second-to-last Monday
+
+    if (currentYear % 2 === 0) {
+        document.getElementById('evenWinterBreakStart').value = fridayBefore.toISOString().split('T')[0];
+        document.getElementById('evenWinterBreakEnd').value = sundayAfter.toISOString().split('T')[0];
+    } else {
+        document.getElementById('oddWinterBreakStart').value = fridayBefore.toISOString().split('T')[0];
+        document.getElementById('oddWinterBreakEnd').value = sundayAfter.toISOString().split('T')[0];
+    }
+
+    // Set dates for the next year
+    const secondToLastMondayInFebruaryNextYear = getSecondToLastMondayInFebruary(nextYear);
+    const fridayBeforeNextYear = new Date(secondToLastMondayInFebruaryNextYear);
+    fridayBeforeNextYear.setDate(secondToLastMondayInFebruaryNextYear.getDate() - 3); // Friday before the second-to-last Monday
+    const sundayAfterNextYear = new Date(secondToLastMondayInFebruaryNextYear);
+    sundayAfterNextYear.setDate(secondToLastMondayInFebruaryNextYear.getDate() + 6); // Sunday after the second-to-last Monday
+
+    if (nextYear % 2 === 0) {
+        document.getElementById('evenWinterBreakStart').value = fridayBeforeNextYear.toISOString().split('T')[0];
+        document.getElementById('evenWinterBreakEnd').value = sundayAfterNextYear.toISOString().split('T')[0];
+    } else {
+        document.getElementById('oddWinterBreakStart').value = fridayBeforeNextYear.toISOString().split('T')[0];
+        document.getElementById('oddWinterBreakEnd').value = sundayAfterNextYear.toISOString().split('T')[0];
+    }
+}
+
+function getSecondToLastMondayInFebruary(year) {
+    const lastFebruary = new Date(year, 1, 28);
+    const dayOfWeek = lastFebruary.getDay();
+    const lastMonday = dayOfWeek === 1 ? 28 : 28 - ((dayOfWeek + 6) % 7);
+    return new Date(year, 1, lastMonday - 7); // Second-to-last Monday in February
+}
+
+function findNextHolidayDate(holiday, startDate) {
+    let year = startDate.getFullYear();
+    let date;
+
+    if (holiday.name === 'Easter') {
+        date = calculateEaster(year);
+    } else if (holiday.day) { // Fixed date holiday
+        date = new Date(year, holiday.month, holiday.day);
+    } else {
+        date = new Date(year, holiday.month, 1);
+        // Move to the first occurrence of the day of the week
+        date.setDate(date.getDate() + (holiday.dayOfWeek - date.getDay() + 7) % 7);
+        
+        // Move to the nth occurrence (week of month)
+        if (holiday.weekOfMonth > 0) {
+            date.setDate(date.getDate() + 7 * (holiday.weekOfMonth - 1));
+        } else {
+            // Handle last occurrence of the month
+            while (date.getMonth() === holiday.month) {
+                date.setDate(date.getDate() + 7);
+            }
+            date.setDate(date.getDate() - 7);
+        }
+    }
+    
+    // If the calculated date is before the start date, move to next year
+    if (date < startDate) {
+        return findNextHolidayDate(holiday, new Date(year + 1, 0, 1));
+    }
+    
+    return date;
+}
+
+function calculateEaster(year) {
+    const a = year % 19;
+    const b = Math.floor(year / 100);
+    const c = year % 100;
+    const d = Math.floor(b / 4);
+    const e = b % 4;
+    const f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4);
+    const k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * m + 114) / 31) - 1;
+    const day = ((h + l - 7 * m + 114) % 31) + 1;
+    return new Date(year, month, day);
+}
+
+function updateHolidayInput(holidayName, date) {
+    const year = date.getFullYear();
+    const isEven = year % 2 === 0;
+    const endInputId = `${isEven ? 'even' : 'odd'}End${holidayName}`;
+    const beginInputId = `${isEven ? 'even' : 'odd'}Begin${holidayName}`;
+    
+    const endInput = document.getElementById(endInputId);
+    const beginInput = document.getElementById(beginInputId);
+    
+    if (endInput && beginInput) {
+        switch (holidayName) {
+            case 'July4':
+                beginInput.value = new Date(year, 6, 3).toISOString().split('T')[0];
+                endInput.value = new Date(year, 6, 5).toISOString().split('T')[0];
+                break;
+            case 'Halloween':
+                beginInput.value = new Date(year, 9, 31).toISOString().split('T')[0];
+                endInput.value = new Date(year, 10, 1).toISOString().split('T')[0];
+                break;
+            case 'Veterans':
+                endInput.value = date.toISOString().split('T')[0];
+                const fridayBefore = new Date(date);
+                fridayBefore.setDate(date.getDate() - ((date.getDay() + 2) % 7));
+                beginInput.value = fridayBefore.toISOString().split('T')[0];
+                break;
+            default:
+                if (['MLK', 'Presidents', 'Easter', 'Mothers', 'Memorial', 'Fathers', 'Labor'].includes(holidayName)) {
+                    endInput.value = date.toISOString().split('T')[0];
+                    const fridayBefore = new Date(date);
+                    fridayBefore.setDate(date.getDate() - ((date.getDay() + 2) % 7));
+                    beginInput.value = fridayBefore.toISOString().split('T')[0];
+                } else {
+                    // For any other holidays, just set the date as is
+                    beginInput.value = date.toISOString().split('T')[0];
+                    endInput.value = date.toISOString().split('T')[0];
+                }
+        }
+    }
+}
+function handleSummerSchedule() {
+    const evenYearOption = document.querySelector('input[name="evenSummerSchedule"]:checked').value;
+    const oddYearOption = document.querySelector('input[name="oddSummerSchedule"]:checked').value;
+
+    // Handle even year summer schedule
+    handleEvenYearSummer(evenYearOption);
+
+    // Handle odd year summer schedule
+    handleOddYearSummer(oddYearOption);
+}
+function handleOddYearSummer(option) {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const calendarYears = Math.ceil(25 / 12);
+
+    for (let i = 0; i < calendarYears; i++) {
+        const year = currentYear + i;
+        if (year % 2 !== 0) { // Check if it's an odd year
+            const firstMondayJune = getFirstMondayOfMonth(year, 5); // 5 represents June (0-indexed)
+
+            // Skip if the first Monday of June is before today
+            if (firstMondayJune < today) {
+                continue;
+            }
+
+            switch (option) {
+                case 'Omit':
+                    // Do nothing
+                    break;
+                case '1week':
+                    updateSummerCalendar(firstMondayJune, 7, 1, today);
+                    updateSummerCalendar(addDays(firstMondayJune, 28), 7, 0, today);
+                    break;
+                case '2weeks':
+                    updateSummerCalendar(firstMondayJune, 14, 1, today);
+                    updateSummerCalendar(addDays(firstMondayJune, 28), 14, 0, today);
+                    break;
+                case '3weeks':
+                    updateSummerCalendar(firstMondayJune, 21, 1, today);
+                    updateSummerCalendar(addDays(firstMondayJune, 28), 21, 0, today);
+                    break;
+                case '4weeks':
+                    updateSummerCalendar(firstMondayJune, 28, 1, today);
+                    updateSummerCalendar(addDays(firstMondayJune, 28), 28, 0, today);
+                    break;
+                case 'alternating':
+                    for (let j = 0; j < 8; j++) {
+                        updateSummerCalendar(addDays(firstMondayJune, j * 7), 7, j % 2, today);
+                    }
+                    break;
+                case 'All':
+                    const firstSaturdayJune = getFirstSaturdayOfMonth(year, 5);
+                    updateSummerCalendar(firstSaturdayJune, 56, 1, today);
+                    break;
+            }
+        }
+    }
+}
+function handleEvenYearSummer(option) {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const calendarYears = Math.ceil(25 / 12); // Number of months / 12
+
+    for (let i = 0; i < calendarYears; i++) {
+        const year = currentYear + i;
+        if (year % 2 === 0) { // Check if it's an even year
+            const firstMondayJune = getFirstMondayOfMonth(year, 5); // 5 represents June (0-indexed)
+
+            // Skip if the first Monday of June is before today
+            if (firstMondayJune < today) {
+                continue;
+            }
+
+            switch (option) {
+                case 'Omit':
+                    // Do nothing
+                    break;
+                case '1week':
+                    updateSummerCalendar(firstMondayJune, 7, 1, today);
+                    updateSummerCalendar(addDays(firstMondayJune, 28), 7, 0, today);
+                    break;
+                case '2weeks':
+                    updateSummerCalendar(firstMondayJune, 14, 1, today);
+                    updateSummerCalendar(addDays(firstMondayJune, 28), 14, 0, today);
+                    break;
+                case '3weeks':
+                    updateSummerCalendar(firstMondayJune, 21, 1, today);
+                    updateSummerCalendar(addDays(firstMondayJune, 28), 21, 0, today);
+                    break;
+                case '4weeks':
+                    updateSummerCalendar(firstMondayJune, 28, 1, today);
+                    updateSummerCalendar(addDays(firstMondayJune, 28), 28, 0, today);
+                    break;
+                case 'alternating':
+                    for (let j = 0; j < 8; j++) {
+                        updateSummerCalendar(addDays(firstMondayJune, j * 7), 7, j % 2, today);
+                    }
+                    break;
+                case 'All':
+                    const firstSaturdayJune = getFirstSaturdayOfMonth(year, 5);
+                    updateSummerCalendar(firstSaturdayJune, 56, 1, today);
+                    break;
+            }
+        }
+    }
+}
+
+function updateSummerCalendar(startDate, days, value, today) {
+    for (let i = 0; i < days; i++) {
+        const date = addDays(startDate, i);
+        if (date < today) {
+            continue; // Skip dates before today
+        }
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Ensure month is two digits
+        const day = String(date.getDate()).padStart(2, '0'); // Ensure day is two digits
+        
+        const inputId = `day-${year}-${month}-${day}`;
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.value = value;
+        }
+    }
+}
+
+
+function getFirstMondayOfMonth(year, month) {
+    const date = new Date(year, month, 1);
+    while (date.getDay() !== 1) {
+        date.setDate(date.getDate() + 1);
+    }
+    return date;
+}
+
+function getFirstSaturdayOfMonth(year, month) {
+    const date = new Date(year, month, 1);
+    while (date.getDay() !== 6) {
+        date.setDate(date.getDate() + 1);
+    }
+    return date;
+}
+
+function addDays(date, days) {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+}
+function handleBreak(startId, endId, parentId) {
+    const start = document.getElementById(startId).value;
+    const end = document.getElementById(endId).value;
+    const parent = document.querySelector(`input[name="${parentId}"]:checked`).value;
+
+    if (start && end) {
+        if (parent === 'B') {
+            assignDateRange(start, end, 1);
+        } else if (parent === 'A') {
+            assignDateRange(start, end, 0);
+        }
+    }
+}
+function handleHolidaySchedule() {
+    // MLK Day (even years)
+    const mlkEvenSelection = document.querySelector('input[name="mlk-even"]:checked');
+    if (mlkEvenSelection && mlkEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginMLK', 'evenEndMLK');
+    }
+
+    // Presidents' Day (even years)
+    const presidentsEvenSelection = document.querySelector('input[name="presidents-even"]:checked');
+    if (presidentsEvenSelection && presidentsEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginPresidents', 'evenEndPresidents');
+    }
+
+    // Easter (even years)
+    const easterEvenSelection = document.querySelector('input[name="easter-even"]:checked');
+    if (easterEvenSelection && easterEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginEaster', 'evenEndEaster');
+    }
+
+    // Mother's Day (even years)
+    const mothersEvenSelection = document.querySelector('input[name="mothers-day-even"]:checked');
+    if (mothersEvenSelection && mothersEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginMothers', 'evenEndMothers');
+    }
+
+    // Memorial Day (even years)
+    const memorialEvenSelection = document.querySelector('input[name="memorial-day-even"]:checked');
+    if (memorialEvenSelection && memorialEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginMemorial', 'evenEndMemorial');
+    }
+
+    // Father's Day (even years)
+    const fathersEvenSelection = document.querySelector('input[name="fathers-day-even"]:checked');
+    if (fathersEvenSelection && fathersEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginFathers', 'evenEndFathers');
+    }
+
+    // Juneteenth (even years)
+    const juneteenthEvenSelection = document.querySelector('input[name="juneteenth-even"]:checked');
+    if (juneteenthEvenSelection && juneteenthEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginJuneteenth', 'evenEndJuneteenth');
+    }
+
+    // Fourth of July (even years)
+    const julyFourthEvenSelection = document.querySelector('input[name="july-fourth-even"]:checked');
+    if (julyFourthEvenSelection && julyFourthEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginJuly4', 'evenEndJuly4');
+    }
+
+    // Labor Day (even years)
+    const laborEvenSelection = document.querySelector('input[name="labor-day-even"]:checked');
+    if (laborEvenSelection && laborEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginLabor', 'evenEndLabor');
+    }
+
+    // Halloween (even years)
+    const halloweenEvenSelection = document.querySelector('input[name="halloween-even"]:checked');
+    if (halloweenEvenSelection && halloweenEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginHalloween', 'evenEndHalloween');
+    }
+
+    // Veterans Day (even years)
+    const veteransEvenSelection = document.querySelector('input[name="veterans-day-even"]:checked');
+    if (veteransEvenSelection && veteransEvenSelection.value === 'parent-b') {
+        updateCalendar('evenBeginVeterans', 'evenEndVeterans');
+    }
+
+    // MLK Day (odd years)
+    const mlkOddSelection = document.querySelector('input[name="mlk-odd"]:checked');
+    if (mlkOddSelection && mlkOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginMLK', 'oddEndMLK');
+    }
+
+    // Presidents' Day (odd years)
+    const presidentsOddSelection = document.querySelector('input[name="presidents-odd"]:checked');
+    if (presidentsOddSelection && presidentsOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginPresidents', 'oddEndPresidents');
+    }
+
+    // Easter (odd years)
+    const easterOddSelection = document.querySelector('input[name="easter-odd"]:checked');
+    if (easterOddSelection && easterOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginEaster', 'oddEndEaster');
+    }
+
+    // Mother's Day (odd years)
+    const mothersOddSelection = document.querySelector('input[name="mothers-day-odd"]:checked');
+    if (mothersOddSelection && mothersOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginMothers', 'oddEndMothers');
+    }
+
+    // Memorial Day (odd years)
+    const memorialOddSelection = document.querySelector('input[name="memorial-day-odd"]:checked');
+    if (memorialOddSelection && memorialOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginMemorial', 'oddEndMemorial');
+    }
+
+    // Father's Day (odd years)
+    const fathersOddSelection = document.querySelector('input[name="fathers-day-odd"]:checked');
+    if (fathersOddSelection && fathersOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginFathers', 'oddEndFathers');
+    }
+
+    // Juneteenth (odd years)
+    const juneteenthOddSelection = document.querySelector('input[name="juneteenth-odd"]:checked');
+    if (juneteenthOddSelection && juneteenthOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginJuneteenth', 'oddEndJuneteenth');
+    }
+
+    // Fourth of July (odd years)
+    const julyFourthOddSelection = document.querySelector('input[name="july-fourth-odd"]:checked');
+    if (julyFourthOddSelection && julyFourthOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginJuly4', 'oddEndJuly4');
+    }
+
+    // Labor Day (odd years)
+    const laborOddSelection = document.querySelector('input[name="labor-day-odd"]:checked');
+    if (laborOddSelection && laborOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginLabor', 'oddEndLabor');
+    }
+
+    // Halloween (odd years)
+    const halloweenOddSelection = document.querySelector('input[name="halloween-odd"]:checked');
+    if (halloweenOddSelection && halloweenOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginHalloween', 'oddEndHalloween');
+    }
+
+    // Veterans Day (odd years)
+    const veteransOddSelection = document.querySelector('input[name="veterans-day-odd"]:checked');
+    if (veteransOddSelection && veteransOddSelection.value === 'parent-b') {
+        updateCalendar('oddBeginVeterans', 'oddEndVeterans');
+    }
+
+    function updateCalendar(beginInputId, endInputId) {
+        const beginDate = new Date(document.getElementById(beginInputId).value + 'T00:00:00');
+        const endDate = new Date(document.getElementById(endInputId).value + 'T00:00:00');
+        
+        let currentDate = new Date(beginDate.getFullYear(), beginDate.getMonth(), beginDate.getDate());
+        
+        while (currentDate < endDate) {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth() + 1;
+            const day = currentDate.getDate();
+            
+            const input = document.getElementById(`day-${year}-${month}-${day}`);
+            if (input) {
+                input.value = 1;
+            }
+            
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+    }
+}
+function assignSpecificDate(dateString, value) {
+    const dateParts = dateString.split('-');
+    const year = parseInt(dateParts[0], 10);
+    const month = parseInt(dateParts[1], 10) - 1; // Months are zero-based in JavaScript
+    const day = parseInt(dateParts[2], 10);
+    const date = new Date(year, month, day);
+    const spinBox = document.getElementById(`day-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`);
+    if (spinBox) {
+        spinBox.value = value;
+    }
+}
+
+function assignDateRange(startDateString, endDateString, value) {
+    const startDateParts = startDateString.split('-');
+    const endDateParts = endDateString.split('-');
+    const startDate = new Date(parseInt(startDateParts[0], 10), parseInt(startDateParts[1], 10) - 1, parseInt(startDateParts[2], 10));
+    const endDate = new Date(parseInt(endDateParts[0], 10), parseInt(endDateParts[1], 10) - 1, parseInt(endDateParts[2], 10));
+
+    let currentDate = new Date(startDate);
+    while (currentDate < endDate) {
+        assignSpecificDate(currentDate.toISOString().split('T')[0], value);
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+}
+
+function assignRecurringDaytimePeriods(isEven, everyWeek) {
+    const startDate = new Date();
+    const endDate = new Date(startDate.getFullYear() + 2, 11, 31);
+    const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+    daysOfWeek.forEach(day => {
+        const checkbox = document.querySelector(`input[name="recurring-day"][value="${day}"]`);
+        if (checkbox && checkbox.checked) {
+            const hoursInput = document.querySelector(`input[name="recurring-hours-${day}"]`);
+            const hours = hoursInput ? parseFloat(hoursInput.value) : 0;
+            if (hours > 0) {
+                const dayIndex = getDayIndex(day);
+                let tempDate = new Date(startDate);
+
+                if (everyWeek) {
+                    while (tempDate <= endDate) {
+                        if (tempDate.getDay() === dayIndex) {
+                            const formattedMonth = String(tempDate.getMonth() + 1).padStart(2, '0');
+                            const formattedDay = String(tempDate.getDate()).padStart(2, '0');
+                            const spinBox = document.getElementById(`day-${tempDate.getFullYear()}-${formattedMonth}-${formattedDay}`);
+                            if (spinBox) {
+                                spinBox.value = hours / 24;
+                            }
+                        }
+                        tempDate.setDate(tempDate.getDate() + 1);
+                    }
+                } else {
+                    // Adjust start date if it's for even weeks
+                    const dayAdjustment = (dayIndex >= tempDate.getDay()) ? dayIndex - tempDate.getDay() : 7 - (tempDate.getDay() - dayIndex);
+                    tempDate.setDate(tempDate.getDate() + dayAdjustment);
+
+                    if (isEven) {
+                        if (getWeekNumber(tempDate) % 2 !== 0) {
+                            tempDate.setDate(tempDate.getDate() + 7);
+                        }
+                    } else {
+                        if (getWeekNumber(tempDate) % 2 === 0) {
+                            tempDate.setDate(tempDate.getDate() + 7);
+                        }
+                    }
+
+                    while (tempDate <= endDate) {
+                        if (tempDate.getDay() === dayIndex) {
+                            const formattedMonth = String(tempDate.getMonth() + 1).padStart(2, '0');
+                            const formattedDay = String(tempDate.getDate()).padStart(2, '0');
+                            const spinBox = document.getElementById(`day-${tempDate.getFullYear()}-${formattedMonth}-${formattedDay}`);
+                            if (spinBox) {
+                                spinBox.value = hours / 24;
+                            }
+                            tempDate.setDate(tempDate.getDate() + 14); // Move to the same day in the next "every-other" week
+                        } else {
+                            tempDate.setDate(tempDate.getDate() + 1);
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function assignRecurringDaytimePeriodsForSpecificWeeks(beginDay, weekCheckFunction) {
+    const startDate = new Date();
+    const endDate = new Date(startDate.getFullYear() + 2, 11, 31);
+    const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+    daysOfWeek.forEach(day => {
+        const checkbox = document.querySelector(`input[name="recurring-day"][value="${day}"]`);
+        if (checkbox && checkbox.checked) {
+            const hoursInput = document.querySelector(`input[name="recurring-hours-${day}"]`);
+            const hours = hoursInput ? parseFloat(hoursInput.value) : 0;
+            if (hours > 0) {
+                const dayIndex = getDayIndex(day);
+                let tempDate = new Date(startDate);
+
+                // Adjust start date based on begin day
+                const beginDayIndex = getDayIndex(beginDay);
+                if (tempDate.getDay() <= beginDayIndex) {
+                    tempDate.setDate(tempDate.getDate() + (beginDayIndex - tempDate.getDay()));
+                } else {
+                    tempDate.setDate(tempDate.getDate() + (7 - (tempDate.getDay() - beginDayIndex)));
+                }
+
+                while (tempDate <= endDate) {
+                    if (tempDate.getDay() === dayIndex && weekCheckFunction(tempDate, beginDayIndex)) {
+                        const spinBox = document.getElementById(`day-${tempDate.getFullYear()}-${tempDate.getMonth() + 1}-${tempDate.getDate()}`);
+                        if (spinBox) {
+                            spinBox.value = hours / 24;
+                        }
+                    }
+                    tempDate.setDate(tempDate.getDate() + 1);
+                }
+            }
+        }
+    });
+}
+
+function getWeekNumber(date) {
+    const startDate = new Date(date.getFullYear(), 0, 1);
+    const days = Math.floor((date - startDate) / (24 * 60 * 60 * 1000));
+    const weekNumber = Math.ceil((days + startDate.getDay() + 1) / 7);
+    return weekNumber;
+}
+
+function getDayIndex(day) {
+    const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    return daysOfWeek.indexOf(day.toLowerCase());
+}
+
+function getDayDifference(beginDay, endDay) {
+    const beginIndex = getDayIndex(beginDay);
+    const endIndex = getDayIndex(endDay);
+    return endIndex >= beginIndex ? endIndex - beginIndex : 7 - (beginIndex - endIndex);
+}
+function padToTwoDigits(num) {
+    return num.toString().padStart(2, '0');
+}
+function generateCalendar() {
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"];
+    const daysOfWeek = ["S", "M", "T", "W", "T", "F", "S"];
+    let calendarHtml = '';
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to beginning of the day
+    const startMonth = today.getMonth();
+    const startYear = today.getFullYear();
+    const futureLimit = new Date(today.getTime() + 729 * 24 * 60 * 60 * 1000); // 729 days in the future
+
+    for (let i = 0; i < 25; i++) {
+        if (i % 3 === 0) {
+            calendarHtml += '<div class="calendar-row" style="display: flex; justify-content: space-between; margin-bottom: 20px;">'; // Start a new row
+        }
+
+        const monthOffset = i;
+        let year = startYear + Math.floor((startMonth + monthOffset) / 12);
+        let month = (startMonth + monthOffset) % 12;
+
+        let currentDate = new Date(year, month, 1);
+        calendarHtml += `
+            <div class="month">
+                <div class="month-header">${monthNames[month]} ${year}</div>
+                <table>
+                    <tr>${daysOfWeek.map(day => `<th>${day}</th>`).join('')}</tr>
+        `;
+
+        let firstDay = currentDate.getDay();
+        if (firstDay > 0) {
+            calendarHtml += '<tr>' + '<td></td>'.repeat(firstDay);
+        }
+
+        while (currentDate.getMonth() === month) {
+            if (currentDate.getDay() === 0) calendarHtml += '<tr>';
+
+            calendarHtml += `<td>${currentDate.getDate()}<br>`;
+            
+            if (currentDate >= today && currentDate <= futureLimit) {
+               calendarHtml += `<input type="number" max="1" id="day-${year}-${padToTwoDigits(month + 1)}-${padToTwoDigits(currentDate.getDate())}" min="0" max="1" step="0.1" value="0">`;
+            }
+            
+            calendarHtml += `</td>`;
+
+            if (currentDate.getDay() === 6) calendarHtml += '</tr>';
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        if (currentDate.getDay() > 0) {
+            calendarHtml += '<td></td>'.repeat(7 - currentDate.getDay()) + '</tr>';
+        }
+
+        calendarHtml += '</table></div>';
+
+        if (i % 3 === 2 || i === 24) {
+            calendarHtml += '</div>'; // Close the row
+        }
+
+        // Start a new row for the 25th month
+        if (i === 24) {
+            calendarHtml += '<div class="calendar-row" style="display: flex; justify-content: space-between; margin-bottom: 20px;">';
+        }
+    }
+
+    document.getElementById('calendar').innerHTML = calendarHtml;
+
+// Add event listeners to all inputs
+document.querySelectorAll('#calendar input[type="number"]').forEach(input => {
+    input.addEventListener('change', function() {
+        updateTotalDays();
+        updateCellBackground(this);
+    });
+});
+document.querySelectorAll('#calendar input[type="number"]').forEach(input => updateCellBackground(input));
+}
+
+function isfirstorthird(date) {
+    var day = date.getDay(); // Day of the week (0-6, 0 is Sunday)
+    var dateOfMonth = date.getDate(); // Day of the month (1-31)
+    
+    // Find the first occurrence of this day in the month
+    var firstOccurrence = new Date(date.getFullYear(), date.getMonth(), 1);
+    while (firstOccurrence.getDay() != day) {
+        firstOccurrence.setDate(firstOccurrence.getDate() + 1);
+    }
+
+    // Calculate the dates of the first and third occurrences
+    var firstOccurrenceDate = firstOccurrence.getDate();
+    var thirdOccurrenceDate = firstOccurrenceDate + 14; // 14 days after the first occurrence
+
+    return dateOfMonth == firstOccurrenceDate || dateOfMonth == thirdOccurrenceDate;
+}
+
+function isSecondOrFourthOccurance(date) {
+}
+
+function isOddWeek(date) {
+    const weekNumber = getWeekNumber(date);
+    return weekNumber % 2 !== 0 && (date.getDay() === 5 || date.getDay() === 6 || date.getDay() === 0);
+}
+
+function isEvenWeek(date) {
+    const weekNumber = getWeekNumber(date);
+    return weekNumber % 2 === 0 && (date.getDay() === 5 || date.getDay() === 6 || date.getDay() === 0);
+}
+
+function isFirstOrThirdWeek(date, beginDayIndex) {
+    const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+    let firstOccurrence = firstDayOfMonth;
+
+    while (firstOccurrence.getDay() !== beginDayIndex) {
+        firstOccurrence.setDate(firstOccurrence.getDate() + 1);
+    }
+
+    let weekCount = 0;
+    let currentWeekStart = new Date(firstOccurrence);
+
+    while (currentWeekStart.getMonth() === date.getMonth()) {
+        weekCount++;
+        if (currentWeekStart <= date && date < new Date(currentWeekStart.getTime() + 7 * 24 * 60 * 60 * 1000)) {
+            return weekCount === 1 || weekCount === 3;
+        }
+        currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+    }
+    return false;
+}
+
+function isSecondOrFourthWeek(date, beginDayIndex) {
+    const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+    let firstOccurrence = firstDayOfMonth;
+
+    while (firstOccurrence.getDay() !== beginDayIndex) {
+        firstOccurrence.setDate(firstOccurrence.getDate() + 1);
+    }
+
+    let weekCount = 0;
+    let currentWeekStart = new Date(firstOccurrence);
+
+    while (currentWeekStart.getMonth() === date.getMonth()) {
+        weekCount++;
+        if (currentWeekStart <= date && date < new Date(currentWeekStart.getTime() + 7 * 24 * 60 * 60 * 1000)) {
+            return weekCount === 2 || weekCount === 4;
+        }
+        currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+    }
+    return false;
+}
+function toggleVisibility(radioGroupName, divId) {
+    const radioButtons = document.querySelectorAll(`input[name="${radioGroupName}"]`);
+    const div = document.getElementById(divId);
+
+    if (radioButtons.length && div) {
+        radioButtons.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'Omit') {
+                    div.style.display = 'none';
+                } else {
+                    div.style.display = 'block';
+                }
+            });
+        });
+
+        // Initial state
+        const checkedRadio = document.querySelector(`input[name="${radioGroupName}"]:checked`);
+        if (checkedRadio && checkedRadio.value === 'Omit') {
+            div.style.display = 'none';
+        }
+    }
+}
+function updateCellBackground(input) {
+    const cell = input.closest('td');
+    const value = parseFloat(input.value);
+    
+    if (value === 1) {
+        cell.style.backgroundColor = 'darkgrey';
+    } else if (value > 0 && value < 1) {
+        cell.style.backgroundColor = 'lightgrey';
+    } else {
+        cell.style.backgroundColor = ''; // Reset to default
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Georgia Automatic Parenting Time Calendar Tool | Calculate Custody Percentages{% endblock %}
+{% block meta_description %}Georgia Automatic Parenting Time Calendar Tool - The leading AI-powered calculator for Georgia custody schedules. Automatically calculate parenting time percentages and generate court-ready calendars.{% endblock %}
+
+{% block content %}
+<h1>Georgia Automatic Parenting Time Calendar Tool</h1>
+{% if current_user.is_authenticated %}
+    <p>Hello, {{ current_user.username }}!</p>
+    <a href="{{ url_for('main.ai_calendar') }}">Go to AI Calendar Tool</a>
+{% else %}
+    <p>The first ever Automatic Online Georgia Parenting Time Calendar Tool - try it with no registration required!</p>
+    <a href="{{ url_for('main.ai_calendar') }}" style="display: inline-block; padding: 12px 24px; background: #8b5cf6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 10px 5px;">Try AI Calendar Tool</a>
+    <a href="{{ url_for('auth.login') }}" style="display: inline-block; padding: 12px 24px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 10px 5px;">Login</a>
+    <a href="{{ url_for('auth.register') }}" style="display: inline-block; padding: 12px 24px; background: #10b981; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 10px 5px;">Register</a>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/2FQXY-1FZc8?si=pQ5LCRBuIN4kBRwx" title="Georgia Automatic Parenting Time Calendar Tool Demo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+{% endif %}
+{% endblock %}

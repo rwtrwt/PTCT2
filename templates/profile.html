@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Profile</h1>
+<p>Username: {{ current_user.username }}</p>
+<p>Email: {{ current_user.email }}</p>
+<p>Subscription: {{ current_user.subscription_type }}</p>
+
+{% if guest_journey %}
+<div style="margin: 20px 0; padding: 20px; background: #f0f9ff; border: 1px solid #3b82f6; border-radius: 8px;">
+    <h2 style="margin-top: 0; color: #1f2937;">Client Journey</h2>
+    <p style="color: #6b7280; margin-bottom: 15px;">Your activity before registering:</p>
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 8px 0; font-weight: 600;">First Visit</td>
+            <td style="padding: 8px 0;">{{ guest_journey.created_at.strftime('%B %d, %Y at %I:%M %p') if guest_journey.created_at else 'Unknown' }}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 8px 0; font-weight: 600;">Guest Email</td>
+            <td style="padding: 8px 0;">{{ guest_journey.email or 'Not provided' }}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 8px 0; font-weight: 600;">Guest Phone</td>
+            <td style="padding: 8px 0;">{{ guest_journey.phone or 'Not provided' }}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 8px 0; font-weight: 600;">Contact Permission</td>
+            <td style="padding: 8px 0;">{{ 'Yes' if guest_journey.contact_permission else 'No' }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; font-weight: 600;">IP Address</td>
+            <td style="padding: 8px 0;">{{ guest_journey.ip_address }}</td>
+        </tr>
+    </table>
+</div>
+{% endif %}
+
+{% if current_user.subscription_type == 'paid' %}
+    <h2>Customize Your H4 Tag</h2>
+    <form method="POST" action="{{ url_for('main.profile') }}">
+        <label for="custom_h4">Custom H4 Content:</label>
+        <input type="text" id="custom_h4" name="custom_h4" value="{{ current_user.custom_h4 or '' }}">
+        <button type="submit">Update</button>
+    </form>
+{% endif %}
+
+<h2>Change Password</h2>
+<form method="POST" action="{{ url_for('main.profile') }}">
+    <input type="hidden" name="_method" value="PUT">
+    <label for="current_password">Current Password:</label>
+    <input type="password" id="current_password" name="current_password" required>
+    
+    <label for="new_password">New Password:</label>
+    <input type="password" id="new_password" name="new_password" required>
+    
+    <button type="submit">Change Password</button>
+</form>
+{% endblock %}

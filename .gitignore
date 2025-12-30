@@ -1,0 +1,9 @@
+.env
+.env.*
+node_modules/
+dist/
+build/
+.replit
+.cache/
+.DS_Store
+attached_assets/

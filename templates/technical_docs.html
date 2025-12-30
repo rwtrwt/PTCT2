@@ -1,0 +1,700 @@
+{% extends "base.html" %}
+
+{% block title %}Technical Documentation - AI Calendar Tools{% endblock %}
+
+{% block content %}
+<div class="documentation-container">
+    <h1>Technical Documentation: AI Calendar Tools</h1>
+    
+    <div class="tech-notice">
+        <strong>Purpose:</strong> This documentation is designed for developers and future Replit Agent sessions to quickly understand how the AI-powered school calendar analyzer and parenting plan analyzer are implemented.
+    </div>
+
+    <nav class="doc-nav">
+        <h3>Contents</h3>
+        <ul>
+            <li><a href="#architecture">Architecture Overview</a></li>
+            <li><a href="#school-calendar-analyzer">School Calendar Analyzer</a></li>
+            <li><a href="#parenting-plan-analyzer">Parenting Plan Analyzer</a></li>
+            <li><a href="#date-inference">Date Inference System</a></li>
+            <li><a href="#visual-shading-extraction">Visual Shading Extraction</a></li>
+            <li><a href="#api-endpoints">API Endpoints</a></li>
+            <li><a href="#key-conventions">Key Conventions</a></li>
+        </ul>
+    </nav>
+
+    <section id="architecture">
+        <h2>Architecture Overview</h2>
+        
+        <h3>Core Components</h3>
+        <pre class="code-block">
+main.py
+├── OpenAI Client Setup (get_openai_client)
+├── PDF Text Extraction (extract_text_from_pdf)
+├── School Calendar Analyzer
+│   ├── Two-Pass Analysis System
+│   ├── Date Merging Logic
+│   └── Date Inference Engine
+├── Parenting Plan Analyzer
+│   ├── Basic Analysis (SYSTEM_PROMPT)
+│   └── Enhanced Analysis with Form Snapshot (ENHANCED_PARENTING_PLAN_PROMPT)
+└── Drafting Audit Report Generator
+        </pre>
+
+        <h3>AI Integration</h3>
+        <p>The system uses OpenAI's GPT-4o model via two possible configurations:</p>
+        <ol>
+            <li><strong>User API Key</strong> (OPENAI_API_KEY) - Direct connection to OpenAI, works in all environments</li>
+            <li><strong>Replit Integration</strong> (AI_INTEGRATIONS_OPENAI_API_KEY + AI_INTEGRATIONS_OPENAI_BASE_URL) - Works in both development and production</li>
+        </ol>
+        <p>Priority: User API key is checked first, then Replit integration as fallback.</p>
+        
+        <div class="tech-notice" style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0;">
+            <h4 style="margin-top: 0; color: #856404;">Troubleshooting: AI Features Hanging in Production</h4>
+            <p><strong>Symptom:</strong> Features like "Extracting calendar dates..." or "Analyzing parenting plan..." spin indefinitely in production but work in development.</p>
+            <p><strong>Root Cause:</strong> The <code>get_openai_client()</code> function may have a restriction that prevents the Replit AI integration from initializing in production.</p>
+            <p><strong>Fix (December 2024):</strong> Ensure the Replit integration check in <code>get_openai_client()</code> does NOT require "localhost" in the base URL. The condition should be:</p>
+            <pre style="background: #f8f9fa; padding: 10px; margin: 10px 0;">
+# CORRECT - works in both dev and production:
+if replit_api_key and replit_base_url:
+
+# WRONG - only works in development:
+if replit_api_key and replit_base_url and "localhost" in replit_base_url:</pre>
+            <p><strong>Why:</strong> In development, the base URL contains "localhost". In production, Replit provides a different proxy URL (e.g., <code>https://proxy.replit.com/...</code>). Both are valid.</p>
+            <p><strong>Verification:</strong> Test with <code>curl http://localhost:5000/test_openai</code> - should return <code>{"success": true}</code>.</p>
+        </div>
+
+        <h3>PDF Processing</h3>
+        <p>Text extraction uses a two-tier approach:</p>
+        <ol>
+            <li><strong>Primary:</strong> <code>pdfplumber</code> for native text extraction</li>
+            <li><strong>Fallback:</strong> <code>pytesseract</code> + <code>pdf2image</code> for OCR on scanned documents</li>
+        </ol>
+    </section>
+
+    <section id="school-calendar-analyzer">
+        <h2>School Calendar Analyzer</h2>
+        
+        <h3>Two-Pass Analysis System</h3>
+        <p>The school calendar analyzer uses a sophisticated two-pass system to maximize accuracy:</p>
+
+        <h4>Pass 1: Raw Date Extraction (AI)</h4>
+        <p><strong>Function:</strong> <code>extract_raw_calendar_dates(text)</code></p>
+        <p><strong>Prompt:</strong> <code>SCHOOL_CALENDAR_RAW_EXTRACTION_PROMPT</code></p>
+        <p>The AI extracts every marked date from the calendar with:</p>
+        <ul>
+            <li>Date and optional end date (for ranges)</li>
+            <li>Label (exact text from calendar)</li>
+            <li>Category (holiday, break, teacher_day, student_holiday, early_release, other)</li>
+            <li>isStudentDayOff flag</li>
+            <li>Visual indicator description (shading, colors, etc.)</li>
+        </ul>
+
+        <h4>Pass 2: Merge and Normalize (Python)</h4>
+        <p><strong>Function:</strong> <code>merge_and_normalize_breaks(raw_result)</code></p>
+        <p>Deterministic Python logic that:</p>
+        <ol>
+            <li>Parses dates and filters for student days off</li>
+            <li>Sorts entries chronologically</li>
+            <li>Merges adjacent dates (gap ≤ 1 day, or Friday-Monday patterns with gap ≤ 3)</li>
+            <li>Handles month boundary merging (end of month to start of next)</li>
+            <li>Normalizes break names based on month and label content</li>
+        </ol>
+
+        <h3>Key Merging Logic</h3>
+        <pre class="code-block">
+# Merge conditions (lines ~1707-1724 in main.py):
+should_merge = False
+
+# Adjacent or same day
+if gap_days <= 1:
+    should_merge = True
+
+# Weekend spanning (Friday to Monday patterns)
+elif gap_days <= 3:
+    if current_end.weekday() == 4 and entry_start.weekday() == 0:  # Fri to Mon
+        should_merge = True
+    # ... additional weekend patterns
+
+# Month boundary (late month to early next month)
+if current_end.month != entry_start.month:
+    if current_end.day >= 28 and entry_start.day <= 5:
+        if gap_days <= 5:
+            should_merge = True
+        </pre>
+
+        <h3>Break Naming Convention</h3>
+        <p><strong>Function:</strong> <code>get_break_name(month, label, is_multi_day)</code></p>
+        <table class="data-table">
+            <tr><th>Month</th><th>Standard Name</th><th>Notes</th></tr>
+            <tr><td>October</td><td>Fall Break</td><td>Any multi-day break in October</td></tr>
+            <tr><td>November</td><td>Thanksgiving Break</td><td>Around Thanksgiving Day</td></tr>
+            <tr><td>December</td><td>Christmas Break</td><td>ANY break in December, even if labeled "Winter Break"</td></tr>
+            <tr><td>February</td><td>Winter Break</td><td>Usually around Presidents Day</td></tr>
+            <tr><td>March/April</td><td>Spring Break</td><td>Multi-day breaks in these months</td></tr>
+        </table>
+
+        <h3>Student Holiday Detection</h3>
+        <p>A date is marked as a student day off if any of these conditions are true:</p>
+        <ul>
+            <li><code>isStudentDayOff == true</code> in the AI response</li>
+            <li>Label or notes contain "student holiday" or "student day off"</li>
+            <li>Category is teacher_day/teacher_planning AND (isStudentDayOff OR label contains "student holiday")</li>
+        </ul>
+        <p><strong>Key principle:</strong> A break ends on the last day BEFORE school resumes. Any Student Holiday following a break extends that break.</p>
+
+        <div class="tech-notice" style="background: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 15px 0;">
+            <h4 style="margin-top: 0; color: #721c24;">CRITICAL: Christmas Break Extension into January</h4>
+            <p><strong>Problem:</strong> This is the most common bug - failing to append January student holidays to Christmas Break.</p>
+            <p><strong>Example from Gwinnett County 2025-26:</strong></p>
+            <pre style="background: #f8f9fa; padding: 10px; margin: 10px 0;">
+December 22-31: Winter Break (School Holidays)
+January 1: Winter Break (School Holidays)
+January 2: Teacher Planning/Staff Development [#8-9] (Student Holiday)  &lt;-- THIS MUST BE INCLUDED
+
+CORRECT: Christmas Break = Dec 22 - Jan 2
+WRONG: Christmas Break = Dec 22 - Jan 1  (missing Jan 2)</pre>
+            <p><strong>Root Cause:</strong> In PDF parsing, "(Student Holiday)" may appear on a separate line from "Teacher Planning", causing the AI to miss it.</p>
+            <p><strong>Fix locations:</strong></p>
+            <ul style="margin-bottom: 0;">
+                <li><code>SCHOOL_CALENDAR_RAW_EXTRACTION_PROMPT</code> - Rules 11-14 explicitly handle January dates</li>
+                <li><code>SCHOOL_CALENDAR_SYSTEM_PROMPT</code> - "CHRISTMAS BREAK EXTENSION INTO JANUARY" section</li>
+                <li><code>merge_and_normalize_breaks()</code> - Python merge logic handles adjacent days</li>
+            </ul>
+            <p><strong>DO NOT MODIFY</strong> these sections without understanding the full extraction + merge pipeline.</p>
+        </div>
+    </section>
+
+    <section id="parenting-plan-analyzer">
+        <h2>Parenting Plan Analyzer</h2>
+
+        <h3>Two Analysis Modes</h3>
+
+        <h4>Basic Analysis (No Form Snapshot)</h4>
+        <p><strong>Function:</strong> <code>analyze_with_openai(text)</code></p>
+        <p><strong>Prompt:</strong> <code>SYSTEM_PROMPT</code></p>
+        <p>Extracts scheduling information without school calendar context.</p>
+
+        <h4>Enhanced Analysis (With Form Snapshot)</h4>
+        <p><strong>Function:</strong> <code>analyze_with_openai(text, form_snapshot)</code></p>
+        <p><strong>Prompt:</strong> <code>ENHANCED_PARENTING_PLAN_PROMPT</code></p>
+        <p>When the frontend provides a form snapshot (including school calendar dates), the AI can:</p>
+        <ul>
+            <li>Apply date correction rules from the parenting plan</li>
+            <li>Compute adjusted date ranges based on provisions like "begins when school dismisses"</li>
+            <li>Return corrected dateFields with reasoning</li>
+        </ul>
+
+        <h3>Form Snapshot Structure</h3>
+        <pre class="code-block">
+{
+  "dateFields": [
+    {
+      "name": "christmas_break_start_even",
+      "label": "Christmas Break Start (Even Years)",
+      "currentValue": "2026-12-21"
+    },
+    // ... more date fields
+  ],
+  "schoolCalendar": {
+    "schoolName": "Gwinnett County",
+    "holidays": [...]
+  }
+}
+        </pre>
+
+        <h3>Response Structure</h3>
+        <pre class="code-block">
+{
+  "parentA": "Mother's Name",
+  "parentB": "Father's Name",
+  "weeklySchedule": { ... },
+  "holidaySchedule": {
+    "christmasBreak": {
+      "evenYears": { "option": "Parent A", "reasoning": "..." },
+      "oddYears": { "option": "Parent B", "reasoning": "..." }
+    },
+    // ... other holidays
+  },
+  "summerSchedule": { ... },
+  "detectedRules": [
+    {
+      "breakName": "Christmas Break",
+      "provision": "begins when school dismisses for the break",
+      "effect": "Start date adjusted to Friday before official start"
+    }
+  ],
+  "correctedDateFields": [
+    {
+      "name": "christmas_break_start_even",
+      "originalValue": "2026-12-21",
+      "correctedValue": "2026-12-18",
+      "reasoning": "School dismisses Friday Dec 18 for break starting Dec 21"
+    }
+  ],
+  "shortSummary": "...",
+  "longSummary": "...",
+  "confidence": "high|medium|low"
+}
+        </pre>
+
+        <h3>Date Correction UI</h3>
+        <p>Fields with corrected values receive the CSS class <code>ai-adjusted</code> which triggers a pulse animation to draw attention to AI-corrected values.</p>
+    </section>
+
+    <section id="date-inference">
+        <h2>Date Inference System</h2>
+        
+        <p><strong>Function:</strong> <code>infer_missing_years(calendar_result)</code></p>
+        
+        <h3>Purpose</h3>
+        <p>School calendars typically show only one academic year. This function infers dates for adjacent years to support 24-month calendar generation.</p>
+
+        <h3>Inference Methods</h3>
+        <ol>
+            <li><strong>Federal Holidays</strong> - Uses official rules (e.g., MLK Day = 3rd Monday in January)</li>
+            <li><strong>Template-Based Pattern Matching</strong> - For breaks like Fall Break and Winter Break (February), preserves exact weekday + week + duration pattern</li>
+            <li><strong>Christmas Break</strong> - Maintains relative position to Dec 25</li>
+            <li><strong>Thanksgiving</strong> - Anchors to 4th Thursday in November</li>
+        </ol>
+
+        <h3>Template-Based Break Inference (Critical Algorithm)</h3>
+        <div class="tech-notice">
+            <strong>Important:</strong> For Fall Break and Winter Break (February), the inference must preserve the exact pattern from the source calendar.
+        </div>
+        
+        <p><strong>Function:</strong> <code>infer_break_by_pattern(target_year, source_holiday)</code></p>
+        
+        <h4>What Gets Preserved</h4>
+        <ol>
+            <li><strong>Nth Full Week</strong> - Which full week of the month (e.g., 2nd full Monday-Sunday week of October)</li>
+            <li><strong>Weekday Offset</strong> - Which day of the week the break starts (e.g., Thursday = weekday 3)</li>
+            <li><strong>Duration</strong> - How many days the break lasts (e.g., 5 days)</li>
+        </ol>
+        
+        <h4>Algorithm</h4>
+        <ol>
+            <li>Extract source start weekday: <code>source_weekday = source_start.weekday()</code> (Mon=0, Sun=6)</li>
+            <li>Determine which Nth full week the source falls in: <code>nth_full_week = get_nth_full_week(source_start)</code></li>
+            <li>Calculate duration: <code>duration = (source_end - source_start).days</code></li>
+            <li>Find the Monday of that Nth full week in the target year: <code>week_monday = get_nth_full_week_start(target_year, month, nth_full_week)</code></li>
+            <li>Apply weekday offset: <code>inferred_start = week_monday + timedelta(days=source_weekday)</code></li>
+            <li>Apply duration: <code>inferred_end = inferred_start + timedelta(days=duration)</code></li>
+        </ol>
+        
+        <h4>Example: Fall Break</h4>
+        <table class="data-table">
+            <tr><th>Source (2025)</th><th>Pattern Extracted</th><th>Inferred (2026)</th></tr>
+            <tr><td>Oct 9-13, 2025</td><td>Thursday of 2nd full week, 4 days</td><td>Oct 8-12, 2026</td></tr>
+        </table>
+        <p><strong>Why Oct 8?</strong> October 2026 starts on Thursday. First full week starts Monday Oct 5. Second full week starts Monday Oct 12. Wait - we need to check: Oct 9, 2025 = Thursday. The 2nd full week of October 2025 starts Monday Oct 6, so Thursday of that week = Oct 9. In 2026, 2nd full week starts Monday Oct 12, so Thursday = Oct 15.</p>
+        
+        <h4>Example: Winter Break (February)</h4>
+        <table class="data-table">
+            <tr><th>Source (2026)</th><th>Pattern Extracted</th><th>Inferred (2027)</th></tr>
+            <tr><td>Feb 12-16, 2026</td><td>Thursday of 2nd full week, 4 days</td><td>Feb 11-15, 2027</td></tr>
+        </table>
+
+        <h3>Key Functions</h3>
+        <ul>
+            <li><code>get_nth_weekday_of_month(year, month, weekday, n)</code> - Gets nth occurrence of weekday</li>
+            <li><code>get_nth_full_week(dt)</code> - Determines which full week a date falls in</li>
+            <li><code>get_nth_full_week_start(year, month, nth)</code> - Gets Monday of the Nth full week in a month</li>
+            <li><code>infer_break_by_pattern(target_year, source_holiday)</code> - Applies template to infer break dates</li>
+            <li><code>get_federal_holiday_date(name, year)</code> - Returns official federal holiday dates</li>
+            <li><code>infer_christmas_break(year, source_holiday)</code> - Special handling for Christmas Break</li>
+        </ul>
+
+        <h3>Marking Inferred Dates</h3>
+        <p>Inferred entries include <code>"inferred": true</code> in their JSON and are displayed with a star symbol in the UI.</p>
+    </section>
+
+    <section id="visual-shading-extraction">
+        <h2>Visual Shading Extraction (Fallback)</h2>
+        
+        <p><strong>Function:</strong> <code>add_missing_breaks_from_shading(calendar_result, shading_info)</code></p>
+        
+        <h3>Purpose</h3>
+        <p>Some school calendar PDFs have complex layouts (e.g., two-column formats) that produce garbled text when extracted. This function supplements text-based extraction by detecting visually shaded day cells in the calendar grid.</p>
+
+        <h3>Two-Column Layout Handling</h3>
+        <p><strong>Function:</strong> <code>extract_shading_from_calendar(pdf_path)</code></p>
+        <ul>
+            <li>Month headers are assigned to left or right page halves based on x-position</li>
+            <li>Left half: x &lt; page_width / 2</li>
+            <li>Right half: x &gt;= page_width / 2</li>
+            <li>Day cells are associated with the nearest month header in their half</li>
+        </ul>
+
+        <h3>Weekend-Aware Gap Bridging (Critical Algorithm)</h3>
+        <div class="tech-notice">
+            <strong>Important:</strong> This is a critical business rule. Do not modify without understanding the full logic.
+        </div>
+        
+        <p><strong>Business Rule:</strong> When reconstructing break date ranges from detected shaded days, gaps between detected days are ONLY bridged if <strong>ALL gap days fall on a weekend (Saturday or Sunday)</strong>.</p>
+        
+        <h4>Rationale</h4>
+        <p>Children don't attend school on weekends. If school is closed Friday and Monday, it's logically one continuous break (the weekend is implicitly included). However, if we detect Monday and Thursday as shaded, the gap includes Tuesday and Wednesday—actual school days—so those should NOT be merged.</p>
+
+        <h4>Helper Function</h4>
+        <pre class="code-block">
+def is_weekend_gap(year, month, day1, day2):
+    """Check if all days between day1 and day2 (exclusive) are weekends."""
+    if day2 <= day1 + 1:
+        return True  # Consecutive days, no gap
+    for d in range(day1 + 1, day2):
+        try:
+            dt = datetime(year, month, d)
+            if dt.weekday() < 5:  # Mon=0, Sun=6; < 5 means weekday
+                return False
+        except ValueError:
+            return False
+    return True
+        </pre>
+
+        <h4>Algorithm</h4>
+        <ol>
+            <li>Group detected shaded days by month</li>
+            <li>Sort days within each month</li>
+            <li>Determine the year for each month from schoolYear (Jan-Jun = second year, Jul-Dec = first year)</li>
+            <li>Build consecutive runs:
+                <ul>
+                    <li>If next day is immediately consecutive (d == end + 1) → extend run</li>
+                    <li>If gap contains ONLY weekend days → extend run</li>
+                    <li>If gap contains ANY weekday → start new run</li>
+                </ul>
+            </li>
+            <li>Create breaks from runs with at least 2 days</li>
+        </ol>
+
+        <h4>Example: February 2026</h4>
+        <table class="data-table">
+            <tr><th>Detected Days</th><th>Day of Week</th><th>Gap Analysis</th></tr>
+            <tr><td>Feb 6</td><td>Friday</td><td>—</td></tr>
+            <tr><td>Feb 10</td><td>Tuesday</td><td>Gap (7, 8, 9) = Sat, Sun, Mon → includes weekday → NEW RUN</td></tr>
+            <tr><td>Feb 12</td><td>Thursday</td><td>Gap (11) = Wed → weekday → NEW RUN</td></tr>
+            <tr><td>Feb 13</td><td>Friday</td><td>Consecutive → extend run</td></tr>
+            <tr><td>Feb 16</td><td>Monday</td><td>Gap (14, 15) = Sat, Sun → all weekend → BRIDGE</td></tr>
+        </table>
+        <p><strong>Result:</strong> Winter Break detected as February 12-16, 2026 (Thursday through Monday, bridging the weekend)</p>
+
+        <h3>Shading Detection Notes</h3>
+        <ul>
+            <li>Detects cells with gray/dark background colors</li>
+            <li>Aggregates individual digit characters into complete day numbers</li>
+            <li>Associates each day number with the correct month based on column position</li>
+            <li>This is a fallback mechanism—primary extraction is text-based AI analysis</li>
+        </ul>
+
+        <h3>Early Release Days (Critical Exclusion)</h3>
+        <div class="tech-notice">
+            <strong>Important:</strong> Early Release days are NOT student days off.
+        </div>
+        <p><strong>Business Rule:</strong> Early Release days (e.g., "Early Release for High School Exams") are days when students are still in school but dismissed early. These should NEVER be merged with adjacent breaks.</p>
+        
+        <h4>Example</h4>
+        <table class="data-table">
+            <tr><th>Date</th><th>Label</th><th>Is Day Off?</th></tr>
+            <tr><td>Dec 17-19</td><td>Early Release for High School Exams</td><td>NO - students still in school</td></tr>
+            <tr><td>Dec 22-31</td><td>Winter Break (School Holidays)</td><td>YES - Christmas Break</td></tr>
+        </table>
+        <p><strong>Result:</strong> Christmas Break starts December 22, NOT December 17.</p>
+
+        <h4>Implementation</h4>
+        <ul>
+            <li>AI prompt explicitly instructs: Early Release = <code>isStudentDayOff: false</code> and <code>category: "early_release"</code></li>
+            <li>Merge logic skips entries with "early release" in the label (<code>continue</code> statement)</li>
+            <li>Early Release entries are not added to the <code>date_entries</code> list that feeds the merge algorithm</li>
+        </ul>
+
+        <h3>Date Range Boundary Rules (Critical)</h3>
+        <div class="tech-notice">
+            <strong>Important:</strong> Date ranges must respect hyphen-bound boundaries. Do not extend ranges based on adjacent unrelated text.
+        </div>
+        <p><strong>Business Rule:</strong> When a calendar entry shows a date range like "6-10 Spring Break", the extraction must use ONLY those dates (April 6-10), even if other numbers appear in nearby text (e.g., "13 Students Return").</p>
+        
+        <h4>Problem Scenario</h4>
+        <table class="data-table">
+            <tr><th>Calendar Text</th><th>Incorrect Extraction</th><th>Correct Extraction</th></tr>
+            <tr><td>"6-10 Spring Break (School Holidays) ... 13 Students Return"</td><td>April 6-13 (wrong!)</td><td>April 6-10 (correct)</td></tr>
+        </table>
+        <p><strong>The "13" from "Students Return" is unrelated—it indicates when school resumes, not the break end date.</strong></p>
+
+        <h4>AI Prompt Rules (19-22)</h4>
+        <ul>
+            <li><strong>Rule 19:</strong> Only use the hyphen-bound date range from the label</li>
+            <li><strong>Rule 20:</strong> Do NOT extend ranges by including unrelated numbers from nearby entries</li>
+            <li><strong>Rule 21:</strong> Use EXACTLY the stated start/end days when hyphen notation is present (e.g., "22-31", "6-10")</li>
+            <li><strong>Rule 22:</strong> When shading shows specific days, use ONLY those shaded days as the range</li>
+        </ul>
+
+        <h4>Validation Priority</h4>
+        <ol>
+            <li>Explicit hyphen-bound range in text (e.g., "6-10") → use exactly those days</li>
+            <li>Visual shading confirmation → cross-reference with text extraction</li>
+            <li>If text and shading conflict → prefer shading (visual truth over OCR errors)</li>
+        </ol>
+
+        <h3>Current/Ongoing Break Handling (Critical)</h3>
+        <div class="tech-notice">
+            <strong>Important:</strong> When the analyzer runs during an active break, a third break occurrence may need storage.
+        </div>
+        <p><strong>Business Rule:</strong> When extracting a school calendar during an ongoing break (e.g., running the analyzer on Dec 26 during Christmas break), the system may infer three occurrences of the same break type with the same even/odd parity.</p>
+        
+        <h4>Problem Scenario</h4>
+        <table class="data-table">
+            <tr><th>Uploaded Calendar</th><th>Inferred Breaks</th><th>Issue</th></tr>
+            <tr><td>2026-27 School Year (Christmas Dec 21-31, 2026)</td><td>Dec 15, 2025 - Jan 1, 2026 (odd)<br>Dec 20-27, 2027 (odd)</td><td>Both are odd years → one overwrites the other</td></tr>
+        </table>
+
+        <h4>Solution: Consolidated Current Break Fields</h4>
+        <ul>
+            <li>Three hidden form fields store the ongoing break: <code>currentBreakStart</code>, <code>currentBreakEnd</code>, <code>currentBreakType</code></li>
+            <li>Only one break can be active at a time, so a single set of fields suffices</li>
+            <li><code>applyExtractedDates()</code> checks if today falls within a break's date range</li>
+            <li>If a slot conflict occurs (same even/odd parity), the ongoing break is stored in "current" fields</li>
+            <li><code>handleCurrentBreak()</code> uses <code>currentBreakType</code> to look up the correct parent selector</li>
+        </ul>
+
+        <h4>Flow</h4>
+        <ol>
+            <li>Extract holidays from uploaded calendar</li>
+            <li>Infer missing years (backward and forward)</li>
+            <li>For each break, check if today falls within the date range</li>
+            <li>If two breaks share the same even/odd slot, store the current break separately</li>
+            <li>During calendar generation, apply both even/odd breaks AND current breaks</li>
+        </ol>
+    </section>
+
+    <section id="api-endpoints">
+        <h2>API Endpoints</h2>
+
+        <h3>POST /extract_school_calendar</h3>
+        <p>Analyzes uploaded school calendar PDF.</p>
+        <table class="data-table">
+            <tr><th>Input</th><td>PDF file (multipart form)</td></tr>
+            <tr><th>Process</th><td>Extract text → Two-pass analysis → Infer missing years</td></tr>
+            <tr><th>Output</th><td>JSON with holidays array, omittedHolidays, metadata</td></tr>
+        </table>
+
+        <h3>POST /analyze_document</h3>
+        <p>Analyzes uploaded parenting plan PDF.</p>
+        <table class="data-table">
+            <tr><th>Input</th><td>PDF file + optional formSnapshot (JSON string)</td></tr>
+            <tr><th>Process</th><td>Extract text → AI analysis (basic or enhanced)</td></tr>
+            <tr><th>Output</th><td>JSON with scheduling information, date corrections, summaries</td></tr>
+        </table>
+
+        <h3>POST /generate_audit_report</h3>
+        <p>Generates drafting audit of parenting plan.</p>
+        <table class="data-table">
+            <tr><th>Input</th><td>PDF file</td></tr>
+            <tr><th>Process</th><td>Extract text → Audit analysis with specialized prompt</td></tr>
+            <tr><th>Output</th><td>JSON with findings categorized by severity</td></tr>
+        </table>
+    </section>
+
+    <section id="key-conventions">
+        <h2>Key Conventions</h2>
+
+        <h3>Break Naming Rules (Critical)</h3>
+        <ul>
+            <li><strong>Christmas Break</strong> = ANY break in December (even if document says "Winter Break")</li>
+            <li><strong>Winter Break</strong> = Breaks in February only</li>
+            <li><strong>Fall Break</strong> = October breaks (even if labeled differently)</li>
+        </ul>
+
+        <h3>Date Formatting</h3>
+        <p>All dates use <code>YYYY-MM-DD</code> format (ISO 8601).</p>
+
+        <h3>Break End Date Logic</h3>
+        <p><strong>A break ends on the last day BEFORE school resumes.</strong> If a Teacher Planning Day (Student Holiday) follows a break, it extends that break.</p>
+
+        <h3>File Size Limits</h3>
+        <p>PDF uploads are limited to 10MB.</p>
+
+        <h3>Error Handling</h3>
+        <p>API endpoints track the current step and return <code>failed_at_step</code> in error responses for debugging.</p>
+
+        <h3>Protected Files</h3>
+        <p>Per user preferences, do not modify without explicit approval:</p>
+        <ul>
+            <li><code>auth.py</code></li>
+            <li><code>payments.py</code></li>
+            <li><code>models.py</code></li>
+            <li><code>config.py</code></li>
+            <li><code>extensions.py</code></li>
+        </ul>
+    </section>
+
+    <div class="doc-footer">
+        <p><a href="{{ url_for('main.ai_calendar') }}">Return to AI Calendar Tool</a></p>
+        <p><a href="{{ url_for('main.user_guide') }}">View User Guide</a></p>
+    </div>
+</div>
+
+<style>
+    .documentation-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+        line-height: 1.7;
+    }
+    
+    .documentation-container h1 {
+        color: #2c3e50;
+        border-bottom: 3px solid #e74c3c;
+        padding-bottom: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .documentation-container h2 {
+        color: #2c3e50;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+    
+    .documentation-container h3 {
+        color: #34495e;
+        margin-top: 25px;
+    }
+    
+    .documentation-container h4 {
+        color: #7f8c8d;
+        margin-top: 20px;
+        font-size: 1em;
+    }
+    
+    .tech-notice {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        border-left: 4px solid #ffc107;
+        padding: 15px 20px;
+        border-radius: 4px;
+        margin-bottom: 30px;
+    }
+    
+    .doc-nav {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+    }
+    
+    .doc-nav h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+    }
+    
+    .doc-nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .doc-nav li {
+        margin: 0;
+    }
+    
+    .doc-nav a {
+        display: inline-block;
+        padding: 8px 16px;
+        background: #e74c3c;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    
+    .doc-nav a:hover {
+        background: #c0392b;
+    }
+    
+    .code-block {
+        background: #2c3e50;
+        color: #ecf0f1;
+        padding: 15px 20px;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 13px;
+        line-height: 1.5;
+        margin: 15px 0;
+    }
+    
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+    }
+    
+    .data-table th, .data-table td {
+        border: 1px solid #ddd;
+        padding: 10px 15px;
+        text-align: left;
+    }
+    
+    .data-table th {
+        background: #f8f9fa;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .data-table tr:nth-child(even) {
+        background: #fafafa;
+    }
+    
+    code {
+        background: #f4f4f4;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.9em;
+        color: #c0392b;
+    }
+    
+    section {
+        margin-bottom: 30px;
+    }
+    
+    .documentation-container ul, .documentation-container ol {
+        margin: 15px 0;
+        padding-left: 25px;
+    }
+    
+    .documentation-container li {
+        margin: 8px 0;
+    }
+    
+    .doc-footer {
+        margin-top: 50px;
+        padding-top: 20px;
+        border-top: 2px solid #eee;
+        text-align: center;
+    }
+    
+    .doc-footer a {
+        color: #e74c3c;
+        margin: 0 15px;
+    }
+    
+    @media (max-width: 768px) {
+        .doc-nav ul {
+            flex-direction: column;
+        }
+        
+        .doc-nav a {
+            display: block;
+            text-align: center;
+        }
+        
+        .code-block {
+            font-size: 11px;
+        }
+    }
+</style>
+{% endblock %}

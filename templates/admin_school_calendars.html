@@ -1,0 +1,856 @@
+{% extends "base.html" %}
+{% block title %}School Calendar Database - Admin{% endblock %}
+
+{% block content %}
+<style>
+.admin-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.admin-header h1 {
+    font-size: 1.5rem;
+    color: #1f2937;
+    margin: 0;
+}
+
+.admin-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+}
+
+.stat-card .value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.stat-card .label {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 5px;
+}
+
+.action-bar {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.search-input {
+    padding: 10px 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    flex: 1;
+    min-width: 200px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-success {
+    background: #10b981;
+    color: white;
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-secondary {
+    background: #6b7280;
+    color: white;
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+}
+
+.entities-container {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.entity-card {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 20px;
+}
+
+.entity-card:last-child {
+    border-bottom: none;
+}
+
+.entity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.entity-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.1rem;
+    color: #1f2937;
+}
+
+.entity-info .meta {
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+.entity-type-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-left: 10px;
+}
+
+.entity-type-badge.public_district {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.entity-type-badge.private_school {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.entity-type-badge.state_charter {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.entity-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.calendars-list {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #f3f4f6;
+    display: none;
+}
+
+.calendars-list.expanded {
+    display: block;
+}
+
+.calendar-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.calendar-item:last-child {
+    margin-bottom: 0;
+}
+
+.calendar-info {
+    flex: 1;
+}
+
+.calendar-info .year {
+    font-weight: 600;
+    color: #374151;
+}
+
+.calendar-info .details {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 3px;
+}
+
+.calendar-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.status-badge.processed {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.status-badge.uploaded {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.status-badge.error {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal h2 {
+    margin: 0 0 20px 0;
+    font-size: 1.3rem;
+    color: #1f2937;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #374151;
+    font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.form-group input[type="file"] {
+    padding: 8px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    z-index: 2000;
+    animation: slideIn 0.3s ease;
+}
+
+.toast.success {
+    background: #10b981;
+}
+
+.toast.error {
+    background: #ef4444;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.pagination a {
+    padding: 8px 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #374151;
+}
+
+.pagination a.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6b7280;
+}
+
+.empty-state h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.expand-icon {
+    transition: transform 0.3s;
+}
+
+.expand-icon.rotated {
+    transform: rotate(180deg);
+}
+
+.json-preview {
+    background: #1f2937;
+    color: #10b981;
+    padding: 15px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    max-height: 300px;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+</style>
+
+<div class="admin-page">
+    <div class="admin-header">
+        <div>
+            <h1>School Calendar Database</h1>
+            <p style="margin: 5px 0 0 0; color: #6b7280; font-size: 0.9rem;">Manage school districts, private schools, and their calendars</p>
+        </div>
+        <span class="admin-badge">Admin</span>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="value">{{ total_entities }}</div>
+            <div class="label">School Districts/Entities</div>
+        </div>
+        <div class="stat-card">
+            <div class="value">{{ total_calendars }}</div>
+            <div class="label">Calendars Stored</div>
+        </div>
+        <div class="stat-card">
+            <div class="value">{{ public_districts }}</div>
+            <div class="label">Public Districts</div>
+        </div>
+        <div class="stat-card">
+            <div class="value">{{ private_schools }}</div>
+            <div class="label">Private Schools</div>
+        </div>
+    </div>
+
+    <div class="action-bar">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search by district name, county, or school year...">
+        <button class="btn btn-primary" onclick="openModal('addEntityModal')">+ Add School Entity</button>
+        <button class="btn btn-success" onclick="openModal('uploadCalendarModal')">Upload Calendar</button>
+    </div>
+
+    <div class="entities-container">
+        {% if entities %}
+            {% for entity in entities %}
+            <div class="entity-card" data-entity-id="{{ entity.id }}" data-searchable="{{ entity.district_name|lower }} {{ entity.county|lower if entity.county else '' }} {{ entity.entity_type }}">
+                <div class="entity-header" onclick="toggleCalendars({{ entity.id }})">
+                    <div class="entity-info">
+                        <h3>
+                            {{ entity.district_name }}
+                            <span class="entity-type-badge {{ entity.entity_type }}">{{ entity.entity_type|replace('_', ' ')|title }}</span>
+                        </h3>
+                        <div class="meta">
+                            {% if entity.county %}County: {{ entity.county }} | {% endif %}
+                            Calendars: {{ entity.calendars|length }} | 
+                            Created: {{ entity.created_at.strftime('%b %d, %Y') if entity.created_at else 'N/A' }}
+                        </div>
+                    </div>
+                    <div class="entity-actions" onclick="event.stopPropagation()">
+                        <button class="btn btn-secondary btn-sm" onclick="editEntity({{ entity.id }}, '{{ entity.district_name|e }}', '{{ entity.entity_type }}', '{{ entity.county|e if entity.county else '' }}')">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteEntity({{ entity.id }}, '{{ entity.district_name|e }}')">Delete</button>
+                        <span class="expand-icon" id="expand-{{ entity.id }}">&#9660;</span>
+                    </div>
+                </div>
+                <div class="calendars-list" id="calendars-{{ entity.id }}">
+                    {% if entity.calendars %}
+                        {% for calendar in entity.calendars %}
+                        <div class="calendar-item" data-calendar-id="{{ calendar.id }}">
+                            <div class="calendar-info">
+                                <span class="year">{{ calendar.school_year }}</span>
+                                <span class="status-badge {{ calendar.status }}">{{ calendar.status }}</span>
+                                <div class="details">
+                                    {% if calendar.source_filename %}File: {{ calendar.source_filename }} | {% endif %}
+                                    Analyzed: {{ calendar.analysis_generated_at.strftime('%b %d, %Y') if calendar.analysis_generated_at else 'N/A' }}
+                                </div>
+                            </div>
+                            <div class="calendar-actions">
+                                <button class="btn btn-secondary btn-sm" onclick="viewAnalysis({{ calendar.id }})">View JSON</button>
+                                <button class="btn btn-primary btn-sm" onclick="downloadAnalysis({{ calendar.id }})">Download</button>
+                                <button class="btn btn-secondary btn-sm" onclick="reassignCalendar({{ calendar.id }}, {{ entity.id }}, '{{ calendar.school_year }}')">Reassign</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteCalendar({{ calendar.id }}, '{{ calendar.school_year }}')">Delete</button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="color: #6b7280; font-style: italic;">No calendars stored for this entity yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <h3>No School Entities Found</h3>
+                <p>Add your first school district or private school to get started.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if total_pages > 1 %}
+    <div class="pagination">
+        {% for p in range(1, total_pages + 1) %}
+            <a href="?page={{ p }}" class="{% if p == page %}active{% endif %}">{{ p }}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<div class="modal-overlay" id="addEntityModal">
+    <div class="modal">
+        <h2>Add School Entity</h2>
+        <form id="addEntityForm">
+            <div class="form-group">
+                <label>Entity Name *</label>
+                <input type="text" name="district_name" required placeholder="e.g., Fulton County Schools">
+            </div>
+            <div class="form-group">
+                <label>Entity Type *</label>
+                <select name="entity_type" required>
+                    <option value="public_district">Public District</option>
+                    <option value="private_school">Private School</option>
+                    <option value="state_charter">State Charter</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>County</label>
+                <input type="text" name="county" placeholder="e.g., Fulton">
+            </div>
+            <div class="form-group">
+                <label>Website</label>
+                <input type="url" name="website" placeholder="https://...">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addEntityModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Add Entity</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="editEntityModal">
+    <div class="modal">
+        <h2>Edit School Entity</h2>
+        <form id="editEntityForm">
+            <input type="hidden" name="entity_id" id="editEntityId">
+            <div class="form-group">
+                <label>Entity Name *</label>
+                <input type="text" name="district_name" id="editDistrictName" required>
+            </div>
+            <div class="form-group">
+                <label>Entity Type *</label>
+                <select name="entity_type" id="editEntityType" required>
+                    <option value="public_district">Public District</option>
+                    <option value="private_school">Private School</option>
+                    <option value="state_charter">State Charter</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>County</label>
+                <input type="text" name="county" id="editCounty">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editEntityModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="uploadCalendarModal">
+    <div class="modal">
+        <h2>Upload Calendar</h2>
+        <form id="uploadCalendarForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>School Entity *</label>
+                <select name="entity_id" id="uploadEntitySelect" required>
+                    <option value="">-- Select Entity --</option>
+                    {% for entity in all_entities %}
+                        <option value="{{ entity.id }}">{{ entity.district_name }} ({{ entity.entity_type|replace('_', ' ')|title }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>School Year *</label>
+                <input type="text" name="school_year" required placeholder="e.g., 2025-2026">
+            </div>
+            <div class="form-group">
+                <label>Calendar PDF *</label>
+                <input type="file" name="file" accept=".pdf" required>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="analyze" checked> Run AI Analysis
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('uploadCalendarModal')">Cancel</button>
+                <button type="submit" class="btn btn-success">Upload & Analyze</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="reassignModal">
+    <div class="modal">
+        <h2>Reassign Calendar</h2>
+        <form id="reassignForm">
+            <input type="hidden" name="calendar_id" id="reassignCalendarId">
+            <div class="form-group">
+                <label>Current Entity: <strong id="reassignCurrentEntity"></strong></label>
+            </div>
+            <div class="form-group">
+                <label>School Year: <strong id="reassignSchoolYear"></strong></label>
+            </div>
+            <div class="form-group">
+                <label>New Entity *</label>
+                <select name="new_entity_id" id="reassignNewEntity" required>
+                    <option value="">-- Select New Entity --</option>
+                    {% for entity in all_entities %}
+                        <option value="{{ entity.id }}">{{ entity.district_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('reassignModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Reassign</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="viewJsonModal">
+    <div class="modal" style="max-width: 700px;">
+        <h2>Calendar Analysis JSON</h2>
+        <div class="json-preview" id="jsonPreview"></div>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('viewJsonModal')">Close</button>
+            <button type="button" class="btn btn-primary" onclick="copyJson()">Copy to Clipboard</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentJson = '';
+
+function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+}
+
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+function toggleCalendars(entityId) {
+    const list = document.getElementById(`calendars-${entityId}`);
+    const icon = document.getElementById(`expand-${entityId}`);
+    list.classList.toggle('expanded');
+    icon.classList.toggle('rotated');
+}
+
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    const query = e.target.value.toLowerCase();
+    document.querySelectorAll('.entity-card').forEach(card => {
+        const searchable = card.dataset.searchable;
+        card.style.display = searchable.includes(query) ? '' : 'none';
+    });
+});
+
+document.getElementById('addEntityForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    try {
+        const response = await fetch('/admin/school-calendars/entity', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(Object.fromEntries(formData))
+        });
+        const data = await response.json();
+        if (data.success) {
+            showToast('Entity added successfully!');
+            closeModal('addEntityModal');
+            location.reload();
+        } else {
+            showToast(data.error || 'Failed to add entity', 'error');
+        }
+    } catch (err) {
+        showToast('Error adding entity', 'error');
+    }
+});
+
+function editEntity(id, name, type, county) {
+    document.getElementById('editEntityId').value = id;
+    document.getElementById('editDistrictName').value = name;
+    document.getElementById('editEntityType').value = type;
+    document.getElementById('editCounty').value = county;
+    openModal('editEntityModal');
+}
+
+document.getElementById('editEntityForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const entityId = formData.get('entity_id');
+    try {
+        const response = await fetch(`/admin/school-calendars/entity/${entityId}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(Object.fromEntries(formData))
+        });
+        const data = await response.json();
+        if (data.success) {
+            showToast('Entity updated successfully!');
+            closeModal('editEntityModal');
+            location.reload();
+        } else {
+            showToast(data.error || 'Failed to update entity', 'error');
+        }
+    } catch (err) {
+        showToast('Error updating entity', 'error');
+    }
+});
+
+async function deleteEntity(id, name) {
+    if (!confirm(`Are you sure you want to delete "${name}"? This will also delete all associated calendars.`)) return;
+    try {
+        const response = await fetch(`/admin/school-calendars/entity/${id}`, {
+            method: 'DELETE'
+        });
+        const data = await response.json();
+        if (data.success) {
+            showToast('Entity deleted successfully!');
+            location.reload();
+        } else {
+            showToast(data.error || 'Failed to delete entity', 'error');
+        }
+    } catch (err) {
+        showToast('Error deleting entity', 'error');
+    }
+}
+
+document.getElementById('uploadCalendarForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Uploading...';
+    try {
+        const response = await fetch('/admin/school-calendars/upload', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+        if (data.success) {
+            showToast('Calendar uploaded successfully!');
+            closeModal('uploadCalendarModal');
+            location.reload();
+        } else {
+            showToast(data.error || 'Failed to upload calendar', 'error');
+        }
+    } catch (err) {
+        showToast('Error uploading calendar', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Upload & Analyze';
+    }
+});
+
+async function viewAnalysis(calendarId) {
+    try {
+        const response = await fetch(`/admin/school-calendars/calendar/${calendarId}/json`);
+        const data = await response.json();
+        if (data.success) {
+            currentJson = JSON.stringify(data.analysis, null, 2);
+            document.getElementById('jsonPreview').textContent = currentJson;
+            openModal('viewJsonModal');
+        } else {
+            showToast(data.error || 'Failed to load analysis', 'error');
+        }
+    } catch (err) {
+        showToast('Error loading analysis', 'error');
+    }
+}
+
+function copyJson() {
+    navigator.clipboard.writeText(currentJson);
+    showToast('JSON copied to clipboard!');
+}
+
+function downloadAnalysis(calendarId) {
+    window.open(`/admin/school-calendars/calendar/${calendarId}/download`, '_blank');
+}
+
+function reassignCalendar(calendarId, currentEntityId, schoolYear) {
+    document.getElementById('reassignCalendarId').value = calendarId;
+    document.getElementById('reassignSchoolYear').textContent = schoolYear;
+    const currentEntity = document.querySelector(`[data-entity-id="${currentEntityId}"] .entity-info h3`).textContent.trim().split('\n')[0];
+    document.getElementById('reassignCurrentEntity').textContent = currentEntity;
+    openModal('reassignModal');
+}
+
+document.getElementById('reassignForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const calendarId = formData.get('calendar_id');
+    try {
+        const response = await fetch(`/admin/school-calendars/calendar/${calendarId}/reassign`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({new_entity_id: formData.get('new_entity_id')})
+        });
+        const data = await response.json();
+        if (data.success) {
+            showToast('Calendar reassigned successfully!');
+            closeModal('reassignModal');
+            location.reload();
+        } else {
+            showToast(data.error || 'Failed to reassign calendar', 'error');
+        }
+    } catch (err) {
+        showToast('Error reassigning calendar', 'error');
+    }
+});
+
+async function deleteCalendar(id, schoolYear) {
+    if (!confirm(`Are you sure you want to delete the ${schoolYear} calendar?`)) return;
+    try {
+        const response = await fetch(`/admin/school-calendars/calendar/${id}`, {
+            method: 'DELETE'
+        });
+        const data = await response.json();
+        if (data.success) {
+            showToast('Calendar deleted successfully!');
+            location.reload();
+        } else {
+            showToast(data.error || 'Failed to delete calendar', 'error');
+        }
+    } catch (err) {
+        showToast('Error deleting calendar', 'error');
+    }
+}
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+        }
+    });
+});
+</script>
+{% endblock %}

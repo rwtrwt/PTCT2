@@ -1,0 +1,447 @@
+{% extends "base.html" %}
+{% block title %}Saved Calendars - Parenting Time Calendar Tool{% endblock %}
+
+{% block content %}
+<style>
+:root {
+    --primary: #667eea;
+    --primary-dark: #5a67d8;
+    --success: #27ae60;
+    --warning: #f39c12;
+    --danger: #e74c3c;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --radius: 8px;
+}
+
+.saves-page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--gray-200);
+}
+
+.page-header h1 { 
+    font-size: 1.75rem; 
+    color: var(--gray-800); 
+    margin-bottom: 5px; 
+}
+
+.page-header .subtitle { 
+    color: var(--gray-500); 
+    font-size: 0.95rem; 
+}
+
+.saves-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.save-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.2s;
+}
+
+.save-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-color: var(--primary);
+}
+
+.save-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.save-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.save-name input {
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    border: 1px solid var(--primary);
+    border-radius: 4px;
+    outline: none;
+}
+
+.save-dates {
+    font-size: 0.85rem;
+    color: var(--gray-500);
+}
+
+.save-dates span {
+    display: block;
+    margin-bottom: 2px;
+}
+
+.save-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-primary { 
+    background: var(--primary); 
+    color: white; 
+}
+.btn-primary:hover { 
+    background: var(--primary-dark); 
+}
+
+.btn-secondary { 
+    background: var(--gray-200); 
+    color: var(--gray-700); 
+}
+.btn-secondary:hover { 
+    background: var(--gray-300); 
+}
+
+.btn-success { 
+    background: var(--success); 
+    color: white; 
+}
+.btn-success:hover { 
+    background: #219653; 
+}
+
+.btn-danger { 
+    background: var(--danger); 
+    color: white; 
+}
+.btn-danger:hover { 
+    background: #c0392b; 
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--gray-50);
+    border-radius: var(--radius);
+    border: 2px dashed var(--gray-300);
+}
+
+.empty-state h2 {
+    color: var(--gray-600);
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: var(--gray-500);
+    margin-bottom: 20px;
+}
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--radius);
+    padding: 25px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.modal-content h3 {
+    margin: 0 0 15px 0;
+    color: var(--gray-800);
+}
+
+.modal-content p {
+    color: var(--gray-600);
+    margin-bottom: 20px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: var(--radius);
+    background: var(--success);
+    color: white;
+    z-index: 1001;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.notification.error {
+    background: var(--danger);
+}
+
+@media (max-width: 768px) {
+    .save-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .save-actions {
+        justify-content: flex-start;
+    }
+}
+</style>
+
+<div class="saves-page">
+    <div class="page-header">
+        <h1>Saved Calendar Configurations</h1>
+        <p class="subtitle">Manage your saved AI Calendar settings</p>
+    </div>
+
+    <div class="saves-list" id="savesList">
+        {% if saves %}
+            {% for save in saves %}
+            <div class="save-card" data-save-id="{{ save.id }}">
+                <div class="save-header">
+                    <h3 class="save-name">
+                        <span class="name-text">{{ save.name }}</span>
+                    </h3>
+                    <div class="save-dates">
+                        <span>Created: {{ save.created_at.strftime('%b %d, %Y at %I:%M %p') }}</span>
+                        <span>Modified: {{ save.updated_at.strftime('%b %d, %Y at %I:%M %p') }}</span>
+                    </div>
+                </div>
+                <div class="save-actions">
+                    <button class="btn btn-primary" onclick="loadSave({{ save.id }})">Load in AI Calendar</button>
+                    <button class="btn btn-secondary" onclick="renameSave({{ save.id }}, '{{ save.name | e }}')">Rename</button>
+                    <button class="btn btn-secondary" onclick="copySave({{ save.id }})">Copy</button>
+                    <button class="btn btn-danger" onclick="confirmDelete({{ save.id }}, '{{ save.name | e }}')">Delete</button>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <h2>No Saved Configurations</h2>
+                <p>You haven't saved any calendar configurations yet. Go to the AI Calendar page and save your current settings to see them here.</p>
+                <a href="{{ url_for('main.ai_calendar') }}" class="btn btn-primary">Go to AI Calendar</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-content">
+        <h3>Delete Save</h3>
+        <p>Are you sure you want to delete "<span id="deleteSaveName"></span>"? This action cannot be undone.</p>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+            <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="renameModal">
+    <div class="modal-content">
+        <h3>Rename Save</h3>
+        <input type="text" id="renameInput" style="width: 100%; padding: 10px; border: 1px solid var(--gray-300); border-radius: 6px; font-size: 1rem; margin-bottom: 20px;">
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeRenameModal()">Cancel</button>
+            <button class="btn btn-primary" id="confirmRenameBtn">Save</button>
+        </div>
+    </div>
+</div>
+
+<div class="notification" id="notification"></div>
+
+<script>
+let deleteTargetId = null;
+let renameTargetId = null;
+
+function showNotification(message, isError = false) {
+    const notif = document.getElementById('notification');
+    notif.textContent = message;
+    notif.classList.toggle('error', isError);
+    notif.classList.add('show');
+    setTimeout(() => notif.classList.remove('show'), 3000);
+}
+
+function loadSave(saveId) {
+    window.location.href = '/ai-calendar?load=' + saveId;
+}
+
+function confirmDelete(saveId, saveName) {
+    deleteTargetId = saveId;
+    document.getElementById('deleteSaveName').textContent = saveName;
+    document.getElementById('deleteModal').classList.add('active');
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('active');
+    deleteTargetId = null;
+}
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
+    if (!deleteTargetId) return;
+    
+    try {
+        const response = await fetch(`/api/saves/${deleteTargetId}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            const card = document.querySelector(`[data-save-id="${deleteTargetId}"]`);
+            if (card) card.remove();
+            showNotification('Save deleted successfully');
+            
+            if (document.querySelectorAll('.save-card').length === 0) {
+                location.reload();
+            }
+        } else {
+            showNotification('Failed to delete save', true);
+        }
+    } catch (err) {
+        showNotification('Error deleting save', true);
+    }
+    
+    closeDeleteModal();
+});
+
+function renameSave(saveId, currentName) {
+    renameTargetId = saveId;
+    document.getElementById('renameInput').value = currentName;
+    document.getElementById('renameModal').classList.add('active');
+    document.getElementById('renameInput').focus();
+    document.getElementById('renameInput').select();
+}
+
+function closeRenameModal() {
+    document.getElementById('renameModal').classList.remove('active');
+    renameTargetId = null;
+}
+
+document.getElementById('confirmRenameBtn').addEventListener('click', async function() {
+    if (!renameTargetId) return;
+    
+    const newName = document.getElementById('renameInput').value.trim();
+    if (!newName) {
+        showNotification('Name cannot be empty', true);
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/saves/${renameTargetId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: newName })
+        });
+        
+        if (response.ok) {
+            const card = document.querySelector(`[data-save-id="${renameTargetId}"]`);
+            if (card) {
+                card.querySelector('.name-text').textContent = newName;
+            }
+            showNotification('Renamed successfully');
+        } else {
+            showNotification('Failed to rename', true);
+        }
+    } catch (err) {
+        showNotification('Error renaming save', true);
+    }
+    
+    closeRenameModal();
+});
+
+async function copySave(saveId) {
+    try {
+        const response = await fetch(`/api/saves/${saveId}/copy`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            showNotification('Copy created successfully');
+            setTimeout(() => location.reload(), 500);
+        } else {
+            showNotification('Failed to copy save', true);
+        }
+    } catch (err) {
+        showNotification('Error copying save', true);
+    }
+}
+
+document.getElementById('renameInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        document.getElementById('confirmRenameBtn').click();
+    }
+});
+
+document.querySelectorAll('.modal-overlay').forEach(modal => {
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+        }
+    });
+});
+</script>
+{% endblock %}

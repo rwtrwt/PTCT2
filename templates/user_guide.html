@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block title %}User Guide - AI Calendar Tools{% endblock %}
+
+{% block content %}
+<div class="documentation-container">
+    <h1>User Guide: AI Calendar Tools</h1>
+    
+    <nav class="doc-nav">
+        <h3>Quick Navigation</h3>
+        <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#school-calendar">School Calendar Analyzer</a></li>
+            <li><a href="#parenting-plan">Parenting Plan Analyzer</a></li>
+            <li><a href="#workflow">Recommended Workflow</a></li>
+            <li><a href="#tips">Tips for Best Results</a></li>
+            <li><a href="#faq">Frequently Asked Questions</a></li>
+        </ul>
+    </nav>
+
+    <section id="overview">
+        <h2>Overview</h2>
+        <p>The Georgia Parenting Time Calendar Tool includes two AI-powered analyzers that work together to help you calculate parenting time percentages accurately:</p>
+        <ul>
+            <li><strong>School Calendar Analyzer</strong> - Extracts holiday and break dates from your child's school calendar</li>
+            <li><strong>Parenting Plan Analyzer</strong> - Reads your parenting plan document and applies its provisions to the calendar</li>
+        </ul>
+        <p>These tools are designed to save you time and reduce errors when setting up your parenting time calendar.</p>
+    </section>
+
+    <section id="school-calendar">
+        <h2>School Calendar Analyzer</h2>
+        
+        <h3>What It Does</h3>
+        <p>The School Calendar Analyzer reads a PDF of your school district's calendar and automatically extracts:</p>
+        <ul>
+            <li>Fall Break dates</li>
+            <li>Thanksgiving Break dates</li>
+            <li>Christmas/Winter Break dates (December break)</li>
+            <li>Winter Break dates (February break, if applicable)</li>
+            <li>Spring Break dates</li>
+            <li>Federal holidays (MLK Day, Presidents Day, Memorial Day, Labor Day)</li>
+        </ul>
+
+        <h3>How to Use It</h3>
+        <ol>
+            <li><strong>Get your school calendar PDF</strong> - Download the official calendar from your school district's website</li>
+            <li><strong>Upload the PDF</strong> - Click "Upload School Calendar" and select your file</li>
+            <li><strong>Review the results</strong> - The tool will display all detected holidays and breaks</li>
+            <li><strong>Apply to calendar</strong> - Click "Apply" to populate the break date fields automatically</li>
+        </ol>
+
+        <h3>Understanding the Results</h3>
+        <p>After analysis, you'll see a list of detected holidays with their date ranges. Some important notes:</p>
+        <ul>
+            <li><strong>Inferred dates</strong> (marked with a star) - These are dates the system calculated for years not shown in your calendar, based on patterns and federal holiday rules</li>
+            <li><strong>Christmas Break vs Winter Break</strong> - Any break in December is labeled "Christmas Break." Breaks in February (often around Presidents Day) are labeled "Winter Break"</li>
+            <li><strong>Break extensions</strong> - If a Teacher Planning Day or Student Holiday immediately follows a break, it's included as part of that break since students are still off</li>
+        </ul>
+
+        <h3>Legacy Mode</h3>
+        <p>If you prefer not to upload a PDF, you can use Legacy Mode to select from a list of pre-configured Georgia county school calendars. This uses estimated dates based on typical school year patterns.</p>
+    </section>
+
+    <section id="parenting-plan">
+        <h2>Parenting Plan Analyzer</h2>
+        
+        <h3>What It Does</h3>
+        <p>The Parenting Plan Analyzer reads your custody agreement and extracts scheduling information, including:</p>
+        <ul>
+            <li>Parent identification (who is Parent A vs Parent B)</li>
+            <li>Weekly custody schedule</li>
+            <li>Holiday and break allocations (even/odd years)</li>
+            <li>Date modification rules (e.g., "break starts when school dismisses")</li>
+            <li>Summer schedule provisions</li>
+        </ul>
+
+        <h3>How to Use It</h3>
+        <ol>
+            <li><strong>First, upload your school calendar</strong> - The parenting plan analyzer works best when it knows your school's dates</li>
+            <li><strong>Upload your parenting plan PDF</strong> - Click "Upload Parenting Plan" and select your document</li>
+            <li><strong>Review the analysis</strong> - The tool shows what it found and any date corrections</li>
+            <li><strong>Apply to calendar</strong> - Click "Apply" to populate the form fields</li>
+        </ol>
+
+        <h3>Date Corrections</h3>
+        <p>Many parenting plans specify rules like "Christmas Break begins when school dismisses" or "Spring Break ends the day before school resumes." The analyzer detects these rules and adjusts the school calendar dates accordingly. Fields that were adjusted are highlighted with a subtle animation so you can review them.</p>
+
+        <h3>Important Notes</h3>
+        <ul>
+            <li>The analyzer requires school calendar data to apply date corrections. Upload your school calendar first, or enable Legacy Mode.</li>
+            <li>Always review the extracted information against your original document.</li>
+            <li>The tool handles Georgia parenting plans and follows Georgia family law conventions.</li>
+        </ul>
+    </section>
+
+    <section id="workflow">
+        <h2>Recommended Workflow</h2>
+        <p>For the best results, follow this order:</p>
+        <ol>
+            <li><strong>Step 1: Upload School Calendar</strong>
+                <p>Start by uploading your school district's calendar PDF. This gives the system the baseline dates for all breaks and holidays.</p>
+            </li>
+            <li><strong>Step 2: Review and Apply School Dates</strong>
+                <p>Check the extracted dates are correct, then apply them to the calendar form.</p>
+            </li>
+            <li><strong>Step 3: Upload Parenting Plan</strong>
+                <p>Now upload your parenting plan. The analyzer will use the school calendar dates to apply any date correction rules.</p>
+            </li>
+            <li><strong>Step 4: Review and Apply Plan Settings</strong>
+                <p>Review the extracted schedule settings, check any highlighted date corrections, and apply to the form.</p>
+            </li>
+            <li><strong>Step 5: Fine-tune and Calculate</strong>
+                <p>Make any manual adjustments needed, then generate your calendar to see the parenting time percentages.</p>
+            </li>
+        </ol>
+    </section>
+
+    <section id="tips">
+        <h2>Tips for Best Results</h2>
+        
+        <h3>School Calendar Tips</h3>
+        <ul>
+            <li>Use the official PDF from your school district's website, not a screenshot or photo</li>
+            <li>Calendars with clear visual formatting (colored/shaded days) work best</li>
+            <li>Single-page calendar summaries typically work better than multi-page detailed calendars</li>
+        </ul>
+
+        <h3>Parenting Plan Tips</h3>
+        <ul>
+            <li>Use a text-based PDF, not a scanned image (though OCR is supported)</li>
+            <li>Court-filed documents typically have better text extraction than photos of printed documents</li>
+            <li>If the plan uses non-standard terminology, you may need to make manual adjustments</li>
+        </ul>
+
+        <h3>General Tips</h3>
+        <ul>
+            <li>Always verify the AI's output against your original documents</li>
+            <li>The analyzers are tools to speed up data entry, not legal advice</li>
+            <li>If something looks wrong, you can always manually edit any field</li>
+        </ul>
+    </section>
+
+    <section id="faq">
+        <h2>Frequently Asked Questions</h2>
+        
+        <div class="faq-item">
+            <h4>Why is the Parenting Plan Analyzer disabled?</h4>
+            <p>The Parenting Plan Analyzer requires school calendar data to work properly. Either upload a school calendar PDF first, or enable Legacy Mode to use pre-configured dates.</p>
+        </div>
+
+        <div class="faq-item">
+            <h4>What does the star symbol mean next to some dates?</h4>
+            <p>The star indicates an "inferred" date - one that was calculated based on patterns from your uploaded calendar, since it wasn't explicitly shown. These are typically dates for the year before or after the calendar year shown in your PDF.</p>
+        </div>
+
+        <div class="faq-item">
+            <h4>Why is "Winter Break" in December called "Christmas Break"?</h4>
+            <p>To avoid confusion, this tool uses standardized naming: breaks in December are always called "Christmas Break," while breaks in February (typically around Presidents Day) are called "Winter Break." This matches common Georgia family law terminology.</p>
+        </div>
+
+        <div class="faq-item">
+            <h4>Why does my break end date include an extra day?</h4>
+            <p>If a Teacher Planning Day or Student Holiday immediately follows a break, it's included because students are still off that day. The break ends on the last day before school resumes.</p>
+        </div>
+
+        <div class="faq-item">
+            <h4>Can I edit the dates after applying them?</h4>
+            <p>Yes! All fields can be manually edited after applying the AI-extracted values. The analyzers help with initial data entry, but you have full control.</p>
+        </div>
+    </section>
+
+    <div class="doc-footer">
+        <p><a href="{{ url_for('main.ai_calendar') }}">Return to AI Calendar Tool</a></p>
+        <p><a href="{{ url_for('main.technical_docs') }}">View Technical Documentation</a></p>
+    </div>
+</div>
+
+<style>
+    .documentation-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+        line-height: 1.7;
+    }
+    
+    .documentation-container h1 {
+        color: #2c3e50;
+        border-bottom: 3px solid #3498db;
+        padding-bottom: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .documentation-container h2 {
+        color: #2c3e50;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+    
+    .documentation-container h3 {
+        color: #34495e;
+        margin-top: 25px;
+    }
+    
+    .documentation-container h4 {
+        color: #2c3e50;
+        margin-top: 15px;
+    }
+    
+    .doc-nav {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+    }
+    
+    .doc-nav h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+    }
+    
+    .doc-nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .doc-nav li {
+        margin: 0;
+    }
+    
+    .doc-nav a {
+        display: inline-block;
+        padding: 8px 16px;
+        background: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    
+    .doc-nav a:hover {
+        background: #2980b9;
+    }
+    
+    section {
+        margin-bottom: 30px;
+    }
+    
+    .documentation-container ul, .documentation-container ol {
+        margin: 15px 0;
+        padding-left: 25px;
+    }
+    
+    .documentation-container li {
+        margin: 8px 0;
+    }
+    
+    .documentation-container p {
+        margin: 12px 0;
+    }
+    
+    .faq-item {
+        background: #f8f9fa;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin: 15px 0;
+        border-left: 4px solid #3498db;
+    }
+    
+    .faq-item h4 {
+        margin-top: 0;
+        color: #2c3e50;
+    }
+    
+    .faq-item p {
+        margin-bottom: 0;
+        color: #555;
+    }
+    
+    .doc-footer {
+        margin-top: 50px;
+        padding-top: 20px;
+        border-top: 2px solid #eee;
+        text-align: center;
+    }
+    
+    .doc-footer a {
+        color: #3498db;
+        margin: 0 15px;
+    }
+    
+    @media (max-width: 768px) {
+        .doc-nav ul {
+            flex-direction: column;
+        }
+        
+        .doc-nav a {
+            display: block;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}

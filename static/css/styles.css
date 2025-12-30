@@ -1,0 +1,219 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+    color: #333;
+}
+
+nav {
+    background-color: #f8f9fa;
+    color: #333;
+    padding: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+nav ul li {
+    display: inline;
+    margin-right: 0.5rem;
+}
+
+nav ul li a {
+    color: #333;
+    text-decoration: none;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+nav ul li a:hover {
+    background-color: #e9ecef;
+}
+
+@media screen and (max-width: 768px) {
+    nav {
+        padding: 0.75rem;
+    }
+    
+    nav ul {
+        gap: 0.25rem;
+    }
+    
+    nav ul li {
+        margin-right: 0.25rem;
+    }
+    
+    nav ul li a {
+        font-size: 0.9rem;
+        padding: 0.4rem;
+    }
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    overflow: hidden;
+    padding: 2rem 0;
+}
+
+form {
+    background: #f4f4f4;
+    padding: 2rem;
+    margin-bottom: 1rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    display: block;
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+button {
+    display: inline-block;
+    background: #333;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #555;
+}
+
+button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.flashes {
+    list-style-type: none;
+    padding: 1rem;
+    background: #f4f4f4;
+    margin-bottom: 1rem;
+}
+
+.flashes li {
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    text-align: left;
+}
+
+th {
+    background-color: #f4f4f4;
+}
+
+.subscription-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.subscription-info {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.subscription-plans {
+    display: flex;
+    justify-content: space-between;
+}
+
+.plan {
+    background-color: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 1rem;
+    width: 45%;
+}
+
+.plan h3 {
+    text-align: center;
+}
+
+.plan ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.plan ul li {
+    margin-bottom: 0.5rem;
+}
+
+.plan .price {
+    font-size: 1.5rem;
+    text-align: center;
+    font-weight: bold;
+}
+
+.upgrade-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.upgrade-button:hover {
+    background-color: #45a049;
+}
+
+.payment-success, .payment-cancel {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.payment-success h1, .payment-cancel h1 {
+    color: #4CAF50;
+}
+
+.payment-cancel h1 {
+    color: #f44336;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border-radius: 3px;
+    margin-top: 1rem;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}

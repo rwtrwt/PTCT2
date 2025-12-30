@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="payment-cancel">
+    <h1>Payment Cancelled</h1>
+    <p>Your payment has been cancelled. No charges were made to your account.</p>
+    <p>If you have any questions or concerns, please don't hesitate to contact our support team.</p>
+    <a href="{{ url_for('main.subscription') }}" class="btn btn-primary">Back to Subscription Page</a>
+</div>
+{% endblock %}

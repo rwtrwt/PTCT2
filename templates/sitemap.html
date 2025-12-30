@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Sitemap | Georgia Automatic Parenting Time Calendar Tool{% endblock %}
+{% block meta_description %}Sitemap for Georgia Automatic Parenting Time Calendar Tool. Navigate to all pages of our Georgia parenting time calculator.{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
+    <h1>Sitemap</h1>
+    <p>Find all pages on Parenting Time Pro below.</p>
+
+    <section style="margin: 2rem 0;">
+        <h2>Main Pages</h2>
+        <ul style="list-style: none; padding: 0;">
+            <li style="margin: 0.75rem 0;"><a href="{{ url_for('main.home') }}">Home</a></li>
+            <li style="margin: 0.75rem 0;"><a href="{{ url_for('main.ai_calendar') }}">AI Calendar Tool</a></li>
+            <li style="margin: 0.75rem 0;"><a href="{{ url_for('main.user_guide') }}">User Guide</a></li>
+            <li style="margin: 0.75rem 0;"><a href="{{ url_for('main.technical_docs') }}">Technical Documentation</a></li>
+        </ul>
+    </section>
+
+    <section style="margin: 2rem 0;">
+        <h2>Account</h2>
+        <ul style="list-style: none; padding: 0;">
+            <li style="margin: 0.75rem 0;"><a href="{{ url_for('auth.login') }}">Login</a></li>
+            <li style="margin: 0.75rem 0;"><a href="{{ url_for('auth.register') }}">Register</a></li>
+        </ul>
+    </section>
+
+    <section style="margin: 2rem 0;">
+        <h2>Legal & Support</h2>
+        <ul style="list-style: none; padding: 0;">
+            <li style="margin: 0.75rem 0;"><a href="{{ url_for('main.privacy_policy') }}">Privacy Policy</a></li>
+            <li style="margin: 0.75rem 0;"><a href="{{ url_for('main.terms_of_service') }}">Terms of Service</a></li>
+            <li style="margin: 0.75rem 0;"><a href="{{ url_for('main.contact') }}">Contact Us</a></li>
+        </ul>
+    </section>
+
+    <section style="margin: 2rem 0;">
+        <p><a href="{{ url_for('main.sitemap_xml') }}">View XML Sitemap</a> (for search engines)</p>
+    </section>
+</div>
+{% endblock %}

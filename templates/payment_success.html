@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="payment-success">
+    <h1>Payment Successful!</h1>
+    <p>Thank you for upgrading to our Premium plan. Your account has been successfully updated.</p> 
+    <h2>What's next?</h2>
+    <ul>
+        <li>Explore the new premium features in your calendar tool</li>
+        <li>Customize your H4 tag in your profile settings</li>
+        <li>Enjoy priority support for any questions or issues</li>
+    </ul>
+    <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+</div>
+{% endblock %}

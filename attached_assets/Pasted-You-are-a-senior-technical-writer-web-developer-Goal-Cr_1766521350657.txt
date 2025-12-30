@@ -1,0 +1,102 @@
+You are a senior technical writer + web developer.
+
+Goal:
+Create and publish a public, polished “User Guide” website for my tool:
+https://parentingtimecalendartool.com/ai-calendar
+
+Output:
+A complete, deployable Replit web project that hosts the guide at:
+- /user-guide (preferred)
+and also
+- / (redirects to /user-guide or shows a landing page with a button)
+
+Tech requirements:
+- Use a simple static site approach (no database).
+- Use either:
+  A) Next.js (recommended) with static pages, or
+  B) Vite + React with react-router, or
+  C) Plain HTML/CSS with a lightweight generator.
+Pick the fastest, easiest option for Replit deployment.
+- Make it mobile-friendly, fast, and readable.
+- Add a left-side navigation on desktop and a collapsible menu on mobile.
+- Include a search box that searches headings + body text client-side.
+- Include “Copy link” anchors for each heading.
+- Include “Back to top” and breadcrumb navigation.
+- SEO: good titles, meta descriptions, OpenGraph tags, sitemap.xml, and robots.txt.
+- Accessibility: semantic headings, contrast-safe colors, keyboard navigation.
+
+Content requirements (write the guide content yourself):
+Write a complete user guide for the AI Calendar Parenting Time Calendar tool based on what a reasonable user would need. Do NOT assume insider knowledge. Do not require credentials or backend access. If the website content needs specifics that cannot be verified from the link, write them as clearly labeled “Typical behavior” and keep them generic and safe.
+
+Guide structure (must include these pages/sections):
+1) Overview
+   - What the AI Calendar tool does
+   - Who it’s for
+   - What you need before you start (basic info users should gather)
+2) Quick Start (5 minutes)
+   - Step-by-step walkthrough
+3) How to Use
+   - Creating a schedule
+   - Editing rules
+   - Holidays and special days
+   - Exchanges/transportation notes (generic)
+   - Generating outputs (calendar view, summary, downloadable file if applicable)
+4) Inputs Explained
+   - Parenting time patterns (examples)
+   - Weekends, midweek visits
+   - Summer schedules
+   - School year vs breaks
+   - Priority/precedence rules (how conflicts are usually resolved)
+5) Examples Library
+   - At least 6 realistic examples with plain-English descriptions and sample inputs users could paste
+   - Include: alternating weekends, 2-2-3, 3-4-4-3, week-on/week-off, primary custodian + visitation, long-distance/holiday-heavy
+6) Troubleshooting
+   - Common errors
+   - “My holiday schedule looks wrong”
+   - Time zone issues
+   - Conflicts/overlaps
+   - Output mismatch and how to fix it
+7) Best Practices
+   - How to write clear rules
+   - How to verify the result
+   - Things to avoid
+8) FAQ
+   - At least 12 FAQs
+9) Privacy, Security, and Data
+   - What users should and shouldn’t enter
+   - Disclaimer: not legal advice
+10) Changelog (template page)
+11) Contact / Support (template with placeholders)
+
+UI/UX:
+- Clean professional look. Use a neutral palette.
+- Add callout components: Note, Tip, Warning, Example.
+- Add code-style blocks for copy/paste examples.
+- Add “Print this page” button and print-friendly CSS.
+- Add a sticky “Was this helpful?” widget (simple yes/no that stores locally; no server needed).
+
+Implementation details:
+- Create a content folder (markdown or MDX preferred) so I can edit guide text easily.
+- Auto-generate the nav from headings/frontmatter.
+- Add a simple site config file where I can set:
+  site name, logo text, base URL, support email, last updated date.
+- Include a README with:
+  - how to run locally
+  - how to deploy on Replit
+  - how to customize content and navigation
+
+Important constraints:
+- Do not scrape behind logins.
+- If you cannot confirm exact UI labels from the site, write the guide using neutral language like “Select”, “Click”, “Review”, and mark uncertain parts as “Typical behavior”.
+
+Deliverables:
+- A working Replit project with all pages created.
+- Deployed web app link (use Replit Deployments).
+- Ensure no broken links and the search works.
+
+Start by:
+1) Choosing the stack (justify briefly in README)
+2) Generating the complete file tree
+3) Implementing the site
+4) Filling in the full guide content
+5) Running a quick self-check: build succeeds, nav works, search works, mobile menu works.

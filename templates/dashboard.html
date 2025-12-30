@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Welcome to your Dashboard, {{ current_user.username }}!</h1>
+
+{% if current_user.subscription_type == 'paid' %}
+    <h4>Brand Name , {{ current_user.custom_h4 }} </h4>
+{% endif %}
+
+{% if current_user.subscription_type == 'free' %}
+    <h4>Token , {{ current_user.token }} </h4>
+{% endif %}
+
+<p>Your current subscription: {{ current_user.subscription_type }}
+
+
+</p>
+
+<div class="dashboard-options">
+    <div class="option">
+        <h2>AI Calendar Tool</h2>
+        <p>Create and manage your parenting time calendar with AI-powered analysis.</p>
+        <a href="{{ url_for('main.ai_calendar') }}" class="btn btn-primary">Go to AI Calendar Tool</a>
+    </div>
+    <br>
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/2FQXY-1FZc8?si=pQ5LCRBuIN4kBRwx" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    
+    <div class="option">
+        <h2>Profile</h2>
+        <p>View and update your profile information.</p>
+        <a href="{{ url_for('main.profile') }}" class="btn btn-secondary">View Profile</a>
+    </div>
+
+    <div class="option">
+        <h2>Subscription</h2>
+        <p>Manage your subscription and billing information.</p>
+        <a href="{{ url_for('main.subscription') }}" class="btn btn-info">Manage Subscription</a>
+    </div>
+</div>
+
+<a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Logout</a>
+{% endblock %}

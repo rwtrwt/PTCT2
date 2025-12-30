@@ -1,0 +1,137 @@
+E) Schema and Technical GEO Checklist
+JSON-LD Schema Recommendations
+1. SoftwareApplication Schema (Calculator Page)
+json{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Georgia Parenting Time Calculator",
+  "description": "Free online calculator to count parenting time days in Georgia for child support adjustments under OCGA § 19-6-15. Customizable for school calendars, holidays, and specific custody schedules.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Web browser",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "featureList": [
+    "Count annual parenting time days",
+    "Customize holiday schedules",
+    "Import school calendar dates",
+    "Generate printable court report",
+    "Compare different custody schedules"
+  ],
+  "screenshot": "https://parentingtimecalendartool.com/screenshot.png",
+  "softwareVersion": "2.0",
+  "datePublished": "2024-01-01",
+  "dateModified": "2025-01-01",
+  "author": {
+    "@type": "Organization",
+    "name": "Parenting Time Calendar Tool"
+  }
+}
+2. FAQPage Schema (FAQ Sections)
+json{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I calculate parenting time days in Georgia?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "To calculate parenting time days in Georgia for child support purposes, count each overnight the noncustodial parent has with the child over a 12-month period. Georgia uses this day count under OCGA § 19-6-15 to determine if a parenting time adjustment applies."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the parenting time adjustment in Georgia?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The parenting time adjustment in Georgia child support allows the presumptive support amount to be adjusted when the noncustodial parent has significant parenting time. Under OCGA § 19-6-15(b)(5.1), the adjustment recognizes that more time with the child typically means increased direct expenses."
+      }
+    }
+  ]
+}
+3. HowTo Schema (Pillar Page)
+json{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Calculate Parenting Time Days in Georgia",
+  "description": "Step-by-step guide to calculating parenting time days for Georgia child support adjustments under OCGA § 19-6-15.",
+  "totalTime": "PT15M",
+  "tool": {
+    "@type": "HowToTool",
+    "name": "Georgia Parenting Time Calculator"
+  },
+  "step": [
+    {
+      "@type": "HowToStep",
+      "name": "Identify Regular Custody Schedule",
+      "text": "Document your regular custody schedule, including which days/nights the child spends with each parent."
+    },
+    {
+      "@type": "HowToStep",
+      "name": "Add Holiday Parenting Time",
+      "text": "List all holidays where parenting time differs from the regular schedule and count additional overnights."
+    },
+    {
+      "@type": "HowToStep",
+      "name": "Add Summer Parenting Time",
+      "text": "Calculate extended summer parenting time based on your agreement and school calendar dates."
+    },
+    {
+      "@type": "HowToStep",
+      "name": "Calculate Total Annual Days",
+      "text": "Sum all overnights from regular schedule, holidays, and summer for total annual parenting time days."
+    },
+    {
+      "@type": "HowToStep",
+      "name": "Determine Adjustment Eligibility",
+      "text": "Compare your total to the statutory threshold to determine if parenting time adjustment may apply."
+    }
+  ]
+}
+4. Organization Schema (Site-wide)
+json{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Parenting Time Calendar Tool",
+  "url": "https://parentingtimecalendartool.com",
+  "description": "Provider of Georgia parenting time calculation tools for child support purposes.",
+  "foundingDate": "2024",
+  "areaServed": {
+    "@type": "State",
+    "name": "Georgia",
+    "sameAs": "https://en.wikipedia.org/wiki/Georgia_(U.S._state)"
+  }
+}
+5. WebPage Schema with Speakable (Key Pages)
+json{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Georgia Parenting Time Calculator",
+  "description": "Calculate parenting time days for Georgia child support adjustments",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".quick-answer", ".definition-box"]
+  }
+}
+6. BreadcrumbList Schema (All Pages)
+json{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://parentingtimecalendartool.com"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Georgia Parenting Time Guide",
+      "item": "https://parentingtimecalendartool.com/georgia-parenting-time-calculation-guide"
+    }
+  ]
+}

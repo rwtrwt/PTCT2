@@ -1,0 +1,740 @@
+{% extends "base.html" %}
+{% block title %}How Georgia Counts Parenting Time Days | Parenting Time Pro{% endblock %}
+
+{% block meta_description %}Georgia counts parenting time days using the overnight rule. Learn exactly how courts calculate parenting time for child support Schedule C under OCGA 19-6-15(b)(5.1).{% endblock %}
+
+{% block content %}
+<style>
+.pillar-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.8;
+    color: #1f2937;
+}
+
+.pillar-header {
+    text-align: center;
+    margin-bottom: 50px;
+    padding-bottom: 30px;
+    border-bottom: 3px solid #667eea;
+}
+
+.pillar-header h1 {
+    font-size: 2.5rem;
+    color: #1f2937;
+    margin-bottom: 15px;
+    line-height: 1.3;
+}
+
+.pillar-header .subtitle {
+    font-size: 1.2rem;
+    color: #6b7280;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.answer-box {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin: 30px 0;
+    font-size: 1.15rem;
+}
+
+.answer-box strong {
+    font-size: 1.25rem;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.section {
+    margin: 50px 0;
+}
+
+.section h2 {
+    font-size: 1.75rem;
+    color: #1f2937;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.section h3 {
+    font-size: 1.3rem;
+    color: #374151;
+    margin: 30px 0 15px 0;
+}
+
+.section p {
+    margin-bottom: 20px;
+    font-size: 1.05rem;
+}
+
+.highlight-card {
+    background: #f0f9ff;
+    border-left: 4px solid #0284c7;
+    padding: 20px 25px;
+    margin: 25px 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.highlight-card.warning {
+    background: #fef3c7;
+    border-left-color: #d97706;
+}
+
+.highlight-card.success {
+    background: #d1fae5;
+    border-left-color: #059669;
+}
+
+.example-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.example-table th {
+    background: #374151;
+    color: white;
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.example-table td {
+    padding: 15px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.example-table tr:last-child td {
+    border-bottom: none;
+}
+
+.example-table tr:nth-child(even) {
+    background: #f9fafb;
+}
+
+.calculation-box {
+    background: #1f2937;
+    color: #f9fafb;
+    padding: 25px;
+    border-radius: 8px;
+    margin: 25px 0;
+    font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.calculation-box .formula {
+    font-size: 1.2rem;
+    color: #fbbf24;
+    margin-bottom: 15px;
+}
+
+.calculation-box .explanation {
+    color: #9ca3af;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.toc {
+    background: #f9fafb;
+    padding: 25px 30px;
+    border-radius: 8px;
+    margin: 30px 0;
+}
+
+.toc h3 {
+    margin: 0 0 15px 0;
+    color: #374151;
+    font-size: 1.1rem;
+}
+
+.toc ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.toc li {
+    margin: 10px 0;
+}
+
+.toc a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.toc a:hover {
+    text-decoration: underline;
+}
+
+.cta-box {
+    background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+    color: white;
+    padding: 40px;
+    border-radius: 12px;
+    text-align: center;
+    margin: 50px 0;
+}
+
+.cta-box h3 {
+    color: white;
+    font-size: 1.5rem;
+    margin: 0 0 15px 0;
+}
+
+.cta-box p {
+    margin: 0 0 25px 0;
+    font-size: 1.1rem;
+    opacity: 0.95;
+}
+
+.cta-button {
+    display: inline-block;
+    background: white;
+    color: #059669;
+    padding: 15px 35px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.statute-reference {
+    background: #fefce8;
+    border: 1px solid #ca8a04;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 25px 0;
+}
+
+.statute-reference .cite {
+    font-weight: 600;
+    color: #854d0e;
+}
+
+ul.check-list {
+    list-style: none;
+    padding: 0;
+}
+
+ul.check-list li {
+    padding: 10px 0 10px 35px;
+    position: relative;
+}
+
+ul.check-list li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #059669;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+ul.x-list {
+    list-style: none;
+    padding: 0;
+}
+
+ul.x-list li {
+    padding: 10px 0 10px 35px;
+    position: relative;
+}
+
+ul.x-list li::before {
+    content: "✗";
+    position: absolute;
+    left: 0;
+    color: #dc2626;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+    .pillar-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .pillar-page {
+        padding: 20px 15px;
+    }
+    
+    .example-table {
+        font-size: 0.9rem;
+    }
+    
+    .example-table th, .example-table td {
+        padding: 10px;
+    }
+}
+</style>
+
+<div class="pillar-page">
+    <header class="pillar-header">
+        <h1>How Georgia Counts Parenting Time Days</h1>
+        <p class="subtitle">The complete guide to understanding Georgia's overnight rule and parenting time calculations for child support Schedule C</p>
+    </header>
+
+    <div class="answer-box">
+        <strong>The Short Answer:</strong>
+        Georgia counts parenting time days using the overnight rule. The parent with whom the child sleeps overnight receives credit for one parenting day. Courts average parenting time over a two-year period and enter the yearly average on Child Support Schedule C.
+    </div>
+
+    <nav class="toc">
+        <h3>In This Guide</h3>
+        <ul>
+            <li><a href="#overnight-rule">The Overnight Rule Explained</a></li>
+            <li><a href="#how-to-count">How to Count Days Step-by-Step</a></li>
+            <li><a href="#two-year-average">Why Georgia Uses a Two-Year Average</a></li>
+            <li><a href="#schedule-c">Schedule C and the Parenting Time Adjustment</a></li>
+            <li><a href="#common-schedules">Common Custody Schedules and Their Day Counts</a></li>
+            <li><a href="#what-counts">What Counts (and What Doesn't)</a></li>
+            <li><a href="#2026-changes">2026 Law Changes: Deviation to Adjustment</a></li>
+        </ul>
+    </nav>
+
+    <section class="section" id="overnight-rule">
+        <h2>The Overnight Rule Explained</h2>
+        
+        <p>Georgia courts use one simple principle to count parenting time: <strong>where does the child sleep?</strong> The parent who has the child overnight gets credit for that day.</p>
+        
+        <p>This approach provides clarity and consistency across all Georgia custody cases. Rather than debating hours or activities, courts focus on a single measurable factor: overnight stays.</p>
+        
+        <div class="highlight-card">
+            <strong>Key Principle:</strong> If your child goes to sleep at your home tonight, you receive credit for 1.0 parenting day regardless of what time the child arrived or when the child will leave tomorrow.
+        </div>
+
+        <h3>Why the Overnight Rule?</h3>
+        
+        <p>The overnight rule exists because providing shelter overnight is a significant parenting expense. Parents who have children overnight incur costs for housing, utilities, bedding, food for breakfast and dinner, and maintaining a suitable living space.</p>
+        
+        <p>Georgia's child support formula recognizes that both parents contribute to the child's expenses. The parenting time adjustment reduces the noncustodial parent's support obligation to account for the direct costs they bear during their parenting time.</p>
+    </section>
+
+    <section class="section" id="how-to-count">
+        <h2>How to Count Days Step-by-Step</h2>
+        
+        <h3>Standard Overnight Counting</h3>
+        
+        <p>Each night the child sleeps at your residence counts as one full parenting day (1.0). This applies whether the child arrives at 3:00 PM or 8:00 PM the day before.</p>
+        
+        <table class="example-table">
+            <thead>
+                <tr>
+                    <th>Scenario</th>
+                    <th>Who Gets Credit</th>
+                    <th>Days Credited</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Child sleeps at Father's home Friday night</td>
+                    <td>Father</td>
+                    <td>1.0</td>
+                </tr>
+                <tr>
+                    <td>Child picked up at 5 PM, returned at 9 AM</td>
+                    <td>Picking-up parent (overnight)</td>
+                    <td>1.0</td>
+                </tr>
+                <tr>
+                    <td>Two-week summer vacation</td>
+                    <td>Vacation parent</td>
+                    <td>14.0</td>
+                </tr>
+                <tr>
+                    <td>Exchange happens at noon on Sunday</td>
+                    <td>Parent who had Saturday overnight</td>
+                    <td>1.0 (for Saturday)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Partial Days (0.5 Credit)</h3>
+        
+        <p>Some custody arrangements include substantial daytime visits without overnights. These may be counted as half-days (0.5) when the visit is significant, typically four or more hours.</p>
+        
+        <div class="highlight-card warning">
+            <strong>Important:</strong> Partial day credits are not automatic. Courts evaluate whether daytime-only visits warrant 0.5 credit based on the duration and nature of the parenting time. Standard visitation without overnights generally does not receive credit.
+        </div>
+    </section>
+
+    <section class="section" id="two-year-average">
+        <h2>Why Georgia Uses a Two-Year Average</h2>
+        
+        <p>Georgia law requires courts to average parenting time over a two-year (24-month) period rather than a single year. This requirement exists because custody schedules vary between years.</p>
+        
+        <h3>Factors That Vary Year to Year</h3>
+        
+        <ul class="check-list">
+            <li><strong>Alternating Holidays:</strong> Many parenting plans alternate holidays by even/odd years. Thanksgiving might be with Mother in even years and Father in odd years.</li>
+            <li><strong>Leap Years:</strong> Leap years have 366 days instead of 365, affecting percentage calculations.</li>
+            <li><strong>School Calendar Variations:</strong> Spring break dates, teacher workdays, and semester schedules shift annually.</li>
+            <li><strong>Weekend Patterns:</strong> The number of Fridays, fifth weekends, and holiday weekends varies by year.</li>
+        </ul>
+
+        <div class="calculation-box">
+            <div class="formula">Yearly Average = Total Days Over 24 Months ÷ 2</div>
+            <div class="explanation">Example: If Parent B has 240 days over a two-year period, the yearly average is 120 days (240 ÷ 2).</div>
+        </div>
+
+        <p>The two-year average provides a more accurate picture of the actual custody arrangement and prevents unfair calculations based on anomalous single-year data.</p>
+    </section>
+
+    <section class="section" id="schedule-c">
+        <h2>Schedule C and the Parenting Time Adjustment</h2>
+        
+        <p>Child Support Schedule C is the official Georgia worksheet where parenting time calculations are recorded. The yearly average from your two-year calculation goes directly on this form.</p>
+        
+        <div class="statute-reference">
+            <span class="cite">OCGA 19-6-15(b)(5.1)</span> requires courts to "adjust the noncustodial parent's share of the basic child support obligation amount to account for such parent's expenses incurred during his or her court ordered parenting time."
+        </div>
+
+        <h3>How Schedule C Works</h3>
+        
+        <p>Schedule C converts parenting days into a percentage adjustment. More parenting time means a larger reduction in the noncustodial parent's child support obligation.</p>
+        
+        <table class="example-table">
+            <thead>
+                <tr>
+                    <th>Annual Parenting Days</th>
+                    <th>Percentage of Time</th>
+                    <th>Impact on Support</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>52 days (every other weekend)</td>
+                    <td>14.2%</td>
+                    <td>Small adjustment</td>
+                </tr>
+                <tr>
+                    <td>100 days</td>
+                    <td>27.4%</td>
+                    <td>Moderate adjustment</td>
+                </tr>
+                <tr>
+                    <td>130 days</td>
+                    <td>35.6%</td>
+                    <td>Significant adjustment</td>
+                </tr>
+                <tr>
+                    <td>182.5 days (50/50)</td>
+                    <td>50.0%</td>
+                    <td>Maximum adjustment</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="section" id="common-schedules">
+        <h2>Common Custody Schedules and Their Day Counts</h2>
+        
+        <p>Different custody arrangements produce different parenting time totals. Here are the annual day counts for common Georgia custody schedules.</p>
+        
+        <table class="example-table">
+            <thead>
+                <tr>
+                    <th>Schedule Type</th>
+                    <th>Description</th>
+                    <th>Noncustodial Days/Year</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Standard Visitation</td>
+                    <td>Every other weekend (Friday-Sunday)</td>
+                    <td>52 days</td>
+                </tr>
+                <tr>
+                    <td>Standard + Wednesday</td>
+                    <td>Every other weekend + Wednesday overnight</td>
+                    <td>104 days</td>
+                </tr>
+                <tr>
+                    <td>Extended Standard</td>
+                    <td>Every other weekend + 4 weeks summer</td>
+                    <td>80 days</td>
+                </tr>
+                <tr>
+                    <td>2-2-3 Rotation</td>
+                    <td>Alternating 2-2-3 pattern weekly</td>
+                    <td>182.5 days</td>
+                </tr>
+                <tr>
+                    <td>Alternating Weeks</td>
+                    <td>Week on/week off</td>
+                    <td>182.5 days</td>
+                </tr>
+                <tr>
+                    <td>3-4-4-3 Rotation</td>
+                    <td>3 days, 4 days alternating</td>
+                    <td>182.5 days</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="highlight-card success">
+            <strong>Pro Tip:</strong> Don't forget to add holiday time, school breaks, and summer vacation to your base schedule. These additions often significantly increase the noncustodial parent's total parenting time.
+        </div>
+    </section>
+
+    <section class="section" id="what-counts">
+        <h2>What Counts (and What Doesn't)</h2>
+        
+        <h3>What IS Counted as Parenting Time</h3>
+        
+        <ul class="check-list">
+            <li>Overnight stays at parent's residence</li>
+            <li>Extended vacation periods with overnights</li>
+            <li>Holiday overnights as specified in parenting plan</li>
+            <li>School break overnights (spring break, fall break, winter break)</li>
+            <li>Summer vacation overnights</li>
+            <li>Makeup overnights ordered by court</li>
+        </ul>
+
+        <h3>What is NOT Counted</h3>
+        
+        <ul class="x-list">
+            <li>Daytime visits without overnights (generally)</li>
+            <li>Time child spends at school or daycare</li>
+            <li>Transportation time between households</li>
+            <li>Informal arrangements not in court order</li>
+            <li>Time parent spends with child at other locations (sports, activities)</li>
+            <li>Phone calls, video chats, or virtual visitation</li>
+        </ul>
+
+        <div class="highlight-card warning">
+            <strong>Court Order Requirement:</strong> Only parenting time established by court order, consent agreement, or filed parenting plan may be counted. Informal arrangements between parents, even if longstanding, do not qualify for the parenting time adjustment.
+        </div>
+    </section>
+
+    <section class="section" id="2026-changes">
+        <h2>2026 Law Changes: From Deviation to Adjustment</h2>
+        
+        <p>Effective January 1, 2026, Georgia Senate Bill 454 made significant changes to how parenting time affects child support calculations.</p>
+        
+        <h3>Before January 1, 2026</h3>
+        
+        <p>Under the old law, the "parenting time deviation" was discretionary. Judges could choose whether to grant it and determine the amount based on their assessment of the case. This led to inconsistent outcomes across different courts and judges.</p>
+        
+        <h3>After January 1, 2026</h3>
+        
+        <p>The new law replaces the discretionary deviation with a mandatory "parenting time adjustment." Courts must now:</p>
+        
+        <ul class="check-list">
+            <li>Calculate the number of parenting days for each parent</li>
+            <li>Average the days over a two-year period</li>
+            <li>Enter the figures on Schedule C</li>
+            <li>Apply the adjustment automatically using the Schedule C formula</li>
+        </ul>
+
+        <div class="highlight-card success">
+            <strong>What This Means for You:</strong> The parenting time adjustment is no longer discretionary. If you have court-ordered parenting time, you are entitled to have it reflected in your child support calculation through Schedule C.
+        </div>
+    </section>
+
+    <div class="cta-box">
+        <h3>Calculate Your Parenting Time Now</h3>
+        <p>Use our free Georgia Parenting Time Calculator to generate your 24-month calendar and determine your yearly average for Schedule C.</p>
+        <a href="{{ url_for('main.ai_calendar') }}" class="cta-button">Open the Calculator</a>
+    </div>
+
+    <section class="section" id="faq">
+        <h2>Frequently Asked Questions: Georgia Parenting Time Calculation</h2>
+        
+        <h3>How do I calculate parenting time days in Georgia?</h3>
+        <p>To calculate parenting time days in Georgia for child support purposes, count each overnight the noncustodial parent has with the child over a 12-month period. Georgia uses the overnight rule, meaning the parent with whom the child sleeps receives credit for that day. For recurring daytime periods without overnights, divide total annual hours by 24 to get fractional day credit. Courts require a two-year average to account for alternating holidays.</p>
+        
+        <h3>What is the parenting time adjustment in Georgia child support?</h3>
+        <p>The parenting time adjustment in Georgia child support allows the presumptive support amount to be adjusted when the noncustodial parent has significant parenting time. Effective January 1, 2026, Georgia law requires courts to calculate this mandatory adjustment using Schedule C. The adjustment reduces the noncustodial parent's obligation based on the percentage of time the child spends with them.</p>
+        
+        <h3>How many parenting time days triggers an adjustment in Georgia?</h3>
+        <p>Under OCGA § 19-6-15(b)(5.1), the parenting time adjustment may apply when parenting time exceeds the threshold specified in the statute. The adjustment percentage is calculated based on the noncustodial parent's share of annual parenting days divided by 365. Courts average parenting time over a 24-month period to determine the applicable adjustment.</p>
+        
+        <h3>Does Georgia count overnights or 24-hour periods?</h3>
+        <p>Georgia counts overnights (not 24-hour periods) when calculating parenting time days for child support adjustment purposes. Under OCGA § 19-6-15, "days" means: (i) the total number of overnights a parent spends with the child, or (ii) for regular recurring daytime periods, the total hours divided by 24.</p>
+        
+        <h3>How do holidays affect parenting time calculations in Georgia?</h3>
+        <p>Holidays affect Georgia parenting time calculations by adding or subtracting days from the regular schedule. Most parenting plans alternate holidays between parents in even and odd years. This is why Georgia requires courts to average parenting time over a two-year period—to capture the full effect of alternating holiday schedules.</p>
+        
+        <h3>Can I use a calculator for Georgia parenting time?</h3>
+        <p>Yes, you can use a Georgia-specific parenting time calculator to count your annual parenting time days. The calculator should account for your regular schedule, holidays, and school calendar. Our tool generates 24 consecutive months of calendars, applies the overnight rule, handles alternating even/odd year holidays, and produces the yearly average needed for Child Support Schedule C.</p>
+    </section>
+</div>
+
+<!-- FAQPage Schema for Pillar Page -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+        {
+            "@type": "Question",
+            "name": "How do I calculate parenting time days in Georgia?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "To calculate parenting time days in Georgia for child support purposes, count each overnight the noncustodial parent has with the child over a 12-month period. Georgia uses the overnight rule, meaning the parent with whom the child sleeps receives credit for that day. For recurring daytime periods without overnights, divide total annual hours by 24 to get fractional day credit. Courts require a two-year average to account for alternating holidays."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "What is the parenting time adjustment in Georgia child support?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "The parenting time adjustment in Georgia child support allows the presumptive support amount to be adjusted when the noncustodial parent has significant parenting time. Effective January 1, 2026, Georgia law requires courts to calculate this mandatory adjustment using Schedule C. The adjustment reduces the noncustodial parent's obligation based on the percentage of time the child spends with them."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "How many parenting time days triggers an adjustment in Georgia?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Under OCGA § 19-6-15(b)(5.1), the parenting time adjustment may apply when parenting time exceeds the threshold specified in the statute. The adjustment percentage is calculated based on the noncustodial parent's share of annual parenting days divided by 365. Courts average parenting time over a 24-month period to determine the applicable adjustment."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Does Georgia count overnights or 24-hour periods?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Georgia counts overnights (not 24-hour periods) when calculating parenting time days for child support adjustment purposes. Under OCGA § 19-6-15, 'days' means: (i) the total number of overnights a parent spends with the child, or (ii) for regular recurring daytime periods, the total hours divided by 24."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "How do holidays affect parenting time calculations in Georgia?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Holidays affect Georgia parenting time calculations by adding or subtracting days from the regular schedule. Most parenting plans alternate holidays between parents in even and odd years. This is why Georgia requires courts to average parenting time over a two-year period—to capture the full effect of alternating holiday schedules."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Can I use a calculator for Georgia parenting time?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, you can use a Georgia-specific parenting time calculator to count your annual parenting time days. The calculator should account for your regular schedule, holidays, and school calendar. This tool generates 24 consecutive months of calendars, applies the overnight rule, handles alternating even/odd year holidays, and produces the yearly average needed for Child Support Schedule C."
+            }
+        }
+    ]
+}
+</script>
+
+<!-- Article Schema for Pillar Page -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "How Georgia Counts Parenting Time Days",
+    "description": "Complete guide to Georgia's overnight rule for counting parenting time days in child support calculations under OCGA 19-6-15(b)(5.1).",
+    "author": {
+        "@type": "Person",
+        "name": "Russell Taylor",
+        "jobTitle": "Georgia Divorce Lawyer"
+    },
+    "publisher": {
+        "@type": "Organization",
+        "name": "Parenting Time Pro"
+    },
+    "datePublished": "2024-01-01",
+    "dateModified": "2026-01-05",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "{{ request.url }}"
+    }
+}
+</script>
+
+<!-- HowTo Schema -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to Calculate Parenting Time Days in Georgia",
+    "description": "Step-by-step guide to calculating parenting time days for Georgia child support adjustments under OCGA § 19-6-15.",
+    "totalTime": "PT15M",
+    "tool": {
+        "@type": "HowToTool",
+        "name": "Georgia Parenting Time Calculator"
+    },
+    "step": [
+        {
+            "@type": "HowToStep",
+            "name": "Identify Regular Custody Schedule",
+            "text": "Document your regular custody schedule, including which days/nights the child spends with each parent."
+        },
+        {
+            "@type": "HowToStep",
+            "name": "Add Holiday Parenting Time",
+            "text": "List all holidays where parenting time differs from the regular schedule and count additional overnights."
+        },
+        {
+            "@type": "HowToStep",
+            "name": "Add Summer Parenting Time",
+            "text": "Calculate extended summer parenting time based on your agreement and school calendar dates."
+        },
+        {
+            "@type": "HowToStep",
+            "name": "Calculate Total Annual Days",
+            "text": "Sum all overnights from regular schedule, holidays, and summer for total annual parenting time days."
+        },
+        {
+            "@type": "HowToStep",
+            "name": "Determine Adjustment Eligibility",
+            "text": "Compare your total to the statutory threshold to determine if parenting time adjustment may apply."
+        }
+    ]
+}
+</script>
+
+<!-- WebPage Schema with Speakable -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "How Georgia Counts Parenting Time Days",
+    "description": "Complete guide to Georgia's overnight rule for counting parenting time days in child support calculations",
+    "speakable": {
+        "@type": "SpeakableSpecification",
+        "cssSelector": [".answer-box", ".highlight-card"]
+    }
+}
+</script>
+
+<!-- BreadcrumbList Schema -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "{{ request.url_root }}"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Georgia Parenting Time Guide",
+            "item": "{{ request.url_root }}how-georgia-counts-parenting-time-days"
+        }
+    ]
+}
+</script>
+{% endblock %}

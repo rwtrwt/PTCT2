@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us | Georgia Automatic Parenting Time Calendar Tool{% endblock %}
+{% block meta_description %}Contact us for support with the Georgia Automatic Parenting Time Calendar Tool. Get help with your custody calculations.{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
+    <h1>Contact Us</h1>
+    
+    <section style="margin: 2rem 0;">
+        <p>We're here to help! If you have questions, feedback, or need support with Parenting Time Pro, please reach out using the information below.</p>
+    </section>
+
+    <section style="margin: 2rem 0; padding: 2rem; background: #f8f9fa; border-radius: 8px;">
+        <h2>Email Support</h2>
+        <p style="font-size: 1.25rem;">
+            <a href="mailto:parentingtimepro@gmail.com" style="color: #357a8c; text-decoration: none;">
+                parentingtimepro@gmail.com
+            </a>
+        </p>
+        <p>We typically respond within 1-2 business days.</p>
+    </section>
+
+    <section style="margin: 2rem 0;">
+        <h2>Common Questions</h2>
+        
+        <div style="margin: 1.5rem 0;">
+            <h3>How do I get started?</h3>
+            <p>Visit our <a href="{{ url_for('main.user_guide') }}">User Guide</a> for step-by-step instructions on using the parenting time calculator.</p>
+        </div>
+
+        <div style="margin: 1.5rem 0;">
+            <h3>What if my parenting plan isn't being analyzed correctly?</h3>
+            <p>Our AI analysis works best with clearly formatted PDF documents. If you're experiencing issues, try ensuring your document has clear text (not scanned images) and standard formatting.</p>
+        </div>
+
+        <div style="margin: 1.5rem 0;">
+            <h3>How do I upgrade my subscription?</h3>
+            <p>Log in to your account and visit the Subscription page to upgrade to a paid plan for unlimited access.</p>
+        </div>
+
+        <div style="margin: 1.5rem 0;">
+            <h3>Is my data secure?</h3>
+            <p>Yes! We take data security seriously. Please review our <a href="{{ url_for('main.privacy_policy') }}">Privacy Policy</a> for details on how we protect your information.</p>
+        </div>
+    </section>
+
+    <section style="margin: 2rem 0; padding: 2rem; background: #e8f4f8; border-radius: 8px;">
+        <h2>About the Developer</h2>
+        <p>Parenting Time Pro was developed by <strong>Russell Taylor</strong>, a Georgia Divorce Lawyer, to help families and legal professionals accurately calculate parenting time in custody cases.</p>
+    </section>
+
+    <section style="margin: 2rem 0;">
+        <h2>Legal Disclaimer</h2>
+        <p style="font-size: 0.9rem; color: #666;">Parenting Time Pro is a calculation tool and does not provide legal advice. For legal questions about your custody case, please consult with a licensed Georgia family law attorney.</p>
+    </section>
+</div>
+{% endblock %}

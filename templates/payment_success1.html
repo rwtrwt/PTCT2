@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="payment-success">
+    <h1>Payment Successful!</h1>
+    <p>Thank you for purchased Token. Your account has been successfully updated.</p> 
+    <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+</div>
+{% endblock %}

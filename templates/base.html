@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}Georgia Automatic Parenting Time Calendar Tool - Calculate custody percentages automatically, generate court-ready calendars, and analyze parenting plans with AI. The leading Georgia parenting time calculator.{% endblock %}">
+    <meta name="keywords" content="Georgia Automatic Parenting Time Calendar Tool, Georgia parenting time calculator, Georgia custody calculator, parenting time percentage, custody schedule Georgia, child custody Georgia, family law Georgia, parenting plan calculator">
+    <meta name="author" content="Russell Taylor, Georgia Divorce Lawyer">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ request.url }}">
+    
+    <meta property="og:title" content="{% block og_title %}Georgia Automatic Parenting Time Calendar Tool | Parenting Time Pro{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Georgia Automatic Parenting Time Calendar Tool - Calculate custody percentages and generate court-ready calendars automatically.{% endblock %}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url }}">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Georgia Automatic Parenting Time Calendar Tool">
+    <meta name="twitter:description" content="Calculate Georgia parenting time percentages automatically with our AI-powered calendar tool.">
+    
+    <title>{% block title %}Georgia Automatic Parenting Time Calendar Tool | Parenting Time Pro{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .nav-icon {
+            height: 48px;
+            width: 48px;
+            vertical-align: middle;
+            margin-right: 5px;
+            transition: all 0.3s ease;
+        }
+
+        @media screen and (max-width: 576px) {
+            .nav-icon {
+                height: 40px;
+                width: 40px;
+            }
+        }
+
+        @media screen and (min-width: 577px) and (max-width: 768px) {
+            .nav-icon {
+                height: 44px;
+                width: 44px;
+            }
+        }
+
+        @media screen and (min-width: 769px) {
+            .nav-icon {
+                height: 48px;
+                width: 48px;
+            }
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-left ul {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .nav-right {
+            position: relative;
+        }
+
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4a90a4 0%, #357a8c 100%);
+            border: 2px solid #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .profile-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 200px;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            transition: background 0.2s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .dropdown-menu a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-menu a:hover {
+            background: #f5f5f5;
+        }
+
+        .dropdown-menu .dropdown-divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 4px 0;
+        }
+
+        .dropdown-menu .dropdown-header {
+            padding: 8px 16px;
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dropdown-menu .logout-link {
+            color: #c0392b;
+        }
+
+        .dropdown-menu .version-link {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .admin-date-override {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 12px;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            border-radius: 6px;
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .admin-date-override.active {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(243, 156, 18, 0); }
+        }
+
+        .admin-date-override label {
+            cursor: pointer;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .admin-date-override input[type="date"] {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        .admin-date-override .clear-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .admin-date-override .clear-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        @media screen and (max-width: 768px) {
+            .admin-date-override {
+                flex-wrap: wrap;
+                font-size: 0.7rem;
+                padding: 4px 8px;
+            }
+            .admin-date-override input[type="date"] {
+                font-size: 0.75rem;
+                padding: 2px 6px;
+            }
+        }
+
+        footer {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+
+        .footer-compact {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-links a {
+            color: #bdc3c7;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #fff;
+        }
+
+        .footer-info {
+            font-size: 0.8rem;
+            color: #95a5a6;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.25rem 0.5rem;
+            align-items: center;
+        }
+
+        .footer-info a {
+            color: #bdc3c7;
+            text-decoration: none;
+        }
+
+        .footer-info a:hover {
+            color: #fff;
+        }
+
+        .footer-divider {
+            color: #7f8c8d;
+        }
+
+        @media screen and (max-width: 768px) {
+            .nav-container {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .nav-left ul {
+                flex-wrap: wrap;
+            }
+
+            .profile-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+
+            .footer-links {
+                gap: 0.5rem 1rem;
+            }
+
+            .footer-info {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+
+            .footer-divider {
+                display: none;
+            }
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="nav-left">
+                <ul>
+                    <li><a href="{{ url_for('main.home') }}"><img src="{{ url_for('static', filename='images/calendar-tool-icon.png') }}" alt="Home" class="nav-icon" /></a></li>
+                    {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('main.ai_calendar') }}">AI Calendar Tool</a></li>
+                        <li><a href="{{ url_for('main.saves') }}">Saves</a></li>
+                        <li><a href="{{ url_for('main.user_guide') }}">User Guide</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('main.ai_calendar') }}">AI Calendar Tool</a></li>
+                        <li><a href="{{ url_for('main.user_guide') }}">User Guide</a></li>
+                        <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+                        <li><a href="{{ url_for('auth.register') }}">Register</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% if current_user.is_authenticated %}
+            <div class="nav-right" style="display: flex; align-items: center;">
+                {% if current_user.is_admin %}
+                <div class="admin-date-override" id="adminDateOverride">
+                    <label for="overrideDate">Test Date:</label>
+                    <input type="date" id="overrideDate" />
+                    <button class="clear-btn" id="clearOverride" style="display: none;">Clear</button>
+                </div>
+                {% endif %}
+                <div class="profile-dropdown">
+                    <button class="profile-btn" id="profileBtn" aria-label="User menu">
+                        {{ current_user.username[0]|upper }}
+                    </button>
+                    <div class="dropdown-menu" id="profileDropdown">
+                        <div class="dropdown-header">Account</div>
+                        <a href="{{ url_for('main.profile') }}">Profile</a>
+                        <a href="{{ url_for('main.subscription') }}">Subscription</a>
+                        {% if current_user.is_admin %}
+                        <a href="{{ url_for('main.admin_dashboard') }}">Admin Dashboard</a>
+                        <a href="{{ url_for('admin.school_calendars') }}">School Calendar DB</a>
+                        {% endif %}
+                        <div class="dropdown-divider"></div>
+                        <a href="{{ url_for('main.calendar_generator') }}" class="version-link">Version 1.0 (Classic)</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="{{ url_for('auth.logout') }}" class="logout-link">Logout</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="footer-compact">
+            <div class="footer-links">
+                <a href="{{ url_for('main.user_guide') }}">User Guide</a>
+                <a href="{{ url_for('main.privacy_policy') }}">Privacy Policy</a>
+                <a href="{{ url_for('main.terms_of_service') }}">Terms of Service</a>
+                <a href="{{ url_for('main.contact') }}">Contact</a>
+                <a href="{{ url_for('main.sitemap') }}">Sitemap</a>
+            </div>
+            <div class="footer-info">
+                <span>&copy; 2025 Parenting Time Pro</span>
+                <span class="footer-divider">|</span>
+                <span>Developed by Russell Taylor, Georgia Divorce Lawyer</span>
+                <span class="footer-divider">|</span>
+                <a href="mailto:parentingtimepro@gmail.com">parentingtimepro@gmail.com</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Organization Schema (Site-wide) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Parenting Time Calendar Tool",
+        "url": "{{ request.url_root }}",
+        "description": "Provider of Georgia parenting time calculation tools for child support purposes.",
+        "foundingDate": "2024",
+        "areaServed": {
+            "@type": "State",
+            "name": "Georgia",
+            "sameAs": "https://en.wikipedia.org/wiki/Georgia_(U.S._state)"
+        }
+    }
+    </script>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        // Admin date override - exposed as global for calendar generation
+        window.EFFECTIVE_DATE = {{ effective_date_json|safe if effective_date_json else 'null' }};
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileBtn = document.getElementById('profileBtn');
+            const dropdown = document.getElementById('profileDropdown');
+            
+            if (profileBtn && dropdown) {
+                profileBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('show');
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!dropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+                        dropdown.classList.remove('show');
+                    }
+                });
+            }
+
+            const adminDateOverride = document.getElementById('adminDateOverride');
+            const overrideDateInput = document.getElementById('overrideDate');
+            const clearOverrideBtn = document.getElementById('clearOverride');
+
+            if (adminDateOverride && overrideDateInput) {
+                fetch('/admin/date_override')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.override_active && data.override_date) {
+                            overrideDateInput.value = data.override_date;
+                            adminDateOverride.classList.add('active');
+                            clearOverrideBtn.style.display = 'inline-block';
+                        }
+                    })
+                    .catch(err => console.log('Could not fetch date override status'));
+
+                overrideDateInput.addEventListener('change', function() {
+                    const selectedDate = this.value;
+                    if (selectedDate) {
+                        fetch('/admin/date_override', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ date: selectedDate })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.reload();
+                            }
+                        })
+                        .catch(err => console.error('Failed to set date override:', err));
+                    }
+                });
+
+                clearOverrideBtn.addEventListener('click', function() {
+                    fetch('/admin/date_override', {
+                        method: 'DELETE'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.reload();
+                        }
+                    })
+                    .catch(err => console.error('Failed to clear date override:', err));
+                });
+            }
+        });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

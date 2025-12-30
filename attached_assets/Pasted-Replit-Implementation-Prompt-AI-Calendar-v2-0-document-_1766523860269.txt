@@ -1,0 +1,331 @@
+Replit Implementation Prompt: AI Calendar v2.0 document analyzer gating + holiday date correction workflow
+Context
+
+This app page is /ai-calendar and has two AI workflows:
+
+School Calendar Analyzer: Upload a school calendar PDF (or use Legacy Mode county selector) to extract school holidays and breaks.
+
+Parenting Plan Document Analyzer: Upload a parenting plan PDF to auto-populate scheduling settings.
+
+Right now, the parenting plan analyzer does not reliably adjust holiday and break start/end dates when the parenting plan defines holiday “weekends” or uses school-dismissal and return-to-school timing rules. Example: a plan may say holidays that fall on Monday include the preceding Saturday and Sunday, which can expand a Monday-start school break into the preceding weekend. The sample parenting plan includes rules like:
+
+Holidays that fall on Friday include the following Saturday and Sunday; holidays that fall on Monday include the preceding Saturday and Sunday; and holidays/vacations follow the school calendar. 
+
+Proposed Permanent Parenting Pl…
+
+Spring/Fall vacation: begins 6:00 p.m. the day school is dismissed and ends 6:00 p.m. the day before school resumes. 
+
+Proposed Permanent Parenting Pl…
+
+Thanksgiving: begins 6:00 p.m. the preceding Wednesday and ends 6:00 p.m. the Sunday following Thanksgiving. 
+
+Proposed Permanent Parenting Pl…
+
+“Holiday weekends begin at 6:00 p.m. on the Friday before the holiday and end at 6:00 p.m. on the holiday.” 
+
+Proposed Permanent Parenting Pl…
+
+Certain special days (Halloween, birthdays) have different time windows if it is a school day vs not a school day. 
+
+Proposed Permanent Parenting Pl…
+
+The /ai-calendar form includes:
+
+School Calendar Settings (PDF upload), Extracted Holidays & Breaks, and Legacy Mode county selector
+
+Document Analyzer (PDF upload) and “Generate Drafting Audit”
+
+The full schedule form (weekly schedule, recurring daytime, school breaks, summer, holidays, etc.) 
+Parenting Time Calendar Tool
+
+Goals
+
+Implement these changes:
+
+Gate the parenting plan document analyzer:
+
+The parenting plan analyzer (upload control and any “analyze” buttons) must be disabled until either:
+
+the School Calendar Analyzer has completed successfully (school calendar extracted), OR
+
+Legacy Mode is enabled (county selector path) AND the holiday/break dates are available from that legacy selection.
+
+If a user tries to use the parenting plan analyzer early, show a clear inline message telling them to first complete School Calendar extraction or enable Legacy Mode.
+
+Send complete form state to OpenAI when analyzing parenting plan:
+
+When the parenting plan analyzer is used, the request payload to the backend must include:
+
+All current form selections (weekly schedule, recurring daytime, breaks, holidays, summer, etc.)
+
+The extracted school calendar holiday/break dates from step 1 (or legacy mode derived holiday/break dates)
+
+A normalized list of all holiday/break date fields currently on the form, including their DOM field IDs and current values (start/end/exchange where applicable).
+
+This ensures the AI has the “starting point” school-calendar dates and can adjust them based on parenting plan language.
+
+AI must correct holiday/break dates and auto-update the form:
+
+The parenting plan analysis result must include a list of date corrections.
+
+The frontend must automatically apply those corrections by updating the corresponding date inputs (for example evenSpringBreakStart, evenSpringBreakEnd, etc.).
+
+The UI must show a completion notification summarizing how many dates were adjusted, plus a “See more” button to expand a longer explanation (show the per-holiday changes and the rule(s) that caused them).
+
+“Adjustments” the AI must detect and apply
+
+At minimum, detect and apply rules like:
+
+“Friday holiday includes following Sat/Sun” and “Monday holiday includes preceding Sat/Sun” and apply them not just to single-day holidays, but also to vacation periods whose first day is Monday or last day is Friday when the plan’s wording covers “holidays and vacation periods.” 
+
+Proposed Permanent Parenting Pl…
+
+“Begins at 6pm the day school is dismissed” means a break that starts on a Monday in the school calendar often begins on the prior Friday (school dismissal day) for parenting time. 
+
+Proposed Permanent Parenting Pl…
+
+“Ends 6pm the day before school resumes” means if school resumes on a Monday, the break ends on the Sunday before. 
+
+Proposed Permanent Parenting Pl…
+
+Thanksgiving and winter break split rules, plus holiday weekend definitions that start Friday before a Monday holiday. 
+
+Proposed Permanent Parenting Pl…
+
+Proposed Permanent Parenting Pl…
+
+Special-day time windows that differ if it is a school day vs not. 
+
+Proposed Permanent Parenting Pl…
+
+Even if the form stores date-only (not time), the AI should still use time rules to decide which dates should be included.
+
+Implementation requirements
+A) Identify where the /ai-calendar frontend code lives
+
+Find the template/component and any JS for /ai-calendar (for example: templates/ai_calendar.html, static/js/ai-calendar.js, or similar).
+
+You must locate:
+
+the school calendar PDF upload handler
+
+the legacy mode toggle + county selector handler
+
+the parenting plan PDF upload handler
+
+the “Generate Drafting Audit” button handler
+
+the state variables that store extracted school calendar holidays/breaks and analysis results
+
+B) Add an explicit “calendarReady” state
+
+Add a single source of truth boolean such as calendarReady that becomes true when:
+
+School calendar extraction returns successfully and you have a populated holidays/breaks object; OR
+
+Legacy Mode is enabled and the app has populated holidays/breaks based on the chosen county.
+
+If extraction fails or is cleared/reset, set calendarReady = false.
+
+C) Disable the parenting plan analyzer UI until calendarReady
+
+Disable the parenting plan upload control and the analyze button(s) until calendarReady === true.
+
+Add a small help text under the disabled control: “Complete School Calendar Settings first, or enable Legacy Mode.”
+
+If the user clicks anyway (or tries to drop a file), intercept and show the same message.
+
+D) Build a complete “form snapshot” payload for parenting plan analysis
+
+Create a function like collectFormSnapshot() that returns:
+
+{
+  "calendarSource": "extracted" | "legacy",
+  "schoolCalendar": { ...full extractor output... },
+  "form": {
+    "weeklySchedule": {...},
+    "recurringDaytime": {...},
+    "breaks": {...},
+    "holidays": {...},
+    "summer": {...},
+    "other": {...}
+  },
+  "dateFields": [
+    {
+      "label": "Spring Break - EVEN YEARS",
+      "startFieldId": "evenSpringBreakStart",
+      "endFieldId": "evenSpringBreakEnd",
+      "exchangeFieldId": null,
+      "startDate": "YYYY-MM-DD" | null,
+      "endDate": "YYYY-MM-DD" | null,
+      "exchangeDate": null
+    }
+  ]
+}
+
+
+Include every break/holiday date input on the page. The legacy tool code already shows the IDs for breaks and holidays (examples include evenSpringBreakStart, oddSpringBreakStart, evenThanksgivingBreakExchange, plus holiday IDs like evenBeginMLK, evenEndMLK, etc.). 
+
+PTCT
+
+Important: include split breaks’ exchange date fields too (Thanksgiving and Christmas have exchange fields in the legacy tool). 
+
+PTCT
+
+E) Backend: update parenting plan analysis endpoint to include the new prompt and return “corrections”
+
+Find the backend endpoint used by the parenting plan analyzer (something like /api/analyze-parenting-plan).
+
+Modify it so the OpenAI request includes:
+
+the parenting plan document text (extracted from the PDF)
+
+the full form snapshot payload above, including the school calendar output and current holiday/break dates
+
+Return a JSON response shaped like:
+
+{
+  "parties": {
+    "parentA": {"name": "...", "role": "Custodial"},
+    "parentB": {"name": "...", "role": "Non-Custodial"},
+    "confidence": "high|medium|low",
+    "notes": "..."
+  },
+  "rulesDetected": {
+    "weekendDefinition": "string or null",
+    "holidayWeekendRule": "string or null",
+    "vacationStartRule": "string or null",
+    "vacationEndRule": "string or null",
+    "thanksgivingRule": "string or null",
+    "winterBreakSplitRule": "string or null",
+    "schoolDayTimeWindowRule": "string or null",
+    "precedenceRules": ["..."]
+  },
+  "dateCorrections": [
+    {
+      "label": "Spring Break - EVEN YEARS",
+      "startFieldId": "evenSpringBreakStart",
+      "endFieldId": "evenSpringBreakEnd",
+      "exchangeFieldId": null,
+      "originalStartDate": "YYYY-MM-DD",
+      "originalEndDate": "YYYY-MM-DD",
+      "correctedStartDate": "YYYY-MM-DD",
+      "correctedEndDate": "YYYY-MM-DD",
+      "correctedExchangeDate": null,
+      "reason": "short explanation referencing plan language",
+      "confidence": "high|medium|low"
+    }
+  ],
+  "shortSummary": "1-3 sentences",
+  "longSummary": "longer explanation for See more"
+}
+
+F) Frontend: auto-apply corrections and show a “changes made” notification
+
+After receiving the response:
+
+Iterate dateCorrections.
+
+For each correction, if corrected dates differ, set the value of the matching input fields.
+
+Track changes and show:
+
+A compact banner: “Adjusted X dates based on the parenting plan.” + a “See more” button.
+
+When expanded, show a list of each adjustment (label, old range, new range, reason).
+
+Visually highlight updated fields (add a CSS class like .ai-adjusted for a few seconds or until blur).
+
+Also: Do not overwrite user-entered dates if the AI returns null or low confidence without any suggested correction.
+
+Updated OpenAI Prompt to Use for Parenting Plan Analysis (use as the system or developer message)
+
+Use this exact instruction content (adapt variable names as needed):
+
+SYSTEM / DEVELOPER PROMPT:
+
+You are analyzing a Georgia parenting plan PDF. You will be given:
+(1) extracted text from the parenting plan PDF, and
+(2) the app’s current form snapshot, including school-calendar-derived holidays and breaks (date ranges) and the current schedule selections.
+
+Your job:
+
+Extract Parent A (custodial parent) and Parent B (non-custodial parent exercising parenting time).
+
+Identify every parenting plan provision that changes the start date, end date, exchange date, or time window of any holiday, school break, or vacation period relative to the school calendar.
+
+Apply those provisions to the provided school-calendar date ranges to compute corrected date ranges for parenting time.
+
+Important rules:
+
+Do NOT invent new holidays or breaks. Only evaluate and correct the date fields provided in dateFields.
+
+If the parenting plan specifies times (for example 6:00 p.m.), still output corrected dates appropriate for a date-only UI by including any date that is covered by the plan’s time window.
+
+Holiday and vacation “weekend inclusion” rules must be applied when the plan’s language covers holidays and/or vacation periods, even if the school calendar starts on a Monday or ends on a Friday.
+
+If the plan defines “begins when school is dismissed” or “ends the day before school resumes,” compute those dates using the given school break dates and common school patterns:
+
+If a break starts Monday, school is typically dismissed the prior Friday.
+
+If school resumes Monday, “day before school resumes” is Sunday.
+
+Resolve conflicts using the plan’s precedence language (holidays vs spring break vs summer, etc.) if stated.
+
+Return JSON only in this schema:
+
+{
+"parties": {
+"parentA": {"name": string, "role": "Custodial"},
+"parentB": {"name": string, "role": "Non-Custodial"},
+"primaryPhysicalCustodian": "Mother|Father|Joint|Unknown",
+"confidence": "high|medium|low",
+"notes": string
+},
+"rulesDetected": {
+"weekendDefinition": string|null,
+"holidayWeekendRule": string|null,
+"vacationStartRule": string|null,
+"vacationEndRule": string|null,
+"thanksgivingRule": string|null,
+"winterBreakSplitRule": string|null,
+"schoolDayTimeWindowRule": string|null,
+"precedenceRules": [string]
+},
+"dateCorrections": [
+{
+"label": string,
+"startFieldId": string,
+"endFieldId": string,
+"exchangeFieldId": string|null,
+"originalStartDate": string|null,
+"originalEndDate": string|null,
+"originalExchangeDate": string|null,
+"correctedStartDate": string|null,
+"correctedEndDate": string|null,
+"correctedExchangeDate": string|null,
+"reason": string,
+"confidence": "high|medium|low"
+}
+],
+"shortSummary": string,
+"longSummary": string
+}
+
+In dateCorrections:
+
+Include an entry for every dateFields item, even if no change is needed.
+
+If no change is needed, set corrected dates equal to original dates and explain briefly why.
+
+Acceptance checklist
+
+Parenting plan analyzer controls are disabled until school calendar extraction is complete or Legacy Mode is enabled and populated.
+
+Parenting plan analysis sends OpenAI the full form snapshot including all current holiday and break dates.
+
+OpenAI response returns dateCorrections.
+
+App automatically updates the relevant date fields and shows a summary notification with a “See more” expander.
+
+No regression to calendar population, reset, or export

@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<style>
+.admin-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.admin-header h1 {
+    font-size: 1.5rem;
+    color: #1f2937;
+    margin: 0;
+}
+
+.admin-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+}
+
+.stat-card .value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.stat-card .label {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 5px;
+}
+
+.users-table-container {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.users-table-header {
+    background: #f9fafb;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.users-table-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #374151;
+}
+
+.search-input {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    width: 250px;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.users-table th {
+    background: #f9fafb;
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.users-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.9rem;
+    color: #4b5563;
+}
+
+.users-table tr:hover {
+    background: #f9fafb;
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-active { background: #d1fae5; color: #065f46; }
+.status-blocked { background: #fee2e2; color: #991b1b; }
+.status-admin { background: #dbeafe; color: #1e40af; }
+.status-super { background: #ede9fe; color: #5b21b6; }
+
+.action-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-right: 5px;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn-block { background: #fee2e2; color: #991b1b; }
+.btn-unblock { background: #d1fae5; color: #065f46; }
+.btn-admin { background: #dbeafe; color: #1e40af; }
+.btn-credits { background: #fef3c7; color: #92400e; }
+
+.credits-input {
+    width: 60px;
+    padding: 4px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.update-credits-btn {
+    padding: 4px 8px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s;
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.notification.success { background: #27ae60; }
+.notification.error { background: #e74c3c; }
+
+@media (max-width: 768px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .users-table-header { flex-direction: column; gap: 10px; }
+    .search-input { width: 100%; }
+}
+</style>
+
+<div class="admin-page">
+    <div class="admin-header">
+        <h1>Admin Dashboard</h1>
+        <span class="admin-badge">{{ 'Super Admin' if current_user.is_super_admin else 'Admin' }}</span>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="value" id="totalUsers">{{ users|length }}</div>
+            <div class="label">Total Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="activeUsers">{{ users|selectattr('confirmed')|list|length }}</div>
+            <div class="label">Confirmed Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="blockedUsers">{{ users|selectattr('is_blocked')|list|length }}</div>
+            <div class="label">Blocked Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="adminUsers">{{ users|selectattr('is_admin')|list|length }}</div>
+            <div class="label">Admins</div>
+        </div>
+    </div>
+
+    <div class="users-table-container">
+        <div class="users-table-header">
+            <h2>Registered Users</h2>
+            <input type="text" class="search-input" placeholder="Search by username or email..." id="searchInput" onkeyup="filterUsers()">
+        </div>
+        <table class="users-table" id="usersTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Credits</th>
+                    <th>Status</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr data-user-id="{{ user.id }}">
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <input type="number" class="credits-input" value="{{ user.token }}" id="credits-{{ user.id }}" min="0">
+                        <button class="update-credits-btn" onclick="updateCredits({{ user.id }})">Save</button>
+                    </td>
+                    <td>
+                        {% if user.is_blocked %}
+                            <span class="status-badge status-blocked">Blocked</span>
+                        {% elif user.confirmed %}
+                            <span class="status-badge status-active">Active</span>
+                        {% else %}
+                            <span class="status-badge" style="background: #fef3c7; color: #92400e;">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.is_super_admin %}
+                            <span class="status-badge status-super">Super Admin</span>
+                        {% elif user.is_admin %}
+                            <span class="status-badge status-admin">Admin</span>
+                        {% else %}
+                            <span class="status-badge" style="background: #f3f4f6; color: #6b7280;">User</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not user.is_super_admin %}
+                            {% if user.is_blocked %}
+                                <button class="action-btn btn-unblock" onclick="toggleBlock({{ user.id }}, false)">Unblock</button>
+                            {% else %}
+                                <button class="action-btn btn-block" onclick="toggleBlock({{ user.id }}, true)">Block</button>
+                            {% endif %}
+                            
+                            {% if current_user.is_super_admin %}
+                                {% if user.is_admin %}
+                                    <button class="action-btn btn-admin" onclick="toggleAdmin({{ user.id }}, false)">Remove Admin</button>
+                                {% else %}
+                                    <button class="action-btn btn-admin" onclick="toggleAdmin({{ user.id }}, true)">Make Admin</button>
+                                {% endif %}
+                            {% endif %}
+                        {% else %}
+                            <span style="color: #9ca3af; font-size: 0.8rem;">Protected</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="notification" id="notification"></div>
+
+<script>
+function showNotification(message, isError = false) {
+    const notif = document.getElementById('notification');
+    notif.textContent = message;
+    notif.className = 'notification ' + (isError ? 'error' : 'success') + ' show';
+    setTimeout(() => {
+        notif.className = 'notification';
+    }, 3000);
+}
+
+function filterUsers() {
+    const input = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#usersTable tbody tr');
+    rows.forEach(row => {
+        const username = row.cells[1].textContent.toLowerCase();
+        const email = row.cells[2].textContent.toLowerCase();
+        row.style.display = (username.includes(input) || email.includes(input)) ? '' : 'none';
+    });
+}
+
+async function toggleBlock(userId, block) {
+    try {
+        const response = await fetch('/admin/toggle_block', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, block: block })
+        });
+        const data = await response.json();
+        if (data.success) {
+            showNotification(data.message);
+            location.reload();
+        } else {
+            showNotification(data.error, true);
+        }
+    } catch (err) {
+        showNotification('Error: ' + err.message, true);
+    }
+}
+
+async function toggleAdmin(userId, makeAdmin) {
+    try {
+        const response = await fetch('/admin/toggle_admin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, make_admin: makeAdmin })
+        });
+        const data = await response.json();
+        if (data.success) {
+            showNotification(data.message);
+            location.reload();
+        } else {
+            showNotification(data.error, true);
+        }
+    } catch (err) {
+        showNotification('Error: ' + err.message, true);
+    }
+}
+
+async function updateCredits(userId) {
+    const credits = document.getElementById('credits-' + userId).value;
+    try {
+        const response = await fetch('/admin/update_credits', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, credits: parseInt(credits) })
+        });
+        const data = await response.json();
+        if (data.success) {
+            showNotification(data.message);
+        } else {
+            showNotification(data.error, true);
+        }
+    } catch (err) {
+        showNotification('Error: ' + err.message, true);
+    }
+}
+</script>
+{% endblock %}
