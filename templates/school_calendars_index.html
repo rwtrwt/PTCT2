@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Georgia School Calendars 2025-2026 | Download Official PDFs | Parenting Time Pro{% endblock %}
+
+{% block meta_description %}Download official Georgia school calendars for {{ total_schools }}+ districts. Free PDF downloads for 2025-2026, 2026-2027 school years. Gwinnett, Cobb, Fulton, DeKalb, and more.{% endblock %}
+
+{% block og_title %}Georgia School Calendars 2025-2026 | Download Official PDFs{% endblock %}
+{% block og_description %}Free official school calendar downloads for {{ total_schools }}+ Georgia school districts. PDF calendars with holidays, breaks, and important dates.{% endblock %}
+
+{% block extra_head %}
+<style>
+    .school-calendars-hero {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+        color: white;
+        padding: 3rem 2rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .school-calendars-hero h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .school-calendars-hero p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .stats-bar {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        display: block;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+
+    .county-section {
+        margin-bottom: 2rem;
+    }
+
+    .county-header {
+        background: #f8f9fa;
+        padding: 0.75rem 1rem;
+        border-left: 4px solid #2c5282;
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e3a5f;
+    }
+
+    .schools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+        padding: 0 1rem;
+    }
+
+    .school-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1rem;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .school-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+        border-color: #2c5282;
+    }
+
+    .school-name {
+        font-weight: 600;
+        color: #1e3a5f;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .school-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .school-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .years-available {
+        font-size: 0.8rem;
+        color: #2c5282;
+        margin-top: 0.5rem;
+    }
+
+    .search-container {
+        max-width: 600px;
+        margin: 0 auto 2rem;
+        padding: 0 1rem;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    .search-input:focus {
+        border-color: #2c5282;
+    }
+
+    .content-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .school-calendars-hero h1 {
+            font-size: 1.75rem;
+        }
+
+        .stats-bar {
+            gap: 1.5rem;
+        }
+
+        .schools-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="school-calendars-hero">
+    <h1>Georgia School Calendars</h1>
+    <p>Download official school calendars and view verified holiday dates for Georgia school districts. Free PDF downloads available.</p>
+    <div class="stats-bar">
+        <div class="stat-item">
+            <span class="stat-number">{{ total_schools }}</span>
+            <span class="stat-label">School Districts</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">{{ counties|length }}</span>
+            <span class="stat-label">Counties</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">2025-2028</span>
+            <span class="stat-label">Years Available</span>
+        </div>
+    </div>
+</div>
+
+<div class="search-container">
+    <input type="text" id="schoolSearch" class="search-input" placeholder="Search for a school district..." autocomplete="off">
+</div>
+
+<div class="content-container">
+    {% for county, schools in counties.items() %}
+    <div class="county-section" data-county="{{ county }}">
+        <div class="county-header">{{ county }} County</div>
+        <div class="schools-grid">
+            {% for school in schools %}
+            <a href="{{ url_for('main.school_calendar_detail', slug=school.entity.slug) }}" class="school-card" data-name="{{ school.entity.district_name|lower }}">
+                <div class="school-name">{{ school.entity.district_name }}</div>
+                <div class="school-meta">
+                    {% if school.file_count > 0 %}
+                    <span>{{ school.file_count }} PDF{% if school.file_count != 1 %}s{% endif %}</span>
+                    {% endif %}
+                    {% if school.years_available %}
+                    <span>{{ school.years_available|length }} year{% if school.years_available|length != 1 %}s{% endif %}</span>
+                    {% endif %}
+                </div>
+                {% if school.years_available %}
+                <div class="years-available">{{ school.years_available|join(', ') }}</div>
+                {% endif %}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Schema.org structured data for SEO -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Georgia School Calendars",
+    "description": "Download official school calendars for Georgia school districts. Free PDF downloads with verified holiday dates.",
+    "url": "{{ request.url }}",
+    "numberOfItems": {{ total_schools }},
+    "about": {
+        "@type": "Thing",
+        "name": "Georgia School District Calendars",
+        "description": "Official academic calendars for {{ total_schools }} Georgia school districts"
+    }
+}
+</script>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('schoolSearch');
+    const schoolCards = document.querySelectorAll('.school-card');
+    const countySections = document.querySelectorAll('.county-section');
+
+    searchInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase().trim();
+
+        countySections.forEach(section => {
+            const cards = section.querySelectorAll('.school-card');
+            let hasVisibleCard = false;
+
+            cards.forEach(card => {
+                const name = card.getAttribute('data-name');
+                const county = section.getAttribute('data-county').toLowerCase();
+
+                if (name.includes(query) || county.includes(query)) {
+                    card.style.display = '';
+                    hasVisibleCard = true;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            section.style.display = hasVisibleCard ? '' : 'none';
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -71,7 +71,7 @@ class GuestToken(db.Model):
 
 class SchoolEntity(db.Model):
     __tablename__ = 'school_entity'
-    
+
     id = db.Column(db.Integer, primary_key=True)
     entity_type = db.Column(db.String(20), nullable=False, default='public_district')
     district_name = db.Column(db.String(255), nullable=False)
@@ -80,16 +80,18 @@ class SchoolEntity(db.Model):
     nces_id = db.Column(db.String(50), nullable=True)
     is_active = db.Column(db.Boolean, default=True)
     website = db.Column(db.String(500), nullable=True)
+    # New fields for public calendar pages
+    official_website = db.Column(db.String(500), nullable=True)  # Main school district website
+    calendar_page_url = db.Column(db.String(500), nullable=True)  # Direct link to calendar page
+    slug = db.Column(db.String(100), nullable=True, unique=True, index=True)  # URL-friendly name
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    calendars = db.relationship('SchoolCalendar', back_populates='school_entity', lazy=True)
-    
+
     __table_args__ = (
         db.UniqueConstraint('entity_type', 'normalized_name', 'county', name='uix_entity_type_name_county'),
         db.Index('ix_entity_county_name', 'county', 'normalized_name'),
     )
-    
+
     @staticmethod
     def normalize_name(name):
         import re
@@ -97,7 +99,18 @@ class SchoolEntity(db.Model):
         normalized = re.sub(r'[^\w\s-]', '', normalized)
         normalized = re.sub(r'\s+', '_', normalized)
         return normalized
-    
+
+    @staticmethod
+    def generate_slug(name):
+        """Generate URL-friendly slug from district name."""
+        import re
+        slug = name.lower().strip()
+        slug = re.sub(r'[^\w\s-]', '', slug)
+        slug = re.sub(r'\s+', '-', slug)
+        # Remove common suffixes for cleaner URLs
+        slug = re.sub(r'-?(public-schools|school-district|school-system|county-schools|schools)$', '', slug)
+        return slug.strip('-')
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -108,50 +121,72 @@ class SchoolEntity(db.Model):
             'nces_id': self.nces_id,
             'is_active': self.is_active,
             'website': self.website,
+            'official_website': self.official_website,
+            'calendar_page_url': self.calendar_page_url,
+            'slug': self.slug,
             'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
-            'calendar_count': len(list(self.calendars)) if self.calendars else 0
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
 
 
-class SchoolCalendar(db.Model):
-    __tablename__ = 'school_calendar'
-    
+class VerifiedHoliday(db.Model):
+    """Verified holiday dates for school calendars."""
+    __tablename__ = 'verified_holiday'
+
     id = db.Column(db.Integer, primary_key=True)
     school_entity_id = db.Column(db.Integer, db.ForeignKey('school_entity.id'), nullable=False)
-    school_year = db.Column(db.String(20), nullable=False)
-    source_filename = db.Column(db.String(500), nullable=True)
-    file_hash = db.Column(db.String(64), nullable=True, unique=True)
-    analysis_json = db.Column(db.Text, nullable=True)
-    analysis_version = db.Column(db.String(20), nullable=True)
-    analysis_generated_at = db.Column(db.DateTime, nullable=True)
-    uploaded_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
-    status = db.Column(db.String(20), default='uploaded')
-    ingest_metadata = db.Column(db.Text, nullable=True)
+    school_year = db.Column(db.String(20), nullable=False)  # "2025-2026"
+    name = db.Column(db.String(100), nullable=False)  # "Labor Day", "Spring Break"
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    school_entity = db.relationship('SchoolEntity', back_populates='calendars')
-    uploaded_by = db.relationship('User', backref=db.backref('uploaded_calendars', lazy=True))
-    
+
+    school_entity = db.relationship('SchoolEntity', backref=db.backref('holidays', lazy='dynamic'))
+
     __table_args__ = (
-        db.UniqueConstraint('school_entity_id', 'school_year', name='uix_entity_school_year'),
-        db.Index('ix_calendar_school_year', 'school_year'),
+        db.Index('ix_holiday_entity_year', 'school_entity_id', 'school_year'),
     )
-    
+
     def to_dict(self):
-        import json
         return {
             'id': self.id,
             'school_entity_id': self.school_entity_id,
-            'school_entity_name': self.school_entity.district_name if self.school_entity else None,
             'school_year': self.school_year,
-            'source_filename': self.source_filename,
-            'status': self.status,
-            'analysis_version': self.analysis_version,
-            'analysis_generated_at': self.analysis_generated_at.isoformat() if self.analysis_generated_at else None,
-            'analysis_json': json.loads(self.analysis_json) if self.analysis_json else None,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+            'name': self.name,
+            'startDate': self.start_date.isoformat() if self.start_date else None,
+            'endDate': self.end_date.isoformat() if self.end_date else None,
+            'verified': True
+        }
+
+
+class CalendarFile(db.Model):
+    """PDF/image files for school calendars."""
+    __tablename__ = 'calendar_file'
+
+    id = db.Column(db.Integer, primary_key=True)
+    school_entity_id = db.Column(db.Integer, db.ForeignKey('school_entity.id'), nullable=False)
+    school_year = db.Column(db.String(20), nullable=False)  # "2025-2026"
+    filename = db.Column(db.String(255), nullable=False)  # Original filename
+    file_path = db.Column(db.String(500), nullable=False)  # Relative path in Official_Calendars
+    file_type = db.Column(db.String(10), default='pdf')  # pdf, png, jpeg
+    file_size = db.Column(db.Integer, nullable=True)  # Size in bytes
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    school_entity = db.relationship('SchoolEntity', backref=db.backref('calendar_files', lazy='dynamic'))
+
+    __table_args__ = (
+        db.Index('ix_file_entity_year', 'school_entity_id', 'school_year'),
+    )
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'school_entity_id': self.school_entity_id,
+            'school_year': self.school_year,
+            'filename': self.filename,
+            'file_path': self.file_path,
+            'file_type': self.file_type,
+            'file_size': self.file_size
         }
 

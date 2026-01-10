@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, session
 from flask_login import login_required, current_user
-from models import User, CalendarSave, GuestToken, SchoolEntity, SchoolCalendar
+from models import User, CalendarSave, GuestToken, SchoolEntity, VerifiedHoliday, CalendarFile
 from extensions import db, mail
 from flask_mail import Message
 from datetime import datetime
@@ -14,6 +14,9 @@ import tempfile
 import logging
 
 logger = logging.getLogger(__name__)
+
+# Verified school calendar lookup
+from verified_calendars import find_verified_school, get_verified_calendar_24_months, detect_school_year, get_display_name
 
 # PDF processing imports - wrapped to handle missing dependencies gracefully
 pdfplumber = None
@@ -3339,60 +3342,6 @@ def get_or_create_school_entity(district_name, entity_type='public_district', co
     return entity
 
 
-def store_school_calendar(school_entity, school_year, calendar_result, source_filename=None, file_hash=None, user_id=None, ingest_metadata=None):
-    """
-    Store a school calendar and its analysis results in the database.
-    Updates existing calendar if one already exists for this entity+year.
-    Returns the SchoolCalendar object and a flag indicating if it was created or updated.
-    """
-    import json
-    import hashlib
-    
-    if not school_entity or not school_year:
-        return None, False
-    
-    existing = SchoolCalendar.query.filter_by(
-        school_entity_id=school_entity.id,
-        school_year=school_year
-    ).first()
-    
-    analysis_json = json.dumps(calendar_result) if calendar_result else None
-    
-    if existing:
-        existing.analysis_json = analysis_json
-        existing.analysis_version = '2.0'
-        existing.analysis_generated_at = datetime.utcnow()
-        existing.source_filename = source_filename or existing.source_filename
-        existing.file_hash = file_hash or existing.file_hash
-        existing.status = 'processed'
-        existing.ingest_metadata = json.dumps(ingest_metadata) if ingest_metadata else existing.ingest_metadata
-        db.session.commit()
-        logger.info(f"Updated existing calendar for {school_entity.district_name} ({school_year})")
-        return existing, False
-    else:
-        calendar = SchoolCalendar(
-            school_entity_id=school_entity.id,
-            school_year=school_year,
-            source_filename=source_filename,
-            file_hash=file_hash,
-            analysis_json=analysis_json,
-            analysis_version='2.0',
-            analysis_generated_at=datetime.utcnow(),
-            uploaded_by_user_id=user_id,
-            status='processed',
-            ingest_metadata=json.dumps(ingest_metadata) if ingest_metadata else None
-        )
-        db.session.add(calendar)
-        db.session.commit()
-        logger.info(f"Created new calendar for {school_entity.district_name} ({school_year})")
-        return calendar, True
-
-
-def get_file_hash(file_bytes):
-    """Generate SHA256 hash for file contents."""
-    import hashlib
-    return hashlib.sha256(file_bytes).hexdigest()
-
 
 @main.route('/extract_school_calendar', methods=['POST'])
 def extract_school_calendar():
@@ -3430,9 +3379,47 @@ def extract_school_calendar():
             return jsonify({'error': 'File size exceeds 20MB limit'}), 400
         
         if is_image:
+            step = "image_ocr_extraction"
+            logger.info(f"Processing image file: {file.filename} - extracting text via OCR")
+
+            # First, do OCR to extract text for school identification
+            try:
+                ocr_text = extract_text_from_calendar_image_ocr(file_bytes)
+            except Exception as ocr_err:
+                logger.warning(f"OCR extraction failed: {ocr_err}")
+                ocr_text = ""
+
+            # Check if this is a verified school calendar
+            step = "verified_school_check"
+            verified_school = find_verified_school(ocr_text) if ocr_text else None
+
+            if verified_school:
+                school_year = detect_school_year(ocr_text)
+                verified_dates = get_verified_calendar_24_months(verified_school)
+
+                if verified_dates:
+                    logger.info(f"Found verified calendar for {verified_school} ({school_year}) - skipping AI analysis")
+                    calendar_result = {
+                        'schoolName': get_display_name(verified_school),
+                        'schoolYear': school_year,
+                        'holidays': verified_dates,
+                        '_meta': {
+                            'wasImage': True,
+                            'wasScanned': False,
+                            'fileType': 'image',
+                            'extractionMethod': 'verified_lookup',
+                            'verifiedSchool': verified_school,
+                            'extractedAt': __import__('datetime').datetime.now().isoformat()
+                        }
+                    }
+                    # Infer missing dates for incomplete years
+                    calendar_result = infer_missing_years(calendar_result)
+                    return jsonify(calendar_result)
+
+            # No verified match - continue with AI analysis
             step = "image_ocr_analysis"
-            logger.info(f"Processing image file: {file.filename} - using OCR+AI (reliable text extraction)")
-            
+            logger.info(f"No verified calendar found - using OCR+AI analysis")
+
             raw_result = analyze_calendar_with_ocr(file_bytes, file.filename)
             extraction_method = 'ocr_plus_ai'
             
@@ -3471,14 +3458,45 @@ def extract_school_calendar():
             
             step = "extract_text"
             extracted_text, is_scanned = extract_text_from_pdf(file_bytes)
-            
+
             if len(extracted_text) < 50:
                 return jsonify({'error': 'Could not extract sufficient text from the document. Please ensure the PDF contains readable text.'}), 400
-            
+
+            # Check if this is a verified school calendar
+            step = "verified_school_check"
+            verified_school = find_verified_school(extracted_text)
+
+            if verified_school:
+                school_year = detect_school_year(extracted_text)
+                verified_dates = get_verified_calendar_24_months(verified_school)
+
+                if verified_dates:
+                    logger.info(f"Found verified calendar for {verified_school} ({school_year}) - skipping AI analysis")
+                    calendar_result = {
+                        'schoolName': get_display_name(verified_school),
+                        'schoolYear': school_year,
+                        'holidays': verified_dates,
+                        '_meta': {
+                            'wasImage': False,
+                            'wasScanned': is_scanned,
+                            'fileType': 'pdf',
+                            'textLength': len(extracted_text),
+                            'extractionMethod': 'verified_lookup',
+                            'verifiedSchool': verified_school,
+                            'extractedAt': __import__('datetime').datetime.now().isoformat()
+                        }
+                    }
+                    # Infer missing dates for incomplete years
+                    calendar_result = infer_missing_years(calendar_result)
+                    return jsonify(calendar_result)
+
+            # No verified match - continue with AI analysis
+            logger.info(f"No verified calendar found - using AI analysis")
+
             step = "extract_shading"
             shading_info = extract_calendar_shading(file_bytes)
             logger.info(f"Extracted {len(shading_info)} shaded cells from PDF")
-            
+
             step = "two_pass_analysis"
             calendar_result = analyze_school_calendar_two_pass(extracted_text, shading_info)
             
@@ -3499,51 +3517,6 @@ def extract_school_calendar():
                 'textLength': len(extracted_text),
                 'extractedAt': __import__('datetime').datetime.now().isoformat()
             }
-        
-        step = "store_to_database"
-        try:
-            school_name = calendar_result.get('schoolName', '')
-            school_year = calendar_result.get('schoolYear', '')
-            
-            if school_name and school_year:
-                file_hash = get_file_hash(file_bytes)
-                user_id = current_user.id if current_user.is_authenticated else None
-                
-                school_entity = get_or_create_school_entity(
-                    district_name=school_name,
-                    entity_type='public_district',
-                    county=None
-                )
-                
-                if school_entity:
-                    ingest_metadata = {
-                        'wasImage': is_image,
-                        'wasScanned': calendar_result['_meta'].get('wasScanned', False),
-                        'fileType': 'image' if is_image else 'pdf'
-                    }
-                    if not is_image:
-                        ingest_metadata['textLength'] = calendar_result['_meta'].get('textLength', 0)
-                    
-                    stored_calendar, was_created = store_school_calendar(
-                        school_entity=school_entity,
-                        school_year=school_year,
-                        calendar_result=calendar_result,
-                        source_filename=file.filename,
-                        file_hash=file_hash,
-                        user_id=user_id,
-                        ingest_metadata=ingest_metadata
-                    )
-                    
-                    if stored_calendar:
-                        calendar_result['_meta']['storedInDatabase'] = True
-                        calendar_result['_meta']['calendarId'] = stored_calendar.id
-                        calendar_result['_meta']['entityId'] = school_entity.id
-                        calendar_result['_meta']['wasNewEntry'] = was_created
-                        logger.info(f"Stored calendar analysis for {school_name} ({school_year}) - ID: {stored_calendar.id}")
-        except Exception as db_error:
-            logger.warning(f"Could not store calendar to database (non-fatal): {db_error}")
-            calendar_result['_meta']['storedInDatabase'] = False
-            calendar_result['_meta']['storageError'] = str(db_error)
         
         return jsonify(calendar_result)
     
@@ -3570,17 +3543,165 @@ def contact():
     return render_template('contact.html')
 
 
+# ===== PUBLIC SCHOOL CALENDAR PAGES =====
+# SEO-optimized pages for downloading official Georgia school calendars
+
+@main.route('/georgia-school-calendars')
+def school_calendars_index():
+    """Public index page listing all Georgia school districts with calendar downloads."""
+    entities = SchoolEntity.query.filter_by(is_active=True).order_by(SchoolEntity.county, SchoolEntity.district_name).all()
+
+    # Group by county for display
+    counties = {}
+    for entity in entities:
+        county = entity.county or 'Other'
+        if county not in counties:
+            counties[county] = []
+
+        # Get count of calendar files and school years available
+        file_count = CalendarFile.query.filter_by(school_entity_id=entity.id).count()
+        years = db.session.query(VerifiedHoliday.school_year).filter_by(
+            school_entity_id=entity.id
+        ).distinct().all()
+
+        counties[county].append({
+            'entity': entity,
+            'file_count': file_count,
+            'years_available': sorted([y[0] for y in years], reverse=True)
+        })
+
+    # Sort counties alphabetically
+    sorted_counties = dict(sorted(counties.items()))
+
+    return render_template('school_calendars_index.html',
+        counties=sorted_counties,
+        total_schools=len(entities)
+    )
+
+
+@main.route('/georgia-school-calendars/<slug>')
+def school_calendar_detail(slug):
+    """Individual school district page with verified dates and PDF downloads."""
+    entity = SchoolEntity.query.filter_by(slug=slug, is_active=True).first_or_404()
+
+    # Get verified holidays grouped by school year
+    holidays_by_year = {}
+    holidays = VerifiedHoliday.query.filter_by(school_entity_id=entity.id).order_by(
+        VerifiedHoliday.school_year.desc(),
+        VerifiedHoliday.start_date
+    ).all()
+
+    for holiday in holidays:
+        if holiday.school_year not in holidays_by_year:
+            holidays_by_year[holiday.school_year] = []
+        holidays_by_year[holiday.school_year].append(holiday)
+
+    # Get calendar files
+    calendar_files = CalendarFile.query.filter_by(school_entity_id=entity.id).order_by(
+        CalendarFile.school_year.desc()
+    ).all()
+
+    # Get available school years (sorted newest first)
+    available_years = sorted(holidays_by_year.keys(), reverse=True)
+
+    return render_template('school_calendar_detail.html',
+        entity=entity,
+        holidays_by_year=holidays_by_year,
+        calendar_files=calendar_files,
+        available_years=available_years
+    )
+
+
+@main.route('/download-calendar/<int:file_id>')
+def download_calendar(file_id):
+    """Download a calendar PDF file."""
+    from flask import send_from_directory, abort
+    import os
+
+    calendar_file = CalendarFile.query.get_or_404(file_id)
+
+    # Construct the full path
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(base_dir, calendar_file.file_path)
+
+    if not os.path.exists(file_path):
+        abort(404)
+
+    directory = os.path.dirname(file_path)
+    filename = os.path.basename(file_path)
+
+    return send_from_directory(directory, filename, as_attachment=True)
+
+
+@main.route('/api/school-holidays/<int:entity_id>')
+def api_school_holidays(entity_id):
+    """API endpoint to get verified holidays for a school entity."""
+    entity = SchoolEntity.query.get_or_404(entity_id)
+
+    # Get verified holidays for this school
+    holidays = VerifiedHoliday.query.filter_by(school_entity_id=entity.id).order_by(
+        VerifiedHoliday.school_year.desc(),
+        VerifiedHoliday.start_date
+    ).all()
+
+    # Group by school year
+    holidays_by_year = {}
+    for holiday in holidays:
+        if holiday.school_year not in holidays_by_year:
+            holidays_by_year[holiday.school_year] = []
+        holidays_by_year[holiday.school_year].append({
+            'name': holiday.name,
+            'start_date': holiday.start_date.isoformat(),
+            'end_date': holiday.end_date.isoformat()
+        })
+
+    return jsonify({
+        'success': True,
+        'entity_id': entity.id,
+        'district_name': entity.district_name,
+        'county': entity.county,
+        'holidays_by_year': holidays_by_year
+    })
+
+
+@main.route('/api/school-entities')
+def api_school_entities():
+    """API endpoint to list all school entities with verified holidays."""
+    entities = SchoolEntity.query.filter_by(is_active=True).order_by(
+        SchoolEntity.county,
+        SchoolEntity.district_name
+    ).all()
+
+    result = []
+    for entity in entities:
+        # Check if this entity has any verified holidays
+        holiday_count = VerifiedHoliday.query.filter_by(school_entity_id=entity.id).count()
+        if holiday_count > 0:
+            result.append({
+                'id': entity.id,
+                'district_name': entity.district_name,
+                'county': entity.county,
+                'holiday_count': holiday_count
+            })
+
+    return jsonify({
+        'success': True,
+        'entities': result
+    })
+
+
 @main.route('/sitemap.xml', endpoint='sitemap_xml')
 def sitemap_xml():
     """Generate XML sitemap for SEO."""
     from flask import make_response
     import datetime
-    
+
     base_url = request.url_root.rstrip('/')
-    
+
     pages = [
         {'loc': '/', 'priority': '1.0', 'changefreq': 'weekly'},
         {'loc': '/ai-calendar', 'priority': '0.9', 'changefreq': 'weekly'},
+        {'loc': '/georgia-school-calendars', 'priority': '0.9', 'changefreq': 'weekly'},
         {'loc': '/user-guide', 'priority': '0.8', 'changefreq': 'monthly'},
         {'loc': '/technical-docs', 'priority': '0.6', 'changefreq': 'monthly'},
         {'loc': '/privacy-policy', 'priority': '0.3', 'changefreq': 'yearly'},
@@ -3589,10 +3710,20 @@ def sitemap_xml():
         {'loc': '/login', 'priority': '0.4', 'changefreq': 'monthly'},
         {'loc': '/register', 'priority': '0.4', 'changefreq': 'monthly'},
     ]
-    
+
+    # Add individual school calendar pages dynamically
+    school_entities = SchoolEntity.query.filter_by(is_active=True).all()
+    for entity in school_entities:
+        if entity.slug:
+            pages.append({
+                'loc': f'/georgia-school-calendars/{entity.slug}',
+                'priority': '0.8',
+                'changefreq': 'monthly'
+            })
+
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    
+
     for page in pages:
         xml += '  <url>\n'
         xml += f'    <loc>{base_url}{page["loc"]}</loc>\n'
@@ -3600,9 +3731,9 @@ def sitemap_xml():
         xml += f'    <changefreq>{page["changefreq"]}</changefreq>\n'
         xml += f'    <priority>{page["priority"]}</priority>\n'
         xml += '  </url>\n'
-    
+
     xml += '</urlset>'
-    
+
     response = make_response(xml)
     response.headers['Content-Type'] = 'application/xml'
     return response
@@ -3624,6 +3755,7 @@ def robots_txt():
     content = f"""User-agent: *
 Allow: /
 Allow: /ai-calendar
+Allow: /georgia-school-calendars
 Allow: /user-guide
 Allow: /technical-docs
 Allow: /privacy-policy

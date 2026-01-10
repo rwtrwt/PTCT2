@@ -1,0 +1,674 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ entity.district_name }} | Admin{% endblock %}
+
+{% block extra_head %}
+<style>
+    .admin-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .page-header h1 {
+        margin: 0;
+        color: #1e3a5f;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-size: 0.9rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: #2c5282;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #1e3a5f;
+    }
+
+    .btn-secondary {
+        background: #e2e8f0;
+        color: #333;
+    }
+
+    .btn-secondary:hover {
+        background: #cbd5e0;
+    }
+
+    .btn-danger {
+        background: #dc2626;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #b91c1c;
+    }
+
+    .btn-success {
+        background: #059669;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: #047857;
+    }
+
+    .section {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+        border-radius: 8px 8px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-header h2 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #1e3a5f;
+    }
+
+    .section-body {
+        padding: 1.25rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #374151;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.95rem;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #2c5282;
+        box-shadow: 0 0 0 3px rgba(44, 82, 130, 0.1);
+    }
+
+    .form-actions {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .year-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .year-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: #f1f5f9;
+        border-radius: 6px;
+        margin-bottom: 0.75rem;
+    }
+
+    .year-header h3 {
+        margin: 0;
+        font-size: 1rem;
+        color: #1e3a5f;
+    }
+
+    .holidays-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .holidays-table th {
+        text-align: left;
+        padding: 0.5rem;
+        background: #f8fafc;
+        font-weight: 500;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .holidays-table td {
+        padding: 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .holidays-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .holidays-table input {
+        width: 100%;
+        padding: 0.375rem 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .holidays-table .name-col {
+        width: 35%;
+    }
+
+    .holidays-table .date-col {
+        width: 25%;
+    }
+
+    .holidays-table .actions-col {
+        width: 15%;
+        text-align: center;
+    }
+
+    .btn-icon {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .files-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .files-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .files-list li:last-child {
+        border-bottom: none;
+    }
+
+    .file-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .file-icon {
+        width: 36px;
+        height: 36px;
+        background: #dc2626;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.7rem;
+        font-weight: bold;
+    }
+
+    .alert {
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+    }
+
+    .alert-success {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+
+    .alert-error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    .add-holiday-form {
+        background: #f8fafc;
+        padding: 1rem;
+        border-radius: 6px;
+        margin-top: 1rem;
+        display: none;
+    }
+
+    .add-holiday-form.show {
+        display: block;
+    }
+
+    .inline-form {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+
+    .inline-form .form-group {
+        margin-bottom: 0;
+    }
+
+    .inline-form .form-group.flex-1 {
+        flex: 1;
+        min-width: 150px;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .holidays-table {
+            font-size: 0.85rem;
+        }
+
+        .holidays-table input {
+            font-size: 0.85rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="page-header">
+        <h1>Edit: {{ entity.district_name }}</h1>
+        <div class="header-actions">
+            <a href="{{ url_for('main.school_calendar_detail', slug=entity.slug) }}" class="btn btn-secondary" target="_blank">View Public Page</a>
+            <a href="{{ url_for('admin.school_calendars') }}" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+
+    <div id="alertContainer"></div>
+
+    <!-- School Information Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2>School Information</h2>
+        </div>
+        <div class="section-body">
+            <form id="schoolInfoForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>District Name</label>
+                        <input type="text" name="district_name" value="{{ entity.district_name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>County</label>
+                        <input type="text" name="county" value="{{ entity.county or '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Official Website</label>
+                        <input type="url" name="official_website" value="{{ entity.official_website or '' }}" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label>Calendar Page URL</label>
+                        <input type="url" name="calendar_page_url" value="{{ entity.calendar_page_url or '' }}" placeholder="https://...">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save School Info</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Holidays Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Verified Holidays</h2>
+            <button class="btn btn-success" onclick="toggleAddHolidayForm()">+ Add Holiday</button>
+        </div>
+        <div class="section-body">
+            <!-- Add Holiday Form -->
+            <div id="addHolidayForm" class="add-holiday-form">
+                <form onsubmit="addHoliday(event)">
+                    <div class="inline-form">
+                        <div class="form-group">
+                            <label>School Year</label>
+                            <select name="school_year" required>
+                                <option value="2025-2026">2025-2026</option>
+                                <option value="2026-2027">2026-2027</option>
+                                <option value="2027-2028">2027-2028</option>
+                                <option value="2028-2029">2028-2029</option>
+                            </select>
+                        </div>
+                        <div class="form-group flex-1">
+                            <label>Holiday Name</label>
+                            <input type="text" name="name" placeholder="e.g., Labor Day" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Start Date</label>
+                            <input type="date" name="start_date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>End Date</label>
+                            <input type="date" name="end_date" required>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-success">Add</button>
+                            <button type="button" class="btn btn-secondary" onclick="toggleAddHolidayForm()">Cancel</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            {% if holidays_by_year %}
+                {% for year, holidays in holidays_by_year.items() %}
+                <div class="year-section">
+                    <div class="year-header">
+                        <h3>{{ year }}</h3>
+                        <span>{{ holidays|length }} holidays</span>
+                    </div>
+                    <table class="holidays-table">
+                        <thead>
+                            <tr>
+                                <th class="name-col">Holiday Name</th>
+                                <th class="date-col">Start Date</th>
+                                <th class="date-col">End Date</th>
+                                <th class="actions-col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for holiday in holidays %}
+                            <tr data-holiday-id="{{ holiday.id }}">
+                                <td>
+                                    <input type="text" value="{{ holiday.name }}" data-field="name">
+                                </td>
+                                <td>
+                                    <input type="date" value="{{ holiday.start_date.strftime('%Y-%m-%d') }}" data-field="start_date">
+                                </td>
+                                <td>
+                                    <input type="date" value="{{ holiday.end_date.strftime('%Y-%m-%d') }}" data-field="end_date">
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary btn-icon" onclick="updateHoliday({{ holiday.id }}, this)" title="Save">Save</button>
+                                    <button class="btn btn-danger btn-icon" onclick="deleteHoliday({{ holiday.id }}, this)" title="Delete">Del</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="text-align: center; color: #666; padding: 2rem;">No holidays added yet. Click "Add Holiday" to get started.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Calendar Files Section -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Calendar Files</h2>
+            <button class="btn btn-success" onclick="toggleUploadForm()">+ Upload File</button>
+        </div>
+        <div class="section-body">
+            <!-- Upload Form -->
+            <div id="uploadFileForm" class="add-holiday-form">
+                <form id="calendarUploadForm" enctype="multipart/form-data">
+                    <div class="inline-form">
+                        <div class="form-group">
+                            <label>School Year</label>
+                            <select name="school_year" required>
+                                <option value="2024-2025">2024-2025</option>
+                                <option value="2025-2026" selected>2025-2026</option>
+                                <option value="2026-2027">2026-2027</option>
+                                <option value="2027-2028">2027-2028</option>
+                                <option value="2028-2029">2028-2029</option>
+                                <option value="2029-2030">2029-2030</option>
+                            </select>
+                        </div>
+                        <div class="form-group flex-1">
+                            <label>Calendar File (PDF, PNG, JPG)</label>
+                            <input type="file" name="file" accept=".pdf,.png,.jpg,.jpeg" required>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-success" id="uploadBtn">Upload</button>
+                            <button type="button" class="btn btn-secondary" onclick="toggleUploadForm()">Cancel</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            {% if calendar_files %}
+            <ul class="files-list" id="filesList">
+                {% for file in calendar_files %}
+                <li data-file-id="{{ file.id }}">
+                    <div class="file-info">
+                        <div class="file-icon">{{ file.file_type|upper }}</div>
+                        <div>
+                            <strong>{{ file.school_year }}</strong><br>
+                            <small>{{ file.filename }}</small>
+                            {% if file.file_size %}
+                            <small style="color: #999;"> ({{ (file.file_size / 1024)|round(1) }} KB)</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <a href="{{ url_for('main.download_calendar', file_id=file.id) }}" class="btn btn-secondary btn-icon">Download</a>
+                        <button class="btn btn-danger btn-icon" onclick="deleteFile({{ file.id }})">Delete</button>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+                <p id="noFilesMsg" style="text-align: center; color: #666; padding: 2rem;">No calendar files uploaded yet. Click "Upload File" to add one.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const entityId = {{ entity.id }};
+
+function showAlert(message, type) {
+    const container = document.getElementById('alertContainer');
+    container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+    setTimeout(() => container.innerHTML = '', 3000);
+}
+
+function toggleAddHolidayForm() {
+    document.getElementById('addHolidayForm').classList.toggle('show');
+}
+
+// Save school info
+document.getElementById('schoolInfoForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+        const response = await fetch(`/admin/school-calendars/${entityId}/update`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        if (result.success) {
+            showAlert('School information saved successfully!', 'success');
+        } else {
+            showAlert('Error: ' + result.error, 'error');
+        }
+    } catch (err) {
+        showAlert('Error saving school information', 'error');
+    }
+});
+
+// Add holiday
+async function addHoliday(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+        const response = await fetch(`/admin/school-calendars/${entityId}/holidays`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        if (result.success) {
+            showAlert('Holiday added successfully!', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showAlert('Error: ' + result.error, 'error');
+        }
+    } catch (err) {
+        showAlert('Error adding holiday', 'error');
+    }
+}
+
+// Update holiday
+async function updateHoliday(holidayId, btn) {
+    const row = btn.closest('tr');
+    const data = {
+        name: row.querySelector('[data-field="name"]').value,
+        start_date: row.querySelector('[data-field="start_date"]').value,
+        end_date: row.querySelector('[data-field="end_date"]').value
+    };
+
+    try {
+        const response = await fetch(`/admin/school-calendars/holidays/${holidayId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        if (result.success) {
+            showAlert('Holiday updated!', 'success');
+        } else {
+            showAlert('Error: ' + result.error, 'error');
+        }
+    } catch (err) {
+        showAlert('Error updating holiday', 'error');
+    }
+}
+
+// Delete holiday
+async function deleteHoliday(holidayId, btn) {
+    if (!confirm('Are you sure you want to delete this holiday?')) return;
+
+    try {
+        const response = await fetch(`/admin/school-calendars/holidays/${holidayId}`, {
+            method: 'DELETE'
+        });
+        const result = await response.json();
+        if (result.success) {
+            btn.closest('tr').remove();
+            showAlert('Holiday deleted!', 'success');
+        } else {
+            showAlert('Error: ' + result.error, 'error');
+        }
+    } catch (err) {
+        showAlert('Error deleting holiday', 'error');
+    }
+}
+
+// Toggle upload form
+function toggleUploadForm() {
+    document.getElementById('uploadFileForm').classList.toggle('show');
+}
+
+// Upload calendar file
+document.getElementById('calendarUploadForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const uploadBtn = document.getElementById('uploadBtn');
+    uploadBtn.disabled = true;
+    uploadBtn.textContent = 'Uploading...';
+
+    try {
+        const response = await fetch(`/admin/school-calendars/${entityId}/upload`, {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+        if (result.success) {
+            showAlert('File uploaded successfully!', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showAlert('Error: ' + result.error, 'error');
+        }
+    } catch (err) {
+        showAlert('Error uploading file', 'error');
+    } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = 'Upload';
+    }
+});
+
+// Delete calendar file
+async function deleteFile(fileId) {
+    if (!confirm('Are you sure you want to delete this file?')) return;
+
+    try {
+        const response = await fetch(`/admin/school-calendars/files/${fileId}`, {
+            method: 'DELETE'
+        });
+        const result = await response.json();
+        if (result.success) {
+            const li = document.querySelector(`li[data-file-id="${fileId}"]`);
+            if (li) li.remove();
+            showAlert('File deleted!', 'success');
+
+            // Show "no files" message if list is empty
+            const filesList = document.getElementById('filesList');
+            if (filesList && filesList.children.length === 0) {
+                filesList.outerHTML = '<p id="noFilesMsg" style="text-align: center; color: #666; padding: 2rem;">No calendar files uploaded yet. Click "Upload File" to add one.</p>';
+            }
+        } else {
+            showAlert('Error: ' + result.error, 'error');
+        }
+    } catch (err) {
+        showAlert('Error deleting file', 'error');
+    }
+}
+</script>
+{% endblock %}

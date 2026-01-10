@@ -33,23 +33,29 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user:
+            # Check Stripe subscription status (skip if no API key configured)
             stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
-            customers = stripe.Customer.list(email=user.email)
-            print("user.email",user.email)
-            print("customers",customers)
+            if stripe.api_key:
+                try:
+                    customers = stripe.Customer.list(email=user.email)
+                    print("user.email",user.email)
+                    print("customers",customers)
 
-            user.subscription_type = 'free'
-        
-        
-            if customers.data:
-                customer = customers.data[0]  # Get the first matching customer
-                subscriptions = stripe.Subscription.list(customer=customer.id, status='active')
-                
-                # If an active subscription exists, set subscription_type to 'paid'
-                if subscriptions.data:
-                    user.subscription_type = 'paid'
+                    user.subscription_type = 'free'
 
-            db.session.commit()
+                    if customers.data:
+                        customer = customers.data[0]  # Get the first matching customer
+                        subscriptions = stripe.Subscription.list(customer=customer.id, status='active')
+
+                        # If an active subscription exists, set subscription_type to 'paid'
+                        if subscriptions.data:
+                            user.subscription_type = 'paid'
+
+                    db.session.commit()
+                except Exception as e:
+                    print(f"Stripe check skipped: {e}")
+            else:
+                print("Stripe API key not configured - skipping subscription check")
                 
         if user and user.check_password(password):
             

@@ -7,3 +7,7 @@ build/
 .cache/
 .DS_Store
 attached_assets/
+venv/
+__pycache__/
+*.pyc
+instance/*.db

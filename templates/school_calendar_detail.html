@@ -1,0 +1,368 @@
+{% extends "base.html" %}
+
+{% block title %}{{ entity.district_name }} Calendar {% if available_years %}{{ available_years[0] }}{% endif %} | Download PDF | Georgia School Calendars{% endblock %}
+
+{% block meta_description %}Download the official {{ entity.district_name }} school calendar. View verified holiday dates, breaks, and important dates for {% if available_years %}{{ available_years|join(', ') }}{% endif %}. Free PDF download.{% endblock %}
+
+{% block og_title %}{{ entity.district_name }} School Calendar{% endblock %}
+{% block og_description %}Official {{ entity.district_name }} calendar with verified holiday dates and PDF downloads for {% if available_years %}{{ available_years|join(', ') }}{% endif %}.{% endblock %}
+
+{% block extra_head %}
+<style>
+    .school-hero {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .school-hero-content {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .breadcrumb {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin-bottom: 1rem;
+    }
+
+    .breadcrumb a {
+        color: white;
+        text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    .school-hero h1 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .school-county {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .official-links {
+        margin-top: 1rem;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .official-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(255,255,255,0.15);
+        border-radius: 6px;
+        color: white;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: background 0.2s;
+    }
+
+    .official-link:hover {
+        background: rgba(255,255,255,0.25);
+    }
+
+    .content-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 1rem 2rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        color: #1e3a5f;
+        margin: 2rem 0 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .downloads-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .download-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .download-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border-color: #2c5282;
+    }
+
+    .download-icon {
+        width: 48px;
+        height: 48px;
+        background: #dc2626;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    .download-icon.image {
+        background: #059669;
+    }
+
+    .download-info h3 {
+        margin: 0 0 0.25rem;
+        font-size: 1rem;
+        color: #1e3a5f;
+    }
+
+    .download-info p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .year-section {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .year-header {
+        font-size: 1.25rem;
+        color: #1e3a5f;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .holidays-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .holidays-table th {
+        background: #1e3a5f;
+        color: white;
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-weight: 600;
+    }
+
+    .holidays-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .holidays-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .holidays-table tr:hover td {
+        background: #f8fafc;
+    }
+
+    .holiday-name {
+        font-weight: 500;
+    }
+
+    .holiday-dates {
+        color: #666;
+    }
+
+    .verified-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        background: #dcfce7;
+        color: #166534;
+        padding: 0.125rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .no-data {
+        text-align: center;
+        padding: 2rem;
+        color: #666;
+        font-style: italic;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #2c5282;
+        text-decoration: none;
+        font-weight: 500;
+        margin-top: 2rem;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+        .school-hero h1 {
+            font-size: 1.5rem;
+        }
+
+        .downloads-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .holidays-table {
+            font-size: 0.9rem;
+        }
+
+        .holidays-table th,
+        .holidays-table td {
+            padding: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="school-hero">
+    <div class="school-hero-content">
+        <div class="breadcrumb">
+            <a href="{{ url_for('main.school_calendars_index') }}">Georgia School Calendars</a> / {{ entity.county or 'Georgia' }}
+        </div>
+        <h1>{{ entity.district_name }} Calendar</h1>
+        {% if entity.county %}
+        <div class="school-county">{{ entity.county }} County, Georgia</div>
+        {% endif %}
+        <div class="official-links">
+            {% if entity.official_website %}
+            <a href="{{ entity.official_website }}" target="_blank" rel="noopener" class="official-link">
+                Official Website
+            </a>
+            {% endif %}
+            {% if entity.calendar_page_url %}
+            <a href="{{ entity.calendar_page_url }}" target="_blank" rel="noopener" class="official-link">
+                Official Calendar Page
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="content-container">
+    {% if calendar_files %}
+    <h2 class="section-title">Download Official Calendars</h2>
+    <div class="downloads-grid">
+        {% for file in calendar_files %}
+        <a href="{{ url_for('main.download_calendar', file_id=file.id) }}" class="download-card">
+            <div class="download-icon {% if file.file_type != 'pdf' %}image{% endif %}">
+                {{ file.file_type|upper }}
+            </div>
+            <div class="download-info">
+                <h3>{{ file.school_year }} Calendar</h3>
+                <p>{{ file.filename }}</p>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <h2 class="section-title">Verified Holiday Dates</h2>
+
+    {% if holidays_by_year %}
+        {% for year, holidays in holidays_by_year.items() %}
+        <div class="year-section">
+            <div class="year-header">{{ year }} School Year</div>
+            <table class="holidays-table">
+                <thead>
+                    <tr>
+                        <th>Holiday / Break</th>
+                        <th>Dates</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for holiday in holidays %}
+                    <tr>
+                        <td class="holiday-name">{{ holiday.name }}</td>
+                        <td class="holiday-dates">
+                            {% if holiday.start_date == holiday.end_date %}
+                                {{ holiday.start_date.strftime('%B %d, %Y') }}
+                            {% else %}
+                                {{ holiday.start_date.strftime('%B %d') }} - {{ holiday.end_date.strftime('%B %d, %Y') }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="verified-badge">Verified</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-data">
+            No verified holiday dates available yet. Check back soon or download the official calendar PDF above.
+        </div>
+    {% endif %}
+
+    <a href="{{ url_for('main.school_calendars_index') }}" class="back-link">
+        &larr; Back to All Georgia Schools
+    </a>
+</div>
+
+<!-- Schema.org structured data for SEO -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "EducationalOrganization",
+    "name": "{{ entity.district_name }}",
+    "url": "{{ request.url }}",
+    {% if entity.official_website %}
+    "sameAs": "{{ entity.official_website }}",
+    {% endif %}
+    "address": {
+        "@type": "PostalAddress",
+        "addressRegion": "GA"{% if entity.county %},
+        "addressLocality": "{{ entity.county }}"{% endif %}
+    },
+    "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "School Calendars",
+        "itemListElement": [
+            {% for file in calendar_files %}
+            {
+                "@type": "Offer",
+                "itemOffered": {
+                    "@type": "DigitalDocument",
+                    "name": "{{ entity.district_name }} {{ file.school_year }} Calendar",
+                    "encodingFormat": "application/pdf"
+                }
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]
+    }
+}
+</script>
+{% endblock %}

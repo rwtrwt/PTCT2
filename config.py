@@ -6,16 +6,25 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL',
                                              'sqlite:///mydatabase.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_pre_ping': True,
-        'pool_recycle': 300,
-        'connect_args': {
-            'keepalives': 1,
-            'keepalives_idle': 60,
-            'keepalives_interval': 10,
-            'keepalives_count': 10,
+
+    # PostgreSQL-specific options (keepalives) only apply when using PostgreSQL
+    _db_uri = os.environ.get('DATABASE_URL', '')
+    if _db_uri.startswith('postgres'):
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            'pool_pre_ping': True,
+            'pool_recycle': 300,
+            'connect_args': {
+                'keepalives': 1,
+                'keepalives_idle': 60,
+                'keepalives_interval': 10,
+                'keepalives_count': 10,
+            }
         }
-    }
+    else:
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            'pool_pre_ping': True,
+            'pool_recycle': 300,
+        }
     STRIPE_PUBLIC_KEY = 'pk_live_51Q087G08Qtnm286sDsQqxjqso3o6UvzZuiCCQ1Fz47zHrnjEdkNe76dx403WAFZU48mRQXKeQGCYo8iRM79NWzcP00WGBoBX4J'
     STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
 
@@ -29,6 +38,6 @@ class Config:
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS',
                                   'true').lower() in ['true', 'on', '1']
     MAIL_USERNAME = "parentingtimepro@gmail.com"
-    MAIL_PASSWORD = 'cprmjkhxgscevreo'
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER',
                                          "parentingtimepro@gmail.com")

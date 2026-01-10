@@ -1,9 +1,11 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, make_response
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, make_response, current_app
 from flask_login import login_required, current_user
-from models import User, SchoolEntity, SchoolCalendar
+from models import User, SchoolEntity, VerifiedHoliday, CalendarFile
 from extensions import db
 from datetime import datetime
+from werkzeug.utils import secure_filename
 import json
+import os
 
 admin = Blueprint('admin', __name__)
 
@@ -58,19 +60,17 @@ def school_calendars():
     entities_paginated = entities_query.paginate(page=page, per_page=per_page, error_out=False)
     
     total_entities = SchoolEntity.query.count()
-    total_calendars = SchoolCalendar.query.count()
     public_districts = SchoolEntity.query.filter_by(entity_type='public_district').count()
     private_schools = SchoolEntity.query.filter_by(entity_type='private_school').count()
-    
+
     all_entities = SchoolEntity.query.order_by(SchoolEntity.district_name).all()
-    
+
     return render_template('admin_school_calendars.html',
         entities=entities_paginated.items,
         all_entities=all_entities,
         page=page,
         total_pages=entities_paginated.pages,
         total_entities=total_entities,
-        total_calendars=total_calendars,
         public_districts=public_districts,
         private_schools=private_schools
     )
@@ -141,10 +141,16 @@ def update_entity(entity_id):
         
         if 'county' in data:
             entity.county = data['county'].strip() or None
-        
+
+        if 'official_website' in data:
+            entity.official_website = data['official_website'].strip() or None
+
+        if 'calendar_page_url' in data:
+            entity.calendar_page_url = data['calendar_page_url'].strip() or None
+
         entity.updated_at = datetime.utcnow()
         db.session.commit()
-        
+
         return jsonify({'success': True})
     except Exception as e:
         db.session.rollback()
@@ -157,196 +163,262 @@ def delete_entity(entity_id):
     """Delete a school entity and all its calendars."""
     if not current_user.is_admin:
         return jsonify({'success': False, 'error': 'Unauthorized'}), 403
-    
+
     try:
         entity = SchoolEntity.query.get_or_404(entity_id)
-        
-        SchoolCalendar.query.filter_by(school_entity_id=entity_id).delete()
         db.session.delete(entity)
         db.session.commit()
-        
+
         return jsonify({'success': True})
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@admin.route('/admin/school-calendars/calendar/<int:calendar_id>/json')
+@admin.route('/admin/school-calendars/<int:entity_id>/edit')
 @login_required
-def get_calendar_json(calendar_id):
-    """Get calendar analysis JSON."""
+def edit_school_calendar(entity_id):
+    """Edit page for a school entity and its holidays."""
     if not current_user.is_admin:
-        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
-    
-    calendar = SchoolCalendar.query.get_or_404(calendar_id)
-    
-    try:
-        analysis = json.loads(calendar.analysis_json) if calendar.analysis_json else {}
-        return jsonify({'success': True, 'analysis': analysis})
-    except:
-        return jsonify({'success': True, 'analysis': {}})
-
-
-@admin.route('/admin/school-calendars/calendar/<int:calendar_id>/download')
-@login_required
-def download_calendar_json(calendar_id):
-    """Download calendar analysis JSON as file."""
-    if not current_user.is_admin:
-        flash('Unauthorized')
+        flash('You do not have permission to access this page.')
         return redirect(url_for('main.home'))
-    
-    calendar = SchoolCalendar.query.get_or_404(calendar_id)
-    
-    try:
-        analysis = json.loads(calendar.analysis_json) if calendar.analysis_json else {}
-    except:
-        analysis = {}
-    
-    response = make_response(json.dumps(analysis, indent=2))
-    filename = f"{calendar.school_entity.district_name.replace(' ', '_')}_{calendar.school_year}_analysis.json"
-    response.headers['Content-Type'] = 'application/json'
-    response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
-    
-    return response
+
+    entity = SchoolEntity.query.get_or_404(entity_id)
+
+    # Get holidays grouped by school year
+    holidays_by_year = {}
+    holidays = VerifiedHoliday.query.filter_by(school_entity_id=entity.id).order_by(
+        VerifiedHoliday.school_year.desc(),
+        VerifiedHoliday.start_date
+    ).all()
+
+    for holiday in holidays:
+        if holiday.school_year not in holidays_by_year:
+            holidays_by_year[holiday.school_year] = []
+        holidays_by_year[holiday.school_year].append(holiday)
+
+    # Get calendar files
+    calendar_files = CalendarFile.query.filter_by(school_entity_id=entity.id).order_by(
+        CalendarFile.school_year.desc()
+    ).all()
+
+    available_years = sorted(holidays_by_year.keys(), reverse=True) if holidays_by_year else []
+
+    return render_template('admin_edit_school.html',
+        entity=entity,
+        holidays_by_year=holidays_by_year,
+        calendar_files=calendar_files,
+        available_years=available_years
+    )
 
 
-@admin.route('/admin/school-calendars/calendar/<int:calendar_id>', methods=['DELETE'])
+@admin.route('/admin/school-calendars/<int:entity_id>/update', methods=['POST'])
 @login_required
-def delete_calendar(calendar_id):
-    """Delete a calendar."""
+def update_school_info(entity_id):
+    """Update school entity information."""
     if not current_user.is_admin:
         return jsonify({'success': False, 'error': 'Unauthorized'}), 403
-    
+
     try:
-        calendar = SchoolCalendar.query.get_or_404(calendar_id)
-        db.session.delete(calendar)
-        db.session.commit()
-        
-        return jsonify({'success': True})
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-
-@admin.route('/admin/school-calendars/calendar/<int:calendar_id>/reassign', methods=['POST'])
-@login_required
-def reassign_calendar(calendar_id):
-    """Reassign a calendar to a different entity."""
-    if not current_user.is_admin:
-        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
-    
-    try:
-        data = request.get_json()
-        new_entity_id = data.get('new_entity_id')
-        
-        if not new_entity_id:
-            return jsonify({'success': False, 'error': 'New entity ID is required'}), 400
-        
-        calendar = SchoolCalendar.query.get_or_404(calendar_id)
-        new_entity = SchoolEntity.query.get_or_404(new_entity_id)
-        
-        existing = SchoolCalendar.query.filter_by(
-            school_entity_id=new_entity_id,
-            school_year=calendar.school_year
-        ).first()
-        
-        if existing and existing.id != calendar_id:
-            return jsonify({'success': False, 'error': f'A calendar for {calendar.school_year} already exists for this entity'}), 400
-        
-        calendar.school_entity_id = new_entity_id
-        calendar.updated_at = datetime.utcnow()
-        db.session.commit()
-        
-        return jsonify({'success': True})
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-
-@admin.route('/admin/school-calendars/upload', methods=['POST'])
-@login_required
-def admin_upload_calendar():
-    """Admin upload of a new calendar."""
-    if not current_user.is_admin:
-        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
-    
-    try:
-        entity_id = request.form.get('entity_id')
-        school_year = request.form.get('school_year', '').strip()
-        analyze = request.form.get('analyze') == 'on'
-        
-        if not entity_id or not school_year:
-            return jsonify({'success': False, 'error': 'Entity and school year are required'}), 400
-        
-        if 'file' not in request.files:
-            return jsonify({'success': False, 'error': 'No file uploaded'}), 400
-        
-        file = request.files['file']
-        if file.filename == '' or not file.filename.lower().endswith('.pdf'):
-            return jsonify({'success': False, 'error': 'Valid PDF file is required'}), 400
-        
         entity = SchoolEntity.query.get_or_404(entity_id)
-        
-        existing = SchoolCalendar.query.filter_by(
-            school_entity_id=entity_id,
-            school_year=school_year
-        ).first()
-        
-        pdf_bytes = file.read()
-        
-        import hashlib
-        file_hash = hashlib.sha256(pdf_bytes).hexdigest()
-        
-        analysis_json = None
-        status = 'uploaded'
-        
-        if analyze:
-            try:
-                from main import extract_text_from_pdf, extract_calendar_shading, analyze_school_calendar_two_pass, infer_missing_years
-                
-                extracted_text, is_scanned = extract_text_from_pdf(pdf_bytes)
-                shading_info = extract_calendar_shading(pdf_bytes)
-                calendar_result = analyze_school_calendar_two_pass(extracted_text, shading_info)
-                calendar_result = infer_missing_years(calendar_result)
-                
-                calendar_result['_meta'] = {
-                    'wasScanned': is_scanned,
-                    'textLength': len(extracted_text),
-                    'extractedAt': datetime.now().isoformat(),
-                    'uploadedByAdmin': True
-                }
-                
-                analysis_json = json.dumps(calendar_result)
-                status = 'processed'
-            except Exception as e:
-                status = 'error'
-                analysis_json = json.dumps({'error': str(e)})
-        
-        if existing:
-            existing.source_filename = file.filename
-            existing.file_hash = file_hash
-            existing.analysis_json = analysis_json
-            existing.analysis_version = '2.0'
-            existing.analysis_generated_at = datetime.utcnow() if analyze else None
-            existing.status = status
-            existing.updated_at = datetime.utcnow()
-        else:
-            calendar = SchoolCalendar(
-                school_entity_id=entity_id,
-                school_year=school_year,
-                source_filename=file.filename,
-                file_hash=file_hash,
-                analysis_json=analysis_json,
-                analysis_version='2.0' if analyze else None,
-                analysis_generated_at=datetime.utcnow() if analyze else None,
-                uploaded_by_user_id=current_user.id,
-                status=status
-            )
-            db.session.add(calendar)
-        
+        data = request.get_json()
+
+        if 'district_name' in data and data['district_name'].strip():
+            entity.district_name = data['district_name'].strip()
+            entity.normalized_name = SchoolEntity.normalize_name(entity.district_name)
+            entity.slug = SchoolEntity.generate_slug(entity.district_name)
+
+        if 'county' in data:
+            entity.county = data['county'].strip() or None
+
+        if 'official_website' in data:
+            entity.official_website = data['official_website'].strip() or None
+
+        if 'calendar_page_url' in data:
+            entity.calendar_page_url = data['calendar_page_url'].strip() or None
+
+        entity.updated_at = datetime.utcnow()
         db.session.commit()
-        
+
+        return jsonify({'success': True, 'slug': entity.slug})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@admin.route('/admin/school-calendars/<int:entity_id>/holidays', methods=['POST'])
+@login_required
+def add_holiday(entity_id):
+    """Add a new holiday for a school entity."""
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+
+    try:
+        entity = SchoolEntity.query.get_or_404(entity_id)
+        data = request.get_json()
+
+        holiday = VerifiedHoliday(
+            school_entity_id=entity.id,
+            school_year=data['school_year'],
+            name=data['name'],
+            start_date=datetime.strptime(data['start_date'], '%Y-%m-%d').date(),
+            end_date=datetime.strptime(data['end_date'], '%Y-%m-%d').date()
+        )
+        db.session.add(holiday)
+        db.session.commit()
+
+        return jsonify({'success': True, 'holiday_id': holiday.id})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@admin.route('/admin/school-calendars/holidays/<int:holiday_id>', methods=['PUT'])
+@login_required
+def update_holiday(holiday_id):
+    """Update an existing holiday."""
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+
+    try:
+        holiday = VerifiedHoliday.query.get_or_404(holiday_id)
+        data = request.get_json()
+
+        if 'name' in data:
+            holiday.name = data['name']
+        if 'start_date' in data:
+            holiday.start_date = datetime.strptime(data['start_date'], '%Y-%m-%d').date()
+        if 'end_date' in data:
+            holiday.end_date = datetime.strptime(data['end_date'], '%Y-%m-%d').date()
+        if 'school_year' in data:
+            holiday.school_year = data['school_year']
+
+        holiday.updated_at = datetime.utcnow()
+        db.session.commit()
+
         return jsonify({'success': True})
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@admin.route('/admin/school-calendars/holidays/<int:holiday_id>', methods=['DELETE'])
+@login_required
+def delete_holiday(holiday_id):
+    """Delete a holiday."""
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+
+    try:
+        holiday = VerifiedHoliday.query.get_or_404(holiday_id)
+        db.session.delete(holiday)
+        db.session.commit()
+
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@admin.route('/admin/school-calendars/<int:entity_id>/upload', methods=['POST'])
+@login_required
+def upload_calendar_file(entity_id):
+    """Upload a calendar file for a school entity."""
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+
+    try:
+        entity = SchoolEntity.query.get_or_404(entity_id)
+
+        if 'file' not in request.files:
+            return jsonify({'success': False, 'error': 'No file provided'}), 400
+
+        file = request.files['file']
+        school_year = request.form.get('school_year', '').strip()
+
+        if not school_year:
+            return jsonify({'success': False, 'error': 'School year is required'}), 400
+
+        if file.filename == '':
+            return jsonify({'success': False, 'error': 'No file selected'}), 400
+
+        if not allowed_file(file.filename):
+            return jsonify({'success': False, 'error': 'File type not allowed. Use PDF, PNG, or JPG.'}), 400
+
+        # Determine file extension and type
+        file_ext = file.filename.rsplit('.', 1)[1].lower()
+        file_type = 'pdf' if file_ext == 'pdf' else file_ext
+
+        # Create folder structure: Official_Calendars/Public/{County}/
+        base_path = os.path.join(current_app.root_path, 'Official_Calendars', 'Public')
+        county_folder = entity.county if entity.county else 'Other'
+        folder_path = os.path.join(base_path, county_folder)
+
+        # Create folder if it doesn't exist
+        os.makedirs(folder_path, exist_ok=True)
+
+        # Generate filename: {DistrictName}{SchoolYear}.{ext}
+        safe_name = secure_filename(entity.district_name.replace(' ', ''))
+        filename = f"{safe_name}_{school_year.replace('-', '_')}.{file_ext}"
+        file_path = os.path.join(folder_path, filename)
+
+        # Save file
+        file.save(file_path)
+
+        # Get file size
+        file_size = os.path.getsize(file_path)
+
+        # Create database record
+        relative_path = os.path.join('Official_Calendars', 'Public', county_folder, filename)
+        calendar_file = CalendarFile(
+            school_entity_id=entity.id,
+            school_year=school_year,
+            filename=filename,
+            file_path=relative_path,
+            file_type=file_type,
+            file_size=file_size
+        )
+        db.session.add(calendar_file)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'file_id': calendar_file.id,
+            'filename': filename
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@admin.route('/admin/school-calendars/files/<int:file_id>', methods=['DELETE'])
+@login_required
+def delete_calendar_file(file_id):
+    """Delete a calendar file."""
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+
+    try:
+        calendar_file = CalendarFile.query.get_or_404(file_id)
+
+        # Try to delete the actual file
+        full_path = os.path.join(current_app.root_path, calendar_file.file_path)
+        if os.path.exists(full_path):
+            os.remove(full_path)
+
+        # Delete database record
+        db.session.delete(calendar_file)
+        db.session.commit()
+
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+

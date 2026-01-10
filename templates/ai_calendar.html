@@ -646,6 +646,25 @@
 .inferred-legend .inferred-symbol {
     font-style: normal;
 }
+.extracted-holiday-item.verified {
+    background: #ecfdf5;
+    border-left: 3px solid #10b981;
+}
+.verified-symbol {
+    color: #10b981;
+    font-size: 0.9rem;
+    margin-left: 5px;
+    cursor: help;
+}
+.verified-legend {
+    font-size: 0.85rem;
+    color: #6b7280;
+    font-style: italic;
+    margin-top: 10px;
+}
+.verified-legend .verified-symbol {
+    font-style: normal;
+}
 .holiday-name { font-weight: 500; }
 .holiday-dates { font-size: 0.85rem; color: #6b7280; }
 
@@ -1006,21 +1025,11 @@ input[type="date"].ai-adjusted {
         
         
         <div class="county-selector-section" id="countySelectorSection" style="display: none;">
-            <h4>County School Calendar</h4>
-            <select id="county-select">
-                <option value="barrow">Barrow</option>
-                <option value="bibb">Bibb</option>
-                <option value="cobb">Cobb</option>
-                <option value="dekalb">DeKalb</option>
-                <option value="forsyth">Forsyth</option>
-                <option value="fulton">Fulton</option>
-                <option value="gwinnett" selected>Gwinnett</option>
-                <option value="hall">Hall</option>
-                <option value="jackson">Jackson</option>
-                <option value="newton">Newton</option>
-                <option value="rockdale">Rockdale</option>
-                <option value="walton">Walton</option>
+            <h4>Select Your School District</h4>
+            <select id="school-select" style="min-width: 280px;">
+                <option value="">Loading schools...</option>
             </select>
+            <p id="schoolHolidaysStatus" style="margin-top: 10px; font-size: 0.85rem; color: #059669;"></p>
         </div>
     </div>
 
@@ -1260,7 +1269,7 @@ input[type="date"].ai-adjusted {
 
     <div class="break-section">
         <div class="break-card">
-            <h3>Christmas Break - EVEN YEARS</h3>
+            <h3>Christmas/Winter Break - EVEN YEARS</h3>
             <div class="radio-group">
                 <label><input type="radio" name="evenChristmasBreakParent" value="A" onchange="toggleSplitFields('evenChristmas')"> Parent A</label>
                 <label><input type="radio" name="evenChristmasBreakParent" value="B" onchange="toggleSplitFields('evenChristmas')"> Parent B</label>
@@ -1285,7 +1294,7 @@ input[type="date"].ai-adjusted {
             </div>
         </div>
         <div class="break-card">
-            <h3>Christmas Break - ODD YEARS</h3>
+            <h3>Christmas/Winter Break - ODD YEARS</h3>
             <div class="radio-group">
                 <label><input type="radio" name="oddChristmasBreakParent" value="A" onchange="toggleSplitFields('oddChristmas')"> Parent A</label>
                 <label><input type="radio" name="oddChristmasBreakParent" value="B" onchange="toggleSplitFields('oddChristmas')"> Parent B</label>
@@ -1319,7 +1328,7 @@ input[type="date"].ai-adjusted {
 
     <div class="break-section">
         <div class="break-card">
-            <h3>Winter Break - EVEN YEARS</h3>
+            <h3>February Winter Break - EVEN YEARS</h3>
             <div class="radio-group">
                 <label><input type="radio" name="evenWinterBreakParent" value="A"> Parent A</label>
                 <label><input type="radio" name="evenWinterBreakParent" value="B"> Parent B</label>
@@ -1331,7 +1340,7 @@ input[type="date"].ai-adjusted {
             </div>
         </div>
         <div class="break-card">
-            <h3>Winter Break - ODD YEARS</h3>
+            <h3>February Winter Break - ODD YEARS</h3>
             <div class="radio-group">
                 <label><input type="radio" name="oddWinterBreakParent" value="A"> Parent A</label>
                 <label><input type="radio" name="oddWinterBreakParent" value="B"> Parent B</label>
@@ -1346,7 +1355,7 @@ input[type="date"].ai-adjusted {
 
     <div class="break-section">
         <div class="break-card">
-            <h3>Other Break - EVEN YEARS</h3>
+            <h3>March/Other Break - EVEN YEARS</h3>
             <div class="radio-group">
                 <label><input type="radio" name="evenOtherBreakParent" value="A"> Parent A</label>
                 <label><input type="radio" name="evenOtherBreakParent" value="B"> Parent B</label>
@@ -1358,7 +1367,7 @@ input[type="date"].ai-adjusted {
             </div>
         </div>
         <div class="break-card">
-            <h3>Other Break - ODD YEARS</h3>
+            <h3>March/Other Break - ODD YEARS</h3>
             <div class="radio-group">
                 <label><input type="radio" name="oddOtherBreakParent" value="A"> Parent A</label>
                 <label><input type="radio" name="oddOtherBreakParent" value="B"> Parent B</label>
@@ -1610,18 +1619,186 @@ const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const DAY_MAP = { sunday: 0, monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6 };
 
+// Holiday definitions - dates are calculated dynamically
 const HOLIDAYS = [
-    { name: 'MLK Day Weekend', evenStart: '2026-01-16', evenEnd: '2026-01-19', oddStart: '2027-01-15', oddEnd: '2027-01-18' },
-    { name: "Presidents' Day Weekend", evenStart: '2026-02-13', evenEnd: '2026-02-16', oddStart: '2027-02-12', oddEnd: '2027-02-15' },
-    { name: 'Easter Weekend', evenStart: '2026-04-03', evenEnd: '2026-04-05', oddStart: '2027-03-26', oddEnd: '2027-03-28' },
-    { name: "Mother's Day Weekend", evenStart: '2026-05-08', evenEnd: '2026-05-10', oddStart: '2027-05-07', oddEnd: '2027-05-09' },
-    { name: 'Memorial Day Weekend', evenStart: '2026-05-22', evenEnd: '2026-05-25', oddStart: '2027-05-28', oddEnd: '2027-05-31' },
-    { name: "Father's Day Weekend", evenStart: '2026-06-19', evenEnd: '2026-06-21', oddStart: '2027-06-18', oddEnd: '2027-06-20' },
-    { name: 'Fourth of July', evenStart: '2026-07-03', evenEnd: '2026-07-05', oddStart: '2027-07-03', oddEnd: '2027-07-05' },
-    { name: 'Labor Day Weekend', evenStart: '2026-09-04', evenEnd: '2026-09-07', oddStart: '2027-09-03', oddEnd: '2027-09-06' },
-    { name: 'Halloween', evenStart: '2026-10-31', evenEnd: '2026-11-01', oddStart: '2027-10-31', oddEnd: '2027-11-01' },
-    { name: 'Veterans Day', evenStart: '2026-11-06', evenEnd: '2026-11-11', oddStart: '2027-11-05', oddEnd: '2027-11-11' }
+    { name: 'MLK Day Weekend', type: 'mlk' },
+    { name: "Presidents' Day Weekend", type: 'presidents' },
+    { name: 'Easter Weekend', type: 'easter' },
+    { name: "Mother's Day Weekend", type: 'mothers' },
+    { name: 'Memorial Day Weekend', type: 'memorial' },
+    { name: "Father's Day Weekend", type: 'fathers' },
+    { name: 'Fourth of July', type: 'july4' },
+    { name: 'Labor Day Weekend', type: 'labor' },
+    { name: 'Halloween', type: 'halloween' },
+    { name: 'Veterans Day', type: 'veterans' }
 ];
+
+// Calculate the actual date of each holiday for a given year
+function getHolidayDate(type, year) {
+    switch (type) {
+        case 'mlk': // 3rd Monday of January
+            return getNthWeekdayOfMonth(year, 0, 1, 3);
+        case 'presidents': // 3rd Monday of February
+            return getNthWeekdayOfMonth(year, 1, 1, 3);
+        case 'easter': // Complex calculation
+            return getEasterDate(year);
+        case 'mothers': // 2nd Sunday of May
+            return getNthWeekdayOfMonth(year, 4, 0, 2);
+        case 'memorial': // Last Monday of May
+            return getLastWeekdayOfMonth(year, 4, 1);
+        case 'fathers': // 3rd Sunday of June
+            return getNthWeekdayOfMonth(year, 5, 0, 3);
+        case 'july4': // July 4th
+            return new Date(year, 6, 4);
+        case 'labor': // 1st Monday of September
+            return getNthWeekdayOfMonth(year, 8, 1, 1);
+        case 'halloween': // October 31st
+            return new Date(year, 9, 31);
+        case 'veterans': // November 11th
+            return new Date(year, 10, 11);
+        default:
+            return null;
+    }
+}
+
+// Get the last occurrence of a weekday in a month
+function getLastWeekdayOfMonth(year, month, weekday) {
+    const lastDay = new Date(year, month + 1, 0); // Last day of month
+    const lastDayOfWeek = lastDay.getDay();
+    const diff = (lastDayOfWeek - weekday + 7) % 7;
+    return new Date(year, month, lastDay.getDate() - diff);
+}
+
+// Calculate Easter Sunday (Anonymous Gregorian algorithm)
+function getEasterDate(year) {
+    const a = year % 19;
+    const b = Math.floor(year / 100);
+    const c = year % 100;
+    const d = Math.floor(b / 4);
+    const e = b % 4;
+    const f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4);
+    const k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * m + 114) / 31) - 1;
+    const day = ((h + l - 7 * m + 114) % 31) + 1;
+    return new Date(year, month, day);
+}
+
+// Calculate holiday break start and end dates based on the weekly schedule
+function calculateHolidayBreak(holidayDate, weekendStartDay, weekendEndDay) {
+    const holidayDayOfWeek = holidayDate.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+    const startDayNum = DAY_MAP[weekendStartDay] ?? 5; // Default Friday
+    const endDayNum = DAY_MAP[weekendEndDay] ?? 0; // Default Sunday
+
+    let breakStart, breakEnd;
+
+    // Determine break based on what day of week the holiday falls on
+    if (holidayDayOfWeek === 0 || holidayDayOfWeek === 1) {
+        // Sunday or Monday holiday - absorbs the preceding weekend
+        // Break starts on the weekly schedule start day PRIOR to the holiday
+        breakStart = new Date(holidayDate);
+        const daysBack = (holidayDayOfWeek - startDayNum + 7) % 7;
+        breakStart.setDate(holidayDate.getDate() - daysBack);
+
+        // Break ends on holiday, unless holiday falls ON the schedule ending day
+        // (then extend by one day because school dropoff moves to next day)
+        breakEnd = new Date(holidayDate);
+        if (holidayDayOfWeek === endDayNum) {
+            breakEnd.setDate(holidayDate.getDate() + 1);
+        }
+    } else if (holidayDayOfWeek === 5) {
+        // Friday holiday - absorbs the entire Regular Weekly Schedule range
+        // Break starts on the Beginning day (could be Wed, Thu, or Fri)
+        breakStart = new Date(holidayDate);
+        const daysBackFromFri = (5 - startDayNum + 7) % 7;
+        breakStart.setDate(holidayDate.getDate() - daysBackFromFri);
+        // Break ends on the schedule ending day (Sunday or Monday)
+        breakEnd = new Date(holidayDate);
+        const daysToEnd = (endDayNum - 5 + 7) % 7;
+        breakEnd.setDate(holidayDate.getDate() + (daysToEnd === 0 ? 2 : daysToEnd)); // At least to Sunday
+    } else if (holidayDayOfWeek === 6) {
+        // Saturday holiday - absorbs the entire Regular Weekly Schedule range
+        // Break starts on the Beginning day (could be Wed, Thu, Fri, or Sat)
+        breakStart = new Date(holidayDate);
+        const daysBackFromSat = (6 - startDayNum + 7) % 7;
+        breakStart.setDate(holidayDate.getDate() - daysBackFromSat);
+        // Break ends on the schedule ending day (Sunday or Monday)
+        breakEnd = new Date(holidayDate);
+        const daysToEnd = (endDayNum - 6 + 7) % 7;
+        breakEnd.setDate(holidayDate.getDate() + (daysToEnd === 0 ? 1 : daysToEnd)); // At least to Sunday
+    } else {
+        // Tuesday, Wednesday, or Thursday holiday (mid-week)
+        // Break is just the holiday and the following day
+        breakStart = new Date(holidayDate);
+        breakEnd = new Date(holidayDate);
+        breakEnd.setDate(holidayDate.getDate() + 1);
+    }
+
+    return { start: breakStart, end: breakEnd };
+}
+
+// Populate all holiday dates based on current weekly schedule settings
+function populateAllHolidayDates() {
+    const weekendStart = document.getElementById('weekend-start')?.value || 'friday';
+    const weekendEnd = document.getElementById('weekend-end')?.value || 'sunday';
+
+    const today = getEffectiveToday();
+    const currentYear = today.getFullYear();
+
+    // Determine even and odd years for the 24-month window
+    let evenYear, oddYear;
+    if (currentYear % 2 === 0) {
+        evenYear = currentYear;
+        oddYear = currentYear + 1;
+    } else {
+        oddYear = currentYear;
+        evenYear = currentYear + 1;
+    }
+
+    // For each holiday, calculate dates and populate fields
+    HOLIDAYS.forEach((holiday, idx) => {
+        // Get the holiday date for even and odd years
+        const evenHolidayDate = getHolidayDate(holiday.type, evenYear);
+        const oddHolidayDate = getHolidayDate(holiday.type, oddYear);
+
+        // Handle holidays that might need to roll to next even/odd year if already passed
+        let evenDate = evenHolidayDate;
+        let oddDate = oddHolidayDate;
+
+        // If the even year holiday has passed, use the next even year
+        if (evenDate < today) {
+            evenDate = getHolidayDate(holiday.type, evenYear + 2);
+        }
+        // If the odd year holiday has passed, use the next odd year
+        if (oddDate < today) {
+            oddDate = getHolidayDate(holiday.type, oddYear + 2);
+        }
+
+        // Calculate break periods
+        const evenBreak = calculateHolidayBreak(evenDate, weekendStart, weekendEnd);
+        const oddBreak = calculateHolidayBreak(oddDate, weekendStart, weekendEnd);
+
+        // Populate form fields
+        const evenStartEl = document.getElementById(`evenBegin${idx}`);
+        const evenEndEl = document.getElementById(`evenEnd${idx}`);
+        const oddStartEl = document.getElementById(`oddBegin${idx}`);
+        const oddEndEl = document.getElementById(`oddEnd${idx}`);
+
+        if (evenStartEl) evenStartEl.value = formatDateForInput(evenBreak.start);
+        if (evenEndEl) evenEndEl.value = formatDateForInput(evenBreak.end);
+        if (oddStartEl) oddStartEl.value = formatDateForInput(oddBreak.start);
+        if (oddEndEl) oddEndEl.value = formatDateForInput(oddBreak.end);
+    });
+}
+
+// Format a Date object as YYYY-MM-DD for input fields
+function formatDateForInput(date) {
+    return date.toISOString().split('T')[0];
+}
 
 let startYear, startMonth;
 
@@ -1706,23 +1883,25 @@ function generateHolidayTables() {
     const oddBody = document.getElementById('odd-holidays-body');
     evenBody.innerHTML = '';
     oddBody.innerHTML = '';
-    
+
     HOLIDAYS.forEach((h, i) => {
         evenBody.innerHTML += createHolidayRow(h, 'even', i);
         oddBody.innerHTML += createHolidayRow(h, 'odd', i);
     });
+
+    // Populate holiday dates after rows are created
+    populateAllHolidayDates();
 }
 
 function createHolidayRow(h, type, idx) {
-    const start = type === 'even' ? h.evenStart : h.oddStart;
-    const end = type === 'even' ? h.evenEnd : h.oddEnd;
+    // Date values are populated dynamically by populateAllHolidayDates()
     return `<tr>
         <td>${h.name}</td>
         <td data-label="Parent A"><input type="radio" name="${type}-holiday-${idx}" value="A"></td>
         <td data-label="Parent B"><input type="radio" name="${type}-holiday-${idx}" value="B"></td>
         <td data-label="Omit"><input type="radio" name="${type}-holiday-${idx}" value="omit" checked></td>
-        <td data-label="Beginning"><input type="date" value="${start}" id="${type}Begin${idx}"></td>
-        <td data-label="Ending"><input type="date" value="${end}" id="${type}End${idx}"></td>
+        <td data-label="Beginning"><input type="date" id="${type}Begin${idx}"></td>
+        <td data-label="Ending"><input type="date" id="${type}End${idx}"></td>
     </tr>`;
 }
 
@@ -1914,11 +2093,20 @@ function setupEventListeners() {
     
     document.getElementById('showMoreHolidaysBtn')?.addEventListener('click', toggleHolidaysShowMore);
     document.getElementById('showMoreAnalysisBtn')?.addEventListener('click', toggleAnalysisShowMore);
-    
-    document.getElementById('county-select')?.addEventListener('change', function() {
-        populateCountyDates(this.value);
+
+    // Load school entities for legacy mode dropdown
+    loadSchoolEntities();
+
+    document.getElementById('school-select')?.addEventListener('change', function() {
+        if (this.value) {
+            loadSchoolHolidays(this.value);
+        }
     });
-    
+
+    // Recalculate holiday dates when weekly schedule beginning/ending changes
+    document.getElementById('weekend-start')?.addEventListener('change', populateAllHolidayDates);
+    document.getElementById('weekend-end')?.addEventListener('change', populateAllHolidayDates);
+
     document.querySelectorAll('input[name="recurring-freq"]').forEach(radio => {
         radio.addEventListener('change', function() {
             const everyOtherOptions = document.getElementById('every-other-options');
@@ -1992,14 +2180,16 @@ function toggleLegacyMode() {
     const toggle = document.getElementById('legacyToggle');
     const countySection = document.getElementById('countySelectorSection');
     const extractorSection = document.getElementById('calendarExtractorSection');
-    
+
     if (isLegacyMode) {
         toggle.classList.add('active');
         countySection.style.display = 'block';
         extractorSection.style.display = 'none';
-        const county = document.getElementById('county-select').value;
-        populateCountyDates(county);
-        populateCalendars();
+        // Load holidays for currently selected school
+        const schoolSelect = document.getElementById('school-select');
+        if (schoolSelect && schoolSelect.value) {
+            loadSchoolHolidays(schoolSelect.value);
+        }
     } else {
         toggle.classList.remove('active');
         countySection.style.display = 'none';
@@ -2012,7 +2202,8 @@ function toggleLegacyMode() {
 function resetHolidayDates() {
     const breakTypes = ['Spring', 'Fall', 'Thanksgiving', 'Christmas', 'Winter', 'Other'];
     const yearTypes = ['even', 'odd'];
-    
+
+    // Reset break dates (these come from school calendars)
     breakTypes.forEach(bt => {
         yearTypes.forEach(yt => {
             const prefix = yt + bt + 'Break';
@@ -2022,13 +2213,9 @@ function resetHolidayDates() {
             if (endEl) endEl.value = '';
         });
     });
-    
-    HOLIDAYS.forEach((h, idx) => {
-        document.getElementById(`evenBegin${idx}`).value = '';
-        document.getElementById(`evenEnd${idx}`).value = '';
-        document.getElementById(`oddBegin${idx}`).value = '';
-        document.getElementById(`oddEnd${idx}`).value = '';
-    });
+
+    // Repopulate holiday dates (these are calculated dynamically based on weekly schedule)
+    populateAllHolidayDates();
 }
 
 async function extractSchoolCalendar() {
@@ -2077,22 +2264,26 @@ function displayExtractionResults(data) {
     
     let holidaysHtml = '';
     let hasInferred = false;
+    let hasVerified = false;
     const MAX_VISIBLE = 5;
-    
+
     if (data.holidays && data.holidays.length > 0) {
         data.holidays.forEach((h, idx) => {
             const omittedClass = h.isOmitted ? 'omitted' : '';
             const inferredClass = h.inferred ? 'inferred' : '';
-            const inferredSymbol = h.inferred ? '<span class="inferred-symbol" title="Inferred date">★</span>' : '';
+            const verifiedClass = h.verified ? 'verified' : '';
+            const inferredSymbol = h.inferred ? '<span class="inferred-symbol" title="Inferred date (estimated from previous year pattern)">★</span>' : '';
+            const verifiedSymbol = h.verified ? '<span class="verified-symbol" title="Verified date (from official school calendar)">✓</span>' : '';
             if (h.inferred) hasInferred = true;
+            if (h.verified) hasVerified = true;
             holidaysHtml += `
-                <div class="extracted-holiday-item ${omittedClass} ${inferredClass}">
-                    <span class="holiday-name">${h.name}${h.isOmitted ? ' (Omitted)' : ''}${inferredSymbol}</span>
+                <div class="extracted-holiday-item ${omittedClass} ${inferredClass} ${verifiedClass}">
+                    <span class="holiday-name">${h.name}${h.isOmitted ? ' (Omitted)' : ''}${verifiedSymbol}${inferredSymbol}</span>
                     <span class="holiday-dates">${h.startDate} to ${h.endDate}</span>
                 </div>
             `;
         });
-        
+
         if (data.holidays.length > MAX_VISIBLE) {
             holidaysList.style.maxHeight = '150px';
             holidaysList.style.overflow = 'hidden';
@@ -2106,8 +2297,11 @@ function displayExtractionResults(data) {
         showMoreBtn.style.display = 'none';
     }
     holidaysList.innerHTML = holidaysHtml;
-    
+
     let notesHtml = '';
+    if (hasVerified) {
+        notesHtml += '<p class="verified-legend"><span class="verified-symbol">✓</span> = Verified date (from official school calendar)</p>';
+    }
     if (hasInferred) {
         notesHtml += '<p class="inferred-legend"><span class="inferred-symbol">★</span> = Inferred date (estimated from previous year pattern)</p>';
     }
@@ -2139,7 +2333,9 @@ function applyExtractedDates() {
         evenThanksgiving: null,
         oddThanksgiving: null,
         evenWinter: null,
-        oddWinter: null
+        oddWinter: null,
+        evenOther: null,
+        oddOther: null
     };
     
     extractedCalendarData.holidays.forEach(holiday => {
@@ -2214,6 +2410,9 @@ function applyExtractedDates() {
             setBreakDates('Christmas');
         } else if (name.includes('winter break') && !name.includes('christmas') && !name.includes('december')) {
             setBreakDates('Winter');
+        } else if (name.includes('march') && name.includes('break')) {
+            // Map March Break to March/Other Break inputs
+            setBreakDates('Other');
         } else if (name.includes('mlk') || name.includes('martin luther king') || name.includes('king day')) {
             setHolidayDates(0);
         } else if (name.includes('president')) {
@@ -2400,12 +2599,12 @@ function handleCurrentBreak() {
     
     // Map break type to corresponding odd-year parent selector
     const parentSelectorMap = {
-        'Christmas Break': 'oddChristmasBreakParent',
+        'Christmas/Winter Break': 'oddChristmasBreakParent',
         'Spring Break': 'oddSpringBreakParent',
         'Fall Break': 'oddFallBreakParent',
         'Thanksgiving Break': 'oddThanksgivingBreakParent',
-        'Winter Break': 'oddWinterBreakParent',
-        'Other Break': 'oddOtherBreakParent'
+        'February Winter Break': 'oddWinterBreakParent',
+        'March/Other Break': 'oddOtherBreakParent'
     };
     
     const parentSelectorName = parentSelectorMap[breakType];
@@ -3110,7 +3309,7 @@ function applyAnalysisResults() {
         }
     }
     
-    // Christmas Break
+    // Christmas/Winter Break
     if (data.christmasBreak) {
         if (data.christmasBreak.evenYears) {
             setBreakParent('ChristmasBreak', 'even', data.christmasBreak.evenYears.parent);
@@ -3122,7 +3321,7 @@ function applyAnalysisResults() {
         }
     }
     
-    // Winter Break
+    // February Winter Break
     if (data.winterBreak) {
         if (data.winterBreak.evenYears) setBreakParent('WinterBreak', 'even', data.winterBreak.evenYears.parent);
         if (data.winterBreak.oddYears) setBreakParent('WinterBreak', 'odd', data.winterBreak.oddYears.parent);
@@ -3203,12 +3402,9 @@ function applyAnalysisResults() {
         });
     }
     
-    // School County - normalize to lowercase
-    if (data.schoolCounty) {
-        const countySelect = document.getElementById('county-select');
-        if (countySelect) countySelect.value = data.schoolCounty.toLowerCase();
-    }
-    
+    // School County - the user should select their school district from the dropdown
+    // in legacy mode, which uses verified data from the database
+
     // Update party identifiers in totals section
     if (data.identifiedParties) {
         updatePartyIdentifiers(data.identifiedParties);
@@ -3249,6 +3445,306 @@ function populateCountyDates(county) {
     setThanksgivingBreakDates(today, county);
     setChristmasBreakDates(today, county);
     setWinterBreakDates(today, county);
+}
+
+// Load school entities for the dropdown
+async function loadSchoolEntities() {
+    const select = document.getElementById('school-select');
+    if (!select) return;
+
+    try {
+        const response = await fetch('/api/school-entities');
+        const data = await response.json();
+
+        if (data.success && data.entities.length > 0) {
+            select.innerHTML = '<option value="">-- Select School District --</option>';
+
+            // Group by county
+            const byCounty = {};
+            data.entities.forEach(entity => {
+                const county = entity.county || 'Other';
+                if (!byCounty[county]) byCounty[county] = [];
+                byCounty[county].push(entity);
+            });
+
+            // Create optgroups by county
+            Object.keys(byCounty).sort().forEach(county => {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = county + ' County';
+                byCounty[county].forEach(entity => {
+                    const option = document.createElement('option');
+                    option.value = entity.id;
+                    option.textContent = entity.district_name;
+                    optgroup.appendChild(option);
+                });
+                select.appendChild(optgroup);
+            });
+        } else {
+            select.innerHTML = '<option value="">No schools with verified data</option>';
+        }
+    } catch (err) {
+        console.error('Error loading school entities:', err);
+        select.innerHTML = '<option value="">Error loading schools</option>';
+    }
+}
+
+// Load verified holidays for a school and populate the form
+async function loadSchoolHolidays(entityId) {
+    const statusEl = document.getElementById('schoolHolidaysStatus');
+    if (statusEl) statusEl.textContent = 'Loading holidays...';
+
+    try {
+        const response = await fetch(`/api/school-holidays/${entityId}`);
+        const data = await response.json();
+
+        if (data.success) {
+            const stats = applyVerifiedHolidays(data.holidays_by_year, data.district_name);
+            if (statusEl) {
+                const verifiedCount = stats.verified;
+                const inferredCount = stats.inferred;
+                let statusText = `${data.district_name}: ${verifiedCount} verified`;
+                if (inferredCount > 0) {
+                    statusText += `, ${inferredCount} inferred`;
+                }
+                statusEl.innerHTML = statusText;
+            }
+            populateCalendars();
+            updateCalendarReadyState();
+        } else {
+            if (statusEl) statusEl.textContent = 'Error loading holidays';
+        }
+    } catch (err) {
+        console.error('Error loading school holidays:', err);
+        if (statusEl) statusEl.textContent = 'Error loading holidays';
+    }
+}
+
+// Apply verified holidays from the database to the form fields
+function applyVerifiedHolidays(holidaysByYear, districtName) {
+    // Reset all break dates first
+    resetHolidayDates();
+
+    const today = getEffectiveToday();
+    const currentYear = today.getFullYear();
+
+    // Determine relevant school years (current and next)
+    const currentSchoolYear = today.getMonth() >= 7 ? `${currentYear}-${currentYear + 1}` : `${currentYear - 1}-${currentYear}`;
+    const nextSchoolYear = today.getMonth() >= 7 ? `${currentYear + 1}-${currentYear + 2}` : `${currentYear}-${currentYear + 1}`;
+
+    // Map holiday names to form field prefixes
+    const holidayMapping = {
+        'spring break': 'SpringBreak',
+        'fall break': 'FallBreak',
+        'thanksgiving': 'ThanksgivingBreak',
+        'christmas break': 'ChristmasBreak',
+        'winter break': 'WinterBreak',
+        'christmas/winter break': 'ChristmasBreak',
+        'february winter break': 'WinterBreak',
+        'march break': 'OtherBreak',
+        'march/other break': 'OtherBreak'
+    };
+
+    // Track which breaks we've filled from verified data
+    const filledBreaks = {
+        even: { Spring: false, Fall: false, Thanksgiving: false, Christmas: false, Winter: false },
+        odd: { Spring: false, Fall: false, Thanksgiving: false, Christmas: false, Winter: false }
+    };
+
+    // Process each school year
+    Object.entries(holidaysByYear).forEach(([schoolYear, holidays]) => {
+        // Determine if this is an even or odd year (based on the start year of the school year)
+        const startYear = parseInt(schoolYear.split('-')[0]);
+        const yearPrefix = startYear % 2 === 0 ? 'even' : 'odd';
+
+        holidays.forEach(holiday => {
+            const name = holiday.name.toLowerCase();
+
+            // Find matching form field
+            for (const [pattern, fieldSuffix] of Object.entries(holidayMapping)) {
+                if (name.includes(pattern)) {
+                    const startField = document.getElementById(`${yearPrefix}${fieldSuffix}Start`);
+                    const endField = document.getElementById(`${yearPrefix}${fieldSuffix}End`);
+
+                    if (startField && endField) {
+                        startField.value = holiday.start_date;
+                        endField.value = holiday.end_date;
+
+                        // Mark as filled
+                        const breakType = fieldSuffix.replace('Break', '');
+                        if (filledBreaks[yearPrefix][breakType] !== undefined) {
+                            filledBreaks[yearPrefix][breakType] = true;
+                        }
+                    }
+                    break;
+                }
+            }
+        });
+    });
+
+    // Fill in missing breaks with inferred dates and count them
+    const inferredCount = fillMissingBreaksWithInferred(filledBreaks, districtName);
+
+    // Count verified breaks
+    let verifiedCount = 0;
+    ['even', 'odd'].forEach(yp => {
+        Object.values(filledBreaks[yp]).forEach(filled => {
+            if (filled) verifiedCount++;
+        });
+    });
+
+    return { verified: verifiedCount, inferred: inferredCount };
+}
+
+// Fill in any breaks that weren't covered by verified data with inferred/calculated dates
+function fillMissingBreaksWithInferred(filledBreaks, districtName) {
+    let inferredCount = 0;
+    const today = getEffectiveToday();
+
+    // Check each break type and fill if missing
+    ['even', 'odd'].forEach(yearPrefix => {
+        // Spring Break
+        if (!filledBreaks[yearPrefix].Spring) {
+            inferSpringBreakDates(yearPrefix, today);
+            inferredCount++;
+        }
+
+        // Fall Break
+        if (!filledBreaks[yearPrefix].Fall) {
+            inferFallBreakDates(yearPrefix, today);
+            inferredCount++;
+        }
+
+        // Thanksgiving Break
+        if (!filledBreaks[yearPrefix].Thanksgiving) {
+            inferThanksgivingBreakDates(yearPrefix, today);
+            inferredCount++;
+        }
+
+        // Christmas Break
+        if (!filledBreaks[yearPrefix].Christmas) {
+            inferChristmasBreakDates(yearPrefix, today);
+            inferredCount++;
+        }
+
+        // Winter Break (February)
+        if (!filledBreaks[yearPrefix].Winter) {
+            inferWinterBreakDates(yearPrefix, today);
+            inferredCount++;
+        }
+    });
+
+    return inferredCount;
+}
+
+// Infer Spring Break dates for a specific year type
+function inferSpringBreakDates(yearPrefix, today) {
+    const currentYear = today.getFullYear();
+    let targetYear;
+
+    if (yearPrefix === 'even') {
+        targetYear = currentYear % 2 === 0 ? currentYear : currentYear + 1;
+        if (today > new Date(targetYear, 3, 15)) targetYear += 2;
+    } else {
+        targetYear = currentYear % 2 === 1 ? currentYear : currentYear + 1;
+        if (today > new Date(targetYear, 3, 15)) targetYear += 2;
+    }
+
+    const firstMonday = getFirstMondayInApril(targetYear);
+    const fridayBefore = new Date(firstMonday);
+    fridayBefore.setDate(firstMonday.getDate() - 3);
+    const sundayAfter = new Date(firstMonday);
+    sundayAfter.setDate(firstMonday.getDate() + 6);
+
+    document.getElementById(`${yearPrefix}SpringBreakStart`).value = fridayBefore.toISOString().split('T')[0];
+    document.getElementById(`${yearPrefix}SpringBreakEnd`).value = sundayAfter.toISOString().split('T')[0];
+}
+
+// Infer Fall Break dates for a specific year type
+function inferFallBreakDates(yearPrefix, today) {
+    const currentYear = today.getFullYear();
+    let targetYear;
+
+    if (yearPrefix === 'even') {
+        targetYear = currentYear % 2 === 0 ? currentYear : currentYear + 1;
+    } else {
+        targetYear = currentYear % 2 === 1 ? currentYear : currentYear + 1;
+    }
+
+    // Default to second Monday in October pattern
+    const secondMonday = getNthWeekdayOfMonth(targetYear, 9, 1, 2);
+    const fridayBefore = new Date(secondMonday);
+    fridayBefore.setDate(secondMonday.getDate() - 3);
+    const sundayAfter = new Date(secondMonday);
+    sundayAfter.setDate(secondMonday.getDate() + 6);
+
+    document.getElementById(`${yearPrefix}FallBreakStart`).value = fridayBefore.toISOString().split('T')[0];
+    document.getElementById(`${yearPrefix}FallBreakEnd`).value = sundayAfter.toISOString().split('T')[0];
+}
+
+// Infer Thanksgiving Break dates for a specific year type
+function inferThanksgivingBreakDates(yearPrefix, today) {
+    const currentYear = today.getFullYear();
+    let targetYear;
+
+    if (yearPrefix === 'even') {
+        targetYear = currentYear % 2 === 0 ? currentYear : currentYear + 1;
+    } else {
+        targetYear = currentYear % 2 === 1 ? currentYear : currentYear + 1;
+    }
+
+    let thanksgiving = getLastThursdayInNovember(targetYear);
+    if (thanksgiving < today) targetYear += 2;
+    thanksgiving = getLastThursdayInNovember(targetYear);
+
+    const fridayBefore = new Date(thanksgiving);
+    fridayBefore.setDate(thanksgiving.getDate() - 6);
+    const sundayAfter = new Date(thanksgiving);
+    sundayAfter.setDate(thanksgiving.getDate() + 3);
+
+    document.getElementById(`${yearPrefix}ThanksgivingBreakStart`).value = fridayBefore.toISOString().split('T')[0];
+    document.getElementById(`${yearPrefix}ThanksgivingBreakEnd`).value = sundayAfter.toISOString().split('T')[0];
+}
+
+// Infer Christmas Break dates for a specific year type
+function inferChristmasBreakDates(yearPrefix, today) {
+    const currentYear = today.getFullYear();
+    let targetYear;
+
+    if (yearPrefix === 'even') {
+        targetYear = currentYear % 2 === 0 ? currentYear : currentYear + 1;
+    } else {
+        targetYear = currentYear % 2 === 1 ? currentYear : currentYear + 1;
+    }
+
+    if (new Date(targetYear, 11, 25) < today) targetYear += 2;
+
+    const start = new Date(targetYear, 11, 19);
+    const end = new Date(targetYear + 1, 0, 3);
+
+    document.getElementById(`${yearPrefix}ChristmasBreakStart`).value = start.toISOString().split('T')[0];
+    document.getElementById(`${yearPrefix}ChristmasBreakEnd`).value = end.toISOString().split('T')[0];
+}
+
+// Infer Winter Break (February) dates for a specific year type
+function inferWinterBreakDates(yearPrefix, today) {
+    const currentYear = today.getFullYear();
+    let targetYear;
+
+    if (yearPrefix === 'even') {
+        targetYear = currentYear % 2 === 0 ? currentYear : currentYear + 1;
+    } else {
+        targetYear = currentYear % 2 === 1 ? currentYear : currentYear + 1;
+    }
+
+    // MLK weekend (third Monday in January)
+    const mlkDay = getNthWeekdayOfMonth(targetYear, 0, 1, 3);
+    const start = new Date(mlkDay);
+    start.setDate(mlkDay.getDate() - 3);
+    const end = new Date(mlkDay);
+    end.setDate(mlkDay.getDate() + 1);
+
+    document.getElementById(`${yearPrefix}WinterBreakStart`).value = start.toISOString().split('T')[0];
+    document.getElementById(`${yearPrefix}WinterBreakEnd`).value = end.toISOString().split('T')[0];
 }
 
 function getFirstMondayInApril(year) {
@@ -3503,7 +3999,7 @@ function collectFormState() {
         weekendEnd: document.getElementById('weekend-end').value,
         recurringFreq: document.querySelector('input[name="recurring-freq"]:checked')?.value || 'Omit',
         everyOtherType: document.querySelector('input[name="every-other-type"]:checked')?.value || 'odd',
-        county: document.getElementById('county-select').value,
+        schoolEntityId: document.getElementById('school-select')?.value || '',
         recurringDays: {},
         breaks: {},
         summerSchedule: {
@@ -3581,8 +4077,15 @@ function restoreFormState(state) {
     const everyOtherRadio = document.querySelector(`input[name="every-other-type"][value="${state.everyOtherType}"]`);
     if (everyOtherRadio) everyOtherRadio.checked = true;
     
-    if (state.county) document.getElementById('county-select').value = state.county;
-    
+    if (state.schoolEntityId) {
+        const schoolSelect = document.getElementById('school-select');
+        if (schoolSelect) {
+            schoolSelect.value = state.schoolEntityId;
+            // Load the holidays for this school
+            loadSchoolHolidays(state.schoolEntityId);
+        }
+    }
+
     if (state.recurringDays) {
         Object.keys(state.recurringDays).forEach(day => {
             const cb = document.querySelector(`input[name="recurring-day"][value="${day}"]`);

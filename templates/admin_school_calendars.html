@@ -419,10 +419,6 @@
             <div class="label">School Districts/Entities</div>
         </div>
         <div class="stat-card">
-            <div class="value">{{ total_calendars }}</div>
-            <div class="label">Calendars Stored</div>
-        </div>
-        <div class="stat-card">
             <div class="value">{{ public_districts }}</div>
             <div class="label">Public Districts</div>
         </div>
@@ -430,12 +426,17 @@
             <div class="value">{{ private_schools }}</div>
             <div class="label">Private Schools</div>
         </div>
+        <div class="stat-card">
+            <a href="{{ url_for('main.school_calendars_index') }}" style="text-decoration: none; color: inherit;">
+                <div class="value" style="color: #10b981;">View</div>
+                <div class="label">Public Calendar Pages</div>
+            </a>
+        </div>
     </div>
 
     <div class="action-bar">
-        <input type="text" class="search-input" id="searchInput" placeholder="Search by district name, county, or school year...">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search by district name, county...">
         <button class="btn btn-primary" onclick="openModal('addEntityModal')">+ Add School Entity</button>
-        <button class="btn btn-success" onclick="openModal('uploadCalendarModal')">Upload Calendar</button>
     </div>
 
     <div class="entities-container">
@@ -450,38 +451,40 @@
                         </h3>
                         <div class="meta">
                             {% if entity.county %}County: {{ entity.county }} | {% endif %}
-                            Calendars: {{ entity.calendars|length }} | 
+                            Holidays: {{ entity.holidays.count() }} |
+                            Files: {{ entity.calendar_files.count() }} |
                             Created: {{ entity.created_at.strftime('%b %d, %Y') if entity.created_at else 'N/A' }}
                         </div>
                     </div>
                     <div class="entity-actions" onclick="event.stopPropagation()">
-                        <button class="btn btn-secondary btn-sm" onclick="editEntity({{ entity.id }}, '{{ entity.district_name|e }}', '{{ entity.entity_type }}', '{{ entity.county|e if entity.county else '' }}')">Edit</button>
+                        <a href="{{ url_for('admin.edit_school_calendar', entity_id=entity.id) }}" class="btn btn-primary btn-sm">Edit Holidays</a>
+                        {% if entity.slug %}
+                        <a href="{{ url_for('main.school_calendar_detail', slug=entity.slug) }}" class="btn btn-success btn-sm" target="_blank">View Public</a>
+                        {% endif %}
+                        <button class="btn btn-secondary btn-sm" onclick="editEntity({{ entity.id }}, '{{ entity.district_name|e }}', '{{ entity.entity_type }}', '{{ entity.county|e if entity.county else '' }}', '{{ entity.official_website|e if entity.official_website else '' }}', '{{ entity.calendar_page_url|e if entity.calendar_page_url else '' }}')">Edit Info</button>
                         <button class="btn btn-danger btn-sm" onclick="deleteEntity({{ entity.id }}, '{{ entity.district_name|e }}')">Delete</button>
                         <span class="expand-icon" id="expand-{{ entity.id }}">&#9660;</span>
                     </div>
                 </div>
                 <div class="calendars-list" id="calendars-{{ entity.id }}">
-                    {% if entity.calendars %}
-                        {% for calendar in entity.calendars %}
-                        <div class="calendar-item" data-calendar-id="{{ calendar.id }}">
+                    {% set files = entity.calendar_files.all() %}
+                    {% if files %}
+                        {% for file in files %}
+                        <div class="calendar-item">
                             <div class="calendar-info">
-                                <span class="year">{{ calendar.school_year }}</span>
-                                <span class="status-badge {{ calendar.status }}">{{ calendar.status }}</span>
+                                <span class="year">{{ file.school_year }}</span>
+                                <span class="status-badge uploaded">{{ file.file_type|upper }}</span>
                                 <div class="details">
-                                    {% if calendar.source_filename %}File: {{ calendar.source_filename }} | {% endif %}
-                                    Analyzed: {{ calendar.analysis_generated_at.strftime('%b %d, %Y') if calendar.analysis_generated_at else 'N/A' }}
+                                    File: {{ file.filename }}
                                 </div>
                             </div>
                             <div class="calendar-actions">
-                                <button class="btn btn-secondary btn-sm" onclick="viewAnalysis({{ calendar.id }})">View JSON</button>
-                                <button class="btn btn-primary btn-sm" onclick="downloadAnalysis({{ calendar.id }})">Download</button>
-                                <button class="btn btn-secondary btn-sm" onclick="reassignCalendar({{ calendar.id }}, {{ entity.id }}, '{{ calendar.school_year }}')">Reassign</button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteCalendar({{ calendar.id }}, '{{ calendar.school_year }}')">Delete</button>
+                                <a href="{{ url_for('main.download_calendar', file_id=file.id) }}" class="btn btn-primary btn-sm">Download</a>
                             </div>
                         </div>
                         {% endfor %}
                     {% else %}
-                        <p style="color: #6b7280; font-style: italic;">No calendars stored for this entity yet.</p>
+                        <p style="color: #6b7280; font-style: italic;">No calendar files stored for this entity yet.</p>
                     {% endif %}
                 </div>
             </div>
@@ -557,6 +560,14 @@
             <div class="form-group">
                 <label>County</label>
                 <input type="text" name="county" id="editCounty">
+            </div>
+            <div class="form-group">
+                <label>Official Website</label>
+                <input type="url" name="official_website" id="editOfficialWebsite" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>Calendar Page URL</label>
+                <input type="url" name="calendar_page_url" id="editCalendarPageUrl" placeholder="https://...">
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('editEntityModal')">Cancel</button>
@@ -695,11 +706,13 @@ document.getElementById('addEntityForm').addEventListener('submit', async functi
     }
 });
 
-function editEntity(id, name, type, county) {
+function editEntity(id, name, type, county, officialWebsite, calendarPageUrl) {
     document.getElementById('editEntityId').value = id;
     document.getElementById('editDistrictName').value = name;
     document.getElementById('editEntityType').value = type;
     document.getElementById('editCounty').value = county;
+    document.getElementById('editOfficialWebsite').value = officialWebsite || '';
+    document.getElementById('editCalendarPageUrl').value = calendarPageUrl || '';
     openModal('editEntityModal');
 }
 
