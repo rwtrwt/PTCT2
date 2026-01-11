@@ -1182,7 +1182,7 @@ input[type="date"].ai-adjusted {
                 <label style="margin-right: 15px;"><input type="radio" name="every-other-type" value="odd" checked> Odd Weeks</label>
                 <label><input type="radio" name="every-other-type" value="even"> Even Weeks</label>
             </div>
-            <div id="recurring-days">
+            <div id="recurring-days" style="display: none;">
                 <div class="day-row"><label><input type="checkbox" name="recurring-day" value="monday"> Monday</label> for <input type="number" id="hours-monday" min="0" max="24" step="0.5" disabled> hrs</div>
                 <div class="day-row"><label><input type="checkbox" name="recurring-day" value="tuesday"> Tuesday</label> for <input type="number" id="hours-tuesday" min="0" max="24" step="0.5" disabled> hrs</div>
                 <div class="day-row"><label><input type="checkbox" name="recurring-day" value="wednesday"> Wednesday</label> for <input type="number" id="hours-wednesday" min="0" max="24" step="0.5" disabled> hrs</div>
@@ -1633,6 +1633,14 @@ input[type="date"].ai-adjusted {
         <input type="email" id="guestEmailInput" placeholder="your@email.com" style="width:100%; padding:12px; border:2px solid #d1d5db; border-radius:8px; font-size:1rem; margin-bottom:15px; box-sizing:border-box;">
         <div id="emailError" style="color:#ef4444; margin-bottom:10px; display:none;"></div>
         <button class="btn btn-primary" onclick="submitGuestEmail()" style="width:100%; padding:12px; background:#8b5cf6; font-size:1rem;">Submit & Continue</button>
+
+        <div style="margin-top:20px; padding-top:20px; border-top:1px solid #e5e7eb;">
+            <p style="color:#6b7280; margin-bottom:10px; font-size:0.9rem;">Already have an account? Log in:</p>
+            <input type="text" id="modalLoginUsername" name="username" autocomplete="username" placeholder="Username" style="width:100%; padding:10px; border:2px solid #d1d5db; border-radius:8px; font-size:0.95rem; margin-bottom:10px; box-sizing:border-box;">
+            <input type="password" id="modalLoginPassword" name="password" autocomplete="current-password" placeholder="Password" style="width:100%; padding:10px; border:2px solid #d1d5db; border-radius:8px; font-size:0.95rem; margin-bottom:10px; box-sizing:border-box;">
+            <div id="modalLoginError" style="color:#ef4444; margin-bottom:10px; display:none;"></div>
+            <button class="btn" onclick="modalLogin('email')" style="width:100%; padding:10px; background:#3b82f6; color:white; font-size:0.95rem; border:none; border-radius:8px; cursor:pointer;">Log In</button>
+        </div>
         <p style="margin-top:15px; font-size:0.85rem; color:#9ca3af; text-align:center;">Or <a href="{{ url_for('auth.register') }}" style="color:#8b5cf6;">create a free account</a> for more tokens.</p>
     </div>
 </div>
@@ -1648,6 +1656,14 @@ input[type="date"].ai-adjusted {
         </label>
         <div id="phoneError" style="color:#ef4444; margin-bottom:10px; display:none;"></div>
         <button class="btn btn-primary" onclick="submitGuestPhone()" style="width:100%; padding:12px; background:#8b5cf6; font-size:1rem;">Submit & Continue</button>
+
+        <div style="margin-top:20px; padding-top:20px; border-top:1px solid #e5e7eb;">
+            <p style="color:#6b7280; margin-bottom:10px; font-size:0.9rem;">Already have an account? Log in:</p>
+            <input type="text" id="phoneModalLoginUsername" name="username" autocomplete="username" placeholder="Username" style="width:100%; padding:10px; border:2px solid #d1d5db; border-radius:8px; font-size:0.95rem; margin-bottom:10px; box-sizing:border-box;">
+            <input type="password" id="phoneModalLoginPassword" name="password" autocomplete="current-password" placeholder="Password" style="width:100%; padding:10px; border:2px solid #d1d5db; border-radius:8px; font-size:0.95rem; margin-bottom:10px; box-sizing:border-box;">
+            <div id="phoneModalLoginError" style="color:#ef4444; margin-bottom:10px; display:none;"></div>
+            <button class="btn" onclick="modalLogin('phone')" style="width:100%; padding:10px; background:#3b82f6; color:white; font-size:0.95rem; border:none; border-radius:8px; cursor:pointer;">Log In</button>
+        </div>
         <p style="margin-top:15px; font-size:0.85rem; color:#9ca3af; text-align:center;">Or <a href="{{ url_for('auth.register') }}" style="color:#8b5cf6;">create a free account</a> for more tokens.</p>
     </div>
 </div>
@@ -2172,7 +2188,9 @@ function setupEventListeners() {
     document.querySelectorAll('input[name="recurring-freq"]').forEach(radio => {
         radio.addEventListener('change', function() {
             const everyOtherOptions = document.getElementById('every-other-options');
+            const recurringDays = document.getElementById('recurring-days');
             everyOtherOptions.style.display = this.value === 'every-other' ? 'block' : 'none';
+            recurringDays.style.display = this.value === 'Omit' ? 'none' : 'block';
         });
     });
     
@@ -4645,6 +4663,52 @@ async function submitGuestPhone() {
         }
     } catch (err) {
         errorDiv.textContent = 'Error submitting phone. Please try again.';
+        errorDiv.style.display = 'block';
+    }
+}
+
+async function modalLogin(modalType) {
+    let usernameInput, passwordInput, errorDiv;
+
+    if (modalType === 'phone') {
+        usernameInput = document.getElementById('phoneModalLoginUsername');
+        passwordInput = document.getElementById('phoneModalLoginPassword');
+        errorDiv = document.getElementById('phoneModalLoginError');
+    } else {
+        usernameInput = document.getElementById('modalLoginUsername');
+        passwordInput = document.getElementById('modalLoginPassword');
+        errorDiv = document.getElementById('modalLoginError');
+    }
+
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value;
+
+    if (!username || !password) {
+        errorDiv.textContent = 'Please enter both username and password.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    try {
+        const response = await fetch('/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+        });
+
+        if (response.redirected) {
+            window.location.href = response.url;
+        } else {
+            const text = await response.text();
+            if (text.includes('Invalid username or password')) {
+                errorDiv.textContent = 'Invalid username or password.';
+                errorDiv.style.display = 'block';
+            } else {
+                window.location.reload();
+            }
+        }
+    } catch (err) {
+        errorDiv.textContent = 'Error logging in. Please try again.';
         errorDiv.style.display = 'block';
     }
 }
