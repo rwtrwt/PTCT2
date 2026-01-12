@@ -125,15 +125,45 @@ def seed_database():
     db.session.commit()
     print(f"[Seeder] Imported {len(holidays)} verified holidays")
     
+    # Seed verified_break table (no model, use raw SQL)
+    breaks = data.get('verified_break', [])
+    print(f"[Seeder] Importing {len(breaks)} verified breaks...")
+    
+    for b in breaks:
+        db.session.execute(db.text("""
+            INSERT INTO verified_break (id, district_name, normalized_district_name, school_year, 
+                break_type, start_date, end_date, source, verified_by, notes, created_at, updated_at)
+            VALUES (:id, :district_name, :normalized_district_name, :school_year, 
+                :break_type, :start_date, :end_date, :source, :verified_by, :notes, :created_at, :updated_at)
+        """), {
+            'id': b['id'],
+            'district_name': b.get('district_name'),
+            'normalized_district_name': b.get('normalized_district_name'),
+            'school_year': b.get('school_year'),
+            'break_type': b.get('break_type'),
+            'start_date': b.get('start_date'),
+            'end_date': b.get('end_date'),
+            'source': b.get('source'),
+            'verified_by': b.get('verified_by'),
+            'notes': b.get('notes'),
+            'created_at': b.get('created_at'),
+            'updated_at': b.get('updated_at')
+        })
+    
+    db.session.commit()
+    print(f"[Seeder] Imported {len(breaks)} verified breaks")
+    
     # Reset sequences for PostgreSQL
     try:
         max_school = db.session.execute(db.text("SELECT MAX(id) FROM school_entity")).scalar() or 0
         max_calendar = db.session.execute(db.text("SELECT MAX(id) FROM calendar_file")).scalar() or 0
         max_holiday = db.session.execute(db.text("SELECT MAX(id) FROM verified_holiday")).scalar() or 0
+        max_break = db.session.execute(db.text("SELECT MAX(id) FROM verified_break")).scalar() or 0
         
         db.session.execute(db.text(f"SELECT setval('school_entity_id_seq', {max_school})"))
         db.session.execute(db.text(f"SELECT setval('calendar_file_id_seq', {max_calendar})"))
         db.session.execute(db.text(f"SELECT setval('verified_holiday_id_seq', {max_holiday})"))
+        db.session.execute(db.text(f"SELECT setval('verified_break_id_seq', {max_break})"))
         db.session.commit()
         print("[Seeder] Reset ID sequences")
     except Exception as e:
