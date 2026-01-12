@@ -1511,11 +1511,12 @@ def analyze_document():
     step = "init"
     try:
         step = "auth_check"
+        # Premium Attorney Plan exclusive feature
         if not current_user.is_authenticated:
-            ip_address = get_client_ip()
-            guest = get_or_create_guest_token(ip_address)
-            if guest.tokens <= 0:
-                return jsonify({'error': 'No tokens remaining. Please provide your email or register for more access.'}), 403
+            return jsonify({'error': 'The Parenting Plan Analyzer is a Premium Attorney Plan exclusive feature. Please subscribe to access this feature.', 'premium_required': True}), 403
+        
+        if current_user.subscription_type != 'paid':
+            return jsonify({'error': 'The Parenting Plan Analyzer is a Premium Attorney Plan exclusive feature. Please subscribe to access this feature.', 'premium_required': True}), 403
         
         step = "pdfplumber_check"
         if not pdfplumber:
