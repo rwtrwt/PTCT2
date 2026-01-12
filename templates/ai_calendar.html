@@ -1214,23 +1214,7 @@ input[type="date"].ai-adjusted {
         <h2>Parenting Plan Analyzer</h2>
         <p>Upload your parenting plan PDF to automatically extract and populate the schedule settings below.</p>
         
-        <div style="position: relative;">
-            {% if not current_user.is_authenticated or (current_user.subscription_type != 'paid' and current_user.subscription_type != 'government') %}
-            <div class="premium-overlay" id="premiumOverlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12px; padding: 30px; text-align: center;">
-                <div style="background: linear-gradient(135deg, #9b59b6, #8e44ad); padding: 15px 25px; border-radius: 50px; margin-bottom: 20px;">
-                    <span style="color: white; font-weight: 700; font-size: 1.1rem;">Premium Feature</span>
-                </div>
-                <h3 style="color: white; margin: 0 0 15px 0; font-size: 1.4rem;">Parenting Plan Analyzer</h3>
-                <p style="color: rgba(255,255,255,0.8); margin: 0 0 25px 0; max-width: 400px; line-height: 1.6;">
-                    Automatically extract and populate schedule settings from your parenting plan PDF. This feature is exclusive to Premium Attorney Plan subscribers.
-                </p>
-                <a href="{{ url_for('main.subscription') }}" style="display: inline-block; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 14px 35px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); transition: transform 0.2s, box-shadow 0.2s;">
-                    Subscribe to Premium Attorney Plan
-                </a>
-                <p style="color: rgba(255,255,255,0.6); margin-top: 15px; font-size: 0.9rem;">$19.84/month - Cancel anytime</p>
-            </div>
-            {% endif %}
-            
+        <div>
             <div class="gating-message" id="gatingMessage">
                 Complete School Calendar Settings first (select a school district or upload a calendar) before analyzing your parenting plan.
             </div>
@@ -1242,10 +1226,23 @@ input[type="date"].ai-adjusted {
                 <div class="date-corrections-details" id="correctionsDetails"></div>
             </div>
             
-            <div class="upload-area" id="uploadArea">
-                <input type="file" id="pdfUpload" accept=".pdf">
-                <label for="pdfUpload">Click to upload or drag & drop your parenting plan PDF</label>
-                <div class="file-name" id="fileName"></div>
+            <div style="position: relative;">
+                {% if not current_user.is_authenticated or (current_user.subscription_type != 'paid' and current_user.subscription_type != 'government') %}
+                <div class="premium-overlay" id="premiumOverlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.9); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12px; padding: 20px; text-align: center;">
+                    <div style="background: linear-gradient(135deg, #9b59b6, #8e44ad); padding: 8px 16px; border-radius: 50px; margin-bottom: 10px;">
+                        <span style="color: white; font-weight: 700; font-size: 0.9rem;">Premium Feature</span>
+                    </div>
+                    <a href="{{ url_for('main.subscription') }}" style="display: inline-block; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 10px 25px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);">
+                        Subscribe to Unlock
+                    </a>
+                </div>
+                {% endif %}
+                
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="pdfUpload" accept=".pdf">
+                    <label for="pdfUpload">Click to upload or drag & drop your parenting plan PDF</label>
+                    <div class="file-name" id="fileName"></div>
+                </div>
             </div>
             
             
