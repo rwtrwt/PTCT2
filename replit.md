@@ -99,6 +99,20 @@ Court staff can register with government email addresses for free premium access
 - After 50 subscribers, standard $19.84/month pricing applies
 - Registration now grants 10 tokens (reduced from 50)
 
+#### Referral Program (Jan 2026)
+Users can earn free tokens by referring friends:
+- Each user gets a unique 8-character referral code (auto-generated on registration or first login)
+- Shareable referral link displayed on profile page: `/register?ref=USERCODE`
+- When someone registers via referral link, the referrer earns 20 tokens
+- Profile page shows referral stats: people referred and tokens earned
+- Subscription page explains ways to get more tokens: referrals, token purchases, or Premium subscription
+
+**Database Fields:**
+- `referral_code`: Unique 8-char code for sharing
+- `referred_by_id`: Links to the user who referred this user
+- `referral_count`: Number of successful referrals
+- `referral_tokens_earned`: Total tokens earned from referrals
+
 #### Drafting Audit Report
 Generates detailed audit reports for parenting plans, identifying novel provisions, ambiguities, drafting errors, omissions, and areas for clarity, with categorized findings and suggested revisions.
 

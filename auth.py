@@ -73,6 +73,10 @@ def login():
                 flash('Your account has been blocked. Please contact support.')
                 return redirect(url_for('auth.login'))
 
+            if not user.referral_code:
+                user.generate_referral_code()
+                db.session.commit()
+            
             login = login_user(user)
             print("login",login)
             
@@ -137,6 +141,9 @@ def send_government_verification_email(user, email_domain, verification_token):
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
+    
+    referral_code = request.args.get('ref') or request.form.get('ref')
+    
     if request.method == 'POST':
         username = request.form.get('username')
         email = request.form.get('email')
@@ -156,8 +163,23 @@ def register():
             new_user.confirmed = False
             new_user.is_government = is_government
             new_user.government_oath_accepted = government_oath if is_government else False
+            new_user.generate_referral_code()
+            
+            if referral_code:
+                referrer = User.query.filter_by(referral_code=referral_code).first()
+                if referrer:
+                    new_user.referred_by_id = referrer.id
+            
             db.session.add(new_user)
             db.session.commit()
+            
+            if new_user.referred_by_id:
+                referrer = User.query.get(new_user.referred_by_id)
+                if referrer:
+                    referrer.token = (referrer.token or 0) + 20
+                    referrer.referral_count = (referrer.referral_count or 0) + 1
+                    referrer.referral_tokens_earned = (referrer.referral_tokens_earned or 0) + 20
+                    db.session.commit()
             
             ip_address = request.headers.get('X-Forwarded-For', '').split(',')[0].strip() or request.remote_addr or '0.0.0.0'
             guests = GuestToken.query.filter(

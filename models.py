@@ -19,6 +19,20 @@ class User(UserMixin, db.Model):
     is_government = db.Column(db.Boolean, default=False)
     government_verified = db.Column(db.Boolean, default=False)
     government_oath_accepted = db.Column(db.Boolean, default=False)
+    referral_code = db.Column(db.String(20), unique=True, nullable=True, index=True)
+    referred_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    referral_count = db.Column(db.Integer, default=0)
+    referral_tokens_earned = db.Column(db.Integer, default=0)
+
+    referred_by = db.relationship('User', remote_side=[id], backref='referrals')
+
+    def generate_referral_code(self):
+        import secrets
+        import string
+        chars = string.ascii_uppercase + string.digits
+        code = ''.join(secrets.choice(chars) for _ in range(8))
+        self.referral_code = code
+        return code
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

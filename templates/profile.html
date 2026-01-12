@@ -5,6 +5,46 @@
 <p>Username: {{ current_user.username }}</p>
 <p>Email: {{ current_user.email }}</p>
 <p>Subscription: {{ current_user.subscription_type }}</p>
+<p>Available Tokens: {{ current_user.token }}</p>
+
+<div style="margin: 20px 0; padding: 20px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 2px solid #22c55e; border-radius: 12px;">
+    <h2 style="margin-top: 0; color: #166534; display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 1.5em;">🎁</span> Referral Program
+    </h2>
+    <p style="color: #15803d; margin-bottom: 15px;">Share your referral link and earn <strong>20 free tokens</strong> for every person who signs up!</p>
+    
+    <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+        <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 8px;">Your Referral Link:</label>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="referralLink" value="{{ request.host_url }}register?ref={{ current_user.referral_code }}" readonly 
+                   style="flex: 1; padding: 10px 15px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.95em; background: #f9fafb;">
+            <button onclick="copyReferralLink()" style="padding: 10px 20px; background: #22c55e; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                Copy
+            </button>
+        </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+        <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 2em; font-weight: 700; color: #22c55e;">{{ current_user.referral_count or 0 }}</div>
+            <div style="color: #6b7280; font-size: 0.9em;">People Referred</div>
+        </div>
+        <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 2em; font-weight: 700; color: #22c55e;">{{ current_user.referral_tokens_earned or 0 }}</div>
+            <div style="color: #6b7280; font-size: 0.9em;">Tokens Earned</div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyReferralLink() {
+    const input = document.getElementById('referralLink');
+    input.select();
+    input.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(input.value);
+    alert('Referral link copied to clipboard!');
+}
+</script>
 
 {% if guest_journey %}
 <div style="margin: 20px 0; padding: 20px; background: #f0f9ff; border: 1px solid #3b82f6; border-radius: 8px;">
