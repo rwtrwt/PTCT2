@@ -45,12 +45,19 @@
             <h3>Premium Attorney Plan</h3>
             <ul>
                 <li>Advanced calendar generator</li>
+                <li>AI-Powered Parenting Plan Analyzer (Premium Exclusive)</li>
                 <li>Remove Citation to Tool's Developer</li>
                 <li>Customize the "H4" tag on the Calendar Tool page to name YOUR law firm.</li>
             </ul>
-            <p class="price">$19.84 / month</p>
+            <p class="price">
+                <span style="text-decoration: line-through; color: #999;">$19.84 / month</span><br>
+                <span style="color: #22c55e; font-weight: bold;">First month only $0.99!</span><br>
+                <small style="color: #666;">Limited to first 50 subscribers</small>
+            </p>
             {% if current_user.subscription_type == 'free' %}
                 <button id="checkout-button" class="upgrade-button">Upgrade Now</button>
+            {% elif current_user.subscription_type == 'government' %}
+                <button disabled>Government Account</button>
             {% else %}
                 <button disabled>Current Plan</button>
             {% endif %}

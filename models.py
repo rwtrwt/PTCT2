@@ -14,8 +14,11 @@ class User(UserMixin, db.Model):
     is_blocked = db.Column(db.Boolean, default=False)
     subscription_type = db.Column(db.String(20), default='free')
     custom_h4 = db.Column(db.String(255))
-    token = db.Column(db.Integer, nullable=False, default=50)
+    token = db.Column(db.Integer, nullable=False, default=10)
     confirmed = db.Column(db.Boolean, default=False)
+    is_government = db.Column(db.Boolean, default=False)
+    government_verified = db.Column(db.Boolean, default=False)
+    government_oath_accepted = db.Column(db.Boolean, default=False)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -195,4 +198,79 @@ class CalendarFile(db.Model):
             'file_type': self.file_type,
             'file_size': self.file_size
         }
+
+
+class GovernmentDomain(db.Model):
+    """Approved government email domains for automatic verification."""
+    __tablename__ = 'government_domain'
+
+    id = db.Column(db.Integer, primary_key=True)
+    domain = db.Column(db.String(255), unique=True, nullable=False, index=True)
+    approved = db.Column(db.Boolean, default=True)
+    approved_by = db.Column(db.String(120), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'domain': self.domain,
+            'approved': self.approved,
+            'approved_by': self.approved_by,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+
+
+class GovernmentRegistrationRequest(db.Model):
+    """Pending government registration requests awaiting approval."""
+    __tablename__ = 'government_registration_request'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    email_domain = db.Column(db.String(255), nullable=False)
+    status = db.Column(db.String(20), default='pending')
+    verification_token = db.Column(db.String(255), unique=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    reviewed_at = db.Column(db.DateTime, nullable=True)
+    reviewed_by = db.Column(db.String(120), nullable=True)
+
+    user = db.relationship('User', backref=db.backref('government_requests', lazy=True))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'email_domain': self.email_domain,
+            'status': self.status,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'reviewed_at': self.reviewed_at.isoformat() if self.reviewed_at else None
+        }
+
+
+class SubscriptionMetrics(db.Model):
+    """Track subscription metrics like promotional subscriber count."""
+    __tablename__ = 'subscription_metrics'
+
+    id = db.Column(db.Integer, primary_key=True)
+    metric_name = db.Column(db.String(100), unique=True, nullable=False)
+    metric_value = db.Column(db.Integer, default=0)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    @staticmethod
+    def get_promo_subscriber_count():
+        """Get current count of promotional subscribers."""
+        metric = SubscriptionMetrics.query.filter_by(metric_name='promo_subscribers').first()
+        return metric.metric_value if metric else 0
+
+    @staticmethod
+    def increment_promo_subscribers():
+        """Increment promotional subscriber count."""
+        metric = SubscriptionMetrics.query.filter_by(metric_name='promo_subscribers').first()
+        if not metric:
+            metric = SubscriptionMetrics(metric_name='promo_subscribers', metric_value=1)
+            db.session.add(metric)
+        else:
+            metric.metric_value += 1
+        db.session.commit()
+        return metric.metric_value
 

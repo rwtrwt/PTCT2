@@ -1118,7 +1118,9 @@ input[type="date"].ai-adjusted {
 
     <div class="page-header">
         <h1>Georgia Parenting Time Calendar Tool <span style="font-size: 0.6em; color: var(--primary);">v2.0</span></h1>
-        {% if current_user.is_authenticated and current_user.subscription_type == 'paid' and current_user.custom_h4 %}
+        {% if current_user.is_authenticated and current_user.subscription_type == 'government' %}
+        <p class="subtitle">Based upon OCGA 19-6-15(b)(5.1) - A Free government subscription to parentingtimecalendartool.com is provided courtesy of Russell Taylor, Georgia Divorce Attorney - Government Use Only</p>
+        {% elif current_user.is_authenticated and current_user.subscription_type == 'paid' and current_user.custom_h4 %}
         <p class="subtitle">Based upon OCGA 19-6-15(b)(5.1) - {{ current_user.custom_h4 }}</p>
         {% else %}
         <p class="subtitle">Based upon OCGA 19-6-15(b)(5.1) - Georgia Parenting Time Calendar Tool Developed by Russell Taylor, Georgia Divorce Attorney. parentingtimecalendartool.com</p>
@@ -1213,7 +1215,7 @@ input[type="date"].ai-adjusted {
         <p>Upload your parenting plan PDF to automatically extract and populate the schedule settings below.</p>
         
         <div style="position: relative;">
-            {% if not current_user.is_authenticated or current_user.subscription_type != 'paid' %}
+            {% if not current_user.is_authenticated or (current_user.subscription_type != 'paid' and current_user.subscription_type != 'government') %}
             <div class="premium-overlay" id="premiumOverlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12px; padding: 30px; text-align: center;">
                 <div style="background: linear-gradient(135deg, #9b59b6, #8e44ad); padding: 15px 25px; border-radius: 50px; margin-bottom: 20px;">
                     <span style="color: white; font-weight: 700; font-size: 1.1rem;">Premium Feature</span>

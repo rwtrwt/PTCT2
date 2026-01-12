@@ -8,6 +8,12 @@ from flask import redirect, url_for, jsonify
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
 
+from models import SubscriptionMetrics
+
+PROMO_PRICE_ID = 'price_promo_99cents'
+STANDARD_PRICE_ID = 'price_1Q0CJT08Qtnm286sGfkBQ3C0'
+PROMO_SUBSCRIBER_LIMIT = 50
+
 def create_payments_blueprint(db):
     payments = Blueprint('payments', __name__)
 
@@ -24,23 +30,52 @@ def create_payments_blueprint(db):
         if not current_user.is_authenticated:
             print("not authenticate")
             return redirect(url_for(
-                'auth.login'))  # Redirect to login page if not authenticated
+                'auth.login'))
         print("hi - 2")
         try:
             print("hi - 3")
-            session = stripe.checkout.Session.create(
-                payment_method_types=['card'],
-                line_items=[{
-                    'price': 'price_1Q0CJT08Qtnm286sGfkBQ3C0',  # Your Stripe price ID
-                    'quantity': 1,
-                }],
-                mode='subscription',
-                success_url=url_for('payments.payment_success', _external=True)
-                + '?session_id={CHECKOUT_SESSION_ID}',
-                cancel_url=url_for('payments.payment_cancel', _external=True),
-                client_reference_id=str(
-                    current_user.id),  # Reference the current user
-            )
+            
+            promo_count = SubscriptionMetrics.get_promo_subscriber_count()
+            use_promo = promo_count < PROMO_SUBSCRIBER_LIMIT
+            
+            if use_promo:
+                session = stripe.checkout.Session.create(
+                    payment_method_types=['card'],
+                    line_items=[{
+                        'price_data': {
+                            'currency': 'usd',
+                            'product': 'prod_premium_attorney',
+                            'unit_amount': 99,
+                            'recurring': {
+                                'interval': 'month',
+                                'interval_count': 1
+                            }
+                        },
+                        'quantity': 1,
+                    }],
+                    mode='subscription',
+                    subscription_data={
+                        'metadata': {'promo_first_month': 'true'}
+                    },
+                    success_url=url_for('payments.payment_success', _external=True)
+                    + '?session_id={CHECKOUT_SESSION_ID}',
+                    cancel_url=url_for('payments.payment_cancel', _external=True),
+                    client_reference_id=str(current_user.id),
+                )
+            else:
+                session = stripe.checkout.Session.create(
+                    payment_method_types=['card'],
+                    line_items=[{
+                        'price': STANDARD_PRICE_ID,
+                        'quantity': 1,
+                    }],
+                    mode='subscription',
+                    success_url=url_for('payments.payment_success', _external=True)
+                    + '?session_id={CHECKOUT_SESSION_ID}',
+                    cancel_url=url_for('payments.payment_cancel', _external=True),
+                    client_reference_id=str(current_user.id),
+                )
+            
             print("session created successfully", session['url'],
                   session['id'])
             print("hi - 4")
@@ -165,11 +200,19 @@ def create_payments_blueprint(db):
 
         stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
         try:
-            session = stripe.checkout.Session.retrieve(session_id)
+            session = stripe.checkout.Session.retrieve(session_id, expand=['subscription'])
             if session.payment_status == "paid" and str(
                     session.client_reference_id) == str(current_user.id):
                 current_user.subscription_type = 'paid'
                 current_user.stripe_subscription_id = session.subscription
+                
+                is_promo = False
+                if session.subscription and hasattr(session.subscription, 'metadata'):
+                    is_promo = session.subscription.metadata.get('promo_first_month') == 'true'
+                
+                if is_promo:
+                    SubscriptionMetrics.increment_promo_subscribers()
+                
                 db.session.commit()
                 return render_template('payment_success.html')
             else:

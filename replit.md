@@ -73,6 +73,32 @@ The Parenting Plan Analyzer is now exclusive to Premium Attorney Plan subscriber
 **Free User Branding:**
 For free users (non-subscribers), the firm branding displays: "Georgia Parenting Time Calendar Tool Developed by Russell Taylor, Georgia Divorce Attorney. parentingtimecalendartool.com". Premium subscribers can customize this via their `custom_h4` profile setting.
 
+**Government Account Branding:**
+Government users see: "A Free government subscription to parentingtimecalendartool.com is provided courtesy of Russell Taylor, Georgia Divorce Attorney - Government Use Only"
+
+#### Government Registration System (Jan 2026)
+Court staff can register with government email addresses for free premium access:
+
+**Registration Flow:**
+- Checkbox during registration: "I am court staff registering with a government email address"
+- Required oath/affirmation to not share login credentials
+- Email sent to russell@danielstaylor.com with approve/deny links
+- Approved domains are saved for automatic future approvals
+
+**Database Models:**
+- `GovernmentDomain`: Stores approved government email domains
+- `GovernmentRegistrationRequest`: Tracks pending/approved/denied requests
+- User fields: `is_government`, `government_verified`, `government_oath_accepted`
+
+**Verification Endpoints:**
+- `/verify-government/<token>?action=approve` - Approves request and saves domain
+- `/verify-government/<token>?action=deny` - Denies request
+
+#### Promotional Pricing (Jan 2026)
+- First month $0.99 for first 50 subscribers (tracked via `SubscriptionMetrics` table)
+- After 50 subscribers, standard $19.84/month pricing applies
+- Registration now grants 10 tokens (reduced from 50)
+
 #### Drafting Audit Report
 Generates detailed audit reports for parenting plans, identifying novel provisions, ambiguities, drafting errors, omissions, and areas for clarity, with categorized findings and suggested revisions.
 

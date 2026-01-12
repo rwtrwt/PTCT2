@@ -532,7 +532,9 @@ td{min-width:35px;}
     <h1>Georgia Parenting Time Calendar Tool<sub> beta</sub></h1>
     <h2>Watch the video at <a href="https://csc.georgiacourts.gov/">https://csc.georgiacourts.gov/</a> for Child Support Commission guidance.
     <h3>Based upon OCGA § 19-6-15(b)(5.1)(non-binding until January 1, 2026)</h3>
-    {% if current_user.is_authenticated and current_user.subscription_type == 'paid' and current_user.custom_h4 %}
+    {% if current_user.is_authenticated and current_user.subscription_type == 'government' %}
+    <h4>A Free government subscription to parentingtimecalendartool.com is provided courtesy of Russell Taylor, Georgia Divorce Attorney - Government Use Only</h4>
+    {% elif current_user.is_authenticated and current_user.subscription_type == 'paid' and current_user.custom_h4 %}
     <h4>{{ current_user.custom_h4 | safe }}</h4>
     {% else %}
     <h4>Georgia Parenting Time Calendar Tool Developed by Russell Taylor, Georgia Divorce Attorney. parentingtimecalendartool.com</h4>

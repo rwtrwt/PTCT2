@@ -1,8 +1,69 @@
 {% extends "base.html" %}
 
 {% block content %}
+<style>
+    .government-section {
+        margin: 20px 0;
+        padding: 20px;
+        border: 2px solid #1e40af;
+        border-radius: 8px;
+        background: #eff6ff;
+        display: none;
+    }
+    .government-section.visible {
+        display: block;
+    }
+    .government-section h3 {
+        color: #1e40af;
+        margin: 0 0 15px 0;
+        font-size: 1.1rem;
+    }
+    .government-section p {
+        color: #374151;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+    }
+    .oath-checkbox {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 15px;
+        padding: 15px;
+        background: #fef3c7;
+        border: 1px solid #f59e0b;
+        border-radius: 6px;
+    }
+    .oath-checkbox input[type="checkbox"] {
+        margin-top: 3px;
+        width: 18px;
+        height: 18px;
+    }
+    .oath-checkbox label {
+        font-size: 0.9rem;
+        color: #92400e;
+        line-height: 1.5;
+    }
+    .government-toggle {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 15px 0;
+        padding: 10px;
+        background: #f0f9ff;
+        border-radius: 6px;
+    }
+    .government-toggle input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+    }
+    .government-toggle label {
+        font-size: 0.95rem;
+        color: #0369a1;
+    }
+</style>
+
 <h1>Register</h1>
-<form method="POST">
+<form method="POST" id="registerForm">
     <label for="username">Username:</label>
     <input type="text" id="username" name="username" required>
     
@@ -12,7 +73,40 @@
     <label for="password">Password:</label>
     <input type="password" id="password" name="password" required>
     
+    <div class="government-toggle">
+        <input type="checkbox" id="is_government" name="is_government" onchange="toggleGovernmentSection()">
+        <label for="is_government">I am court staff registering with a government email address</label>
+    </div>
+    
+    <div class="government-section" id="governmentSection">
+        <h3>Government Account Registration</h3>
+        <p>
+            Government employees may qualify for a free subscription to the Georgia Parenting Time Calendar Tool. 
+            Your government email domain will be verified before access is granted.
+        </p>
+        <div class="oath-checkbox">
+            <input type="checkbox" id="government_oath" name="government_oath">
+            <label for="government_oath">
+                <strong>I swear and affirm</strong> that I am a government employee using my official government email address, 
+                and I agree not to share my login credentials with any other person. I understand that this account is 
+                for official government use only.
+            </label>
+        </div>
+    </div>
+    
     <button type="submit">Register</button>
 </form>
 <p>Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a></p>
+
+<script>
+function toggleGovernmentSection() {
+    const checkbox = document.getElementById('is_government');
+    const section = document.getElementById('governmentSection');
+    if (checkbox.checked) {
+        section.classList.add('visible');
+    } else {
+        section.classList.remove('visible');
+    }
+}
+</script>
 {% endblock %}
