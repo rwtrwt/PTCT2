@@ -64,8 +64,14 @@ If OCR fails to extract Thanksgiving Break (common due to garbled text), the sys
 
 Both methods include specific rules for classifying breaks (e.g., Christmas, Winter, Fall) and critical logic for Christmas break extension into January. For complex PDFs, it supplements text extraction with visual shading detection, using weekend-aware gap bridging. Strict rules ensure accurate date range boundary interpretation and exclusion of non-student holidays (e.g., "Teacher Planning," "Independent Learning Days"). The system includes logic to handle ongoing breaks and deduplicate Fall Break entries. An Admin Calendar Database, with `SchoolEntity` and `SchoolCalendar` models, stores uploaded calendars and analysis results, supported by an Admin GUI for full management.
 
-#### Document Analyzer
+#### Document Analyzer (Parenting Plan Analyzer)
 AI analyzes uploaded PDF parenting plans to populate forms, apply date correction rules (e.g., "Spring Break starts 1 day before school's scheduled date"), and auto-populate split break fields. This feature is gated until school calendar data is available and includes comprehensive value normalization.
+
+**Premium Feature Gating (Jan 2026):**
+The Parenting Plan Analyzer is now exclusive to Premium Attorney Plan subscribers ($19.84/month). Free users and guests see a disabled overlay with a "Subscribe to Premium Attorney Plan" button directing them to the subscription page. The backend `/analyze_document` endpoint also enforces this restriction.
+
+**Free User Branding:**
+For free users (non-subscribers), the firm branding displays: "Georgia Parenting Time Calendar Tool Developed by Russell Taylor, Georgia Divorce Attorney. parentingtimecalendartool.com". Premium subscribers can customize this via their `custom_h4` profile setting.
 
 #### Drafting Audit Report
 Generates detailed audit reports for parenting plans, identifying novel provisions, ambiguities, drafting errors, omissions, and areas for clarity, with categorized findings and suggested revisions.
