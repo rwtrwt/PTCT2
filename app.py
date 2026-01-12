@@ -31,12 +31,16 @@ def create_app():
     # Initialize Flask-Migrate
     migrate = Migrate(app, db)
 
-    # Test database connection (non-fatal - don't crash app if DB unavailable at startup)
+    # Test database connection and seed if needed
     with app.app_context():
         try:
             connection = db.engine.connect()
             logger.info("Successfully connected to the database.")
             connection.close()
+            
+            # Seed school calendar data if tables are empty (for production)
+            from seeder import seed_database
+            seed_database()
         except Exception as e:
             logger.warning(f"Database connection test skipped: {str(e)}")
 
