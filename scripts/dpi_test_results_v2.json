@@ -1,0 +1,326 @@
+[
+  {
+    "test_name": "Saturation_2x",
+    "detection": {
+      "feb_13": false,
+      "feb_16": true,
+      "feb_17": true,
+      "all_detected": false,
+      "feb_analysis": {
+        "feb_13": {
+          "has_color": false,
+          "color_description": "white/no background color",
+          "confidence": 95
+        },
+        "feb_16": {
+          "has_color": true,
+          "color_description": "light blue/gray shading",
+          "confidence": 90
+        },
+        "feb_17": {
+          "has_color": true,
+          "color_description": "light yellow/cream shading",
+          "confidence": 85
+        }
+      },
+      "all_colored": [
+        "Feb 16",
+        "Feb 17"
+      ]
+    },
+    "raw_result": {
+      "february_analysis": {
+        "feb_13": {
+          "has_color": false,
+          "color_description": "white/no background color",
+          "confidence": 95
+        },
+        "feb_16": {
+          "has_color": true,
+          "color_description": "light blue/gray shading",
+          "confidence": 90
+        },
+        "feb_17": {
+          "has_color": true,
+          "color_description": "light yellow/cream shading",
+          "confidence": 85
+        }
+      },
+      "all_colored_dates_in_february": [
+        "Feb 16",
+        "Feb 17"
+      ],
+      "notes": "Feb 16 appears to have light blue/gray shading consistent with President's Day (holiday). Feb 17 appears to have light yellow shading consistent with a Teacher Workday. Feb 13 (Friday) appears to be white with no special coloring, indicating a regular school day. All other dates in February appear to be regular white/uncolored school days."
+    }
+  },
+  {
+    "test_name": "Saturation_3x",
+    "detection": {
+      "feb_13": false,
+      "feb_16": true,
+      "feb_17": true,
+      "all_detected": false,
+      "feb_analysis": {
+        "feb_13": {
+          "has_color": false,
+          "color_description": "white/no background color",
+          "confidence": 95
+        },
+        "feb_16": {
+          "has_color": true,
+          "color_description": "blue background",
+          "confidence": 100
+        },
+        "feb_17": {
+          "has_color": true,
+          "color_description": "yellow background",
+          "confidence": 100
+        }
+      },
+      "all_colored": [
+        "Feb 16",
+        "Feb 17"
+      ]
+    },
+    "raw_result": {
+      "february_analysis": {
+        "feb_13": {
+          "has_color": false,
+          "color_description": "white/no background color",
+          "confidence": 95
+        },
+        "feb_16": {
+          "has_color": true,
+          "color_description": "blue background",
+          "confidence": 100
+        },
+        "feb_17": {
+          "has_color": true,
+          "color_description": "yellow background",
+          "confidence": 100
+        }
+      },
+      "all_colored_dates_in_february": [
+        "Feb 16",
+        "Feb 17"
+      ],
+      "notes": "February 16 has a clear blue background (Holiday - Presidents Day according to the legend), and February 17 has a clear yellow background (Teacher Workday according to the legend). February 13 (Friday) appears to have no background coloring and is a regular white school day. All other dates in February appear to be regular white school days with no special coloring."
+    }
+  },
+  {
+    "test_name": "CLAHE",
+    "detection": {
+      "feb_13": false,
+      "feb_16": true,
+      "feb_17": true,
+      "all_detected": false,
+      "feb_analysis": {
+        "feb_13": {
+          "has_color": false,
+          "color_description": "white/no background color",
+          "confidence": 95
+        },
+        "feb_16": {
+          "has_color": true,
+          "color_description": "light gray/pale blue - appears to be a holiday marker",
+          "confidence": 90
+        },
+        "feb_17": {
+          "has_color": true,
+          "color_description": "light yellow/cream - appears to be teacher workday",
+          "confidence": 85
+        }
+      },
+      "all_colored": [
+        "Feb 16",
+        "Feb 17"
+      ]
+    },
+    "raw_result": {
+      "february_analysis": {
+        "feb_13": {
+          "has_color": false,
+          "color_description": "white/no background color",
+          "confidence": 95
+        },
+        "feb_16": {
+          "has_color": true,
+          "color_description": "light gray/pale blue - appears to be a holiday marker",
+          "confidence": 90
+        },
+        "feb_17": {
+          "has_color": true,
+          "color_description": "light yellow/cream - appears to be teacher workday",
+          "confidence": 85
+        }
+      },
+      "all_colored_dates_in_february": [
+        "Feb 16",
+        "Feb 17"
+      ],
+      "notes": "February 13 (Friday) appears to be a regular white background with no special coloring. February 16 has a light gray/pale blue background consistent with the holiday marking for President's Day (as listed in the holidays section). February 17 has a light yellow/cream background consistent with teacher workday marking. All other dates in February appear to have white/no special background coloring."
+    }
+  },
+  {
+    "test_name": "Saturation_Contrast",
+    "detection": {
+      "feb_13": false,
+      "feb_16": true,
+      "feb_17": true,
+      "all_detected": false,
+      "feb_analysis": {
+        "feb_13": {
+          "has_color": false,
+          "color_description": "white/no background color",
+          "confidence": 95
+        },
+        "feb_16": {
+          "has_color": true,
+          "color_description": "blue background - holiday",
+          "confidence": 100
+        },
+        "feb_17": {
+          "has_color": true,
+          "color_description": "yellow background - teacher workday",
+          "confidence": 100
+        }
+      },
+      "all_colored": [
+        "Feb 16",
+        "Feb 17"
+      ]
+    },
+    "raw_result": {
+      "february_analysis": {
+        "feb_13": {
+          "has_color": false,
+          "color_description": "white/no background color",
+          "confidence": 95
+        },
+        "feb_16": {
+          "has_color": true,
+          "color_description": "blue background - holiday",
+          "confidence": 100
+        },
+        "feb_17": {
+          "has_color": true,
+          "color_description": "yellow background - teacher workday",
+          "confidence": 100
+        }
+      },
+      "all_colored_dates_in_february": [
+        "Feb 16",
+        "Feb 17"
+      ],
+      "notes": "February 13 (Friday) appears to be a regular school day with no background coloring. February 16 has clear blue shading indicating it's President's Day (holiday), and February 17 has yellow shading indicating it's a Teacher Workday. All other dates in February appear to have white/no background color, indicating regular school days."
+    }
+  },
+  {
+    "test_name": "Sharp_Saturated",
+    "detection": {
+      "feb_13": false,
+      "feb_16": true,
+      "feb_17": true,
+      "all_detected": false,
+      "feb_analysis": {
+        "feb_13": {
+          "has_color": false,
+          "color_description": "white/no background color",
+          "confidence": 95
+        },
+        "feb_16": {
+          "has_color": true,
+          "color_description": "blue background - indicating holiday",
+          "confidence": 100
+        },
+        "feb_17": {
+          "has_color": true,
+          "color_description": "yellow background - indicating teacher workday",
+          "confidence": 100
+        }
+      },
+      "all_colored": [
+        "Feb 16",
+        "Feb 17"
+      ]
+    },
+    "raw_result": {
+      "february_analysis": {
+        "feb_13": {
+          "has_color": false,
+          "color_description": "white/no background color",
+          "confidence": 95
+        },
+        "feb_16": {
+          "has_color": true,
+          "color_description": "blue background - indicating holiday",
+          "confidence": 100
+        },
+        "feb_17": {
+          "has_color": true,
+          "color_description": "yellow background - indicating teacher workday",
+          "confidence": 100
+        }
+      },
+      "all_colored_dates_in_february": [
+        "Feb 16",
+        "Feb 17"
+      ],
+      "notes": "February 13th (Friday) appears to be a regular school day with no background coloring. February 16th has clear blue coloring (President's Day holiday as listed), and February 17th has clear yellow coloring (Teacher Workday). All other dates in February appear to have white/no background color, indicating regular school days."
+    }
+  },
+  {
+    "test_name": "DPI_400",
+    "detection": {
+      "feb_13": false,
+      "feb_16": true,
+      "feb_17": true,
+      "all_detected": false,
+      "feb_analysis": {
+        "feb_13": {
+          "has_color": false,
+          "color_description": "white/no background color",
+          "confidence": 95
+        },
+        "feb_16": {
+          "has_color": true,
+          "color_description": "blue background",
+          "confidence": 98
+        },
+        "feb_17": {
+          "has_color": true,
+          "color_description": "yellow background",
+          "confidence": 95
+        }
+      },
+      "all_colored": [
+        "Feb 16",
+        "Feb 17"
+      ]
+    },
+    "raw_result": {
+      "february_analysis": {
+        "feb_13": {
+          "has_color": false,
+          "color_description": "white/no background color",
+          "confidence": 95
+        },
+        "feb_16": {
+          "has_color": true,
+          "color_description": "blue background",
+          "confidence": 98
+        },
+        "feb_17": {
+          "has_color": true,
+          "color_description": "yellow background",
+          "confidence": 95
+        }
+      },
+      "all_colored_dates_in_february": [
+        "Feb 16",
+        "Feb 17"
+      ],
+      "notes": "February 16 has a clear blue background indicating it's Presidents Day (holiday). February 17 has a yellow background indicating it's a Teacher Workday. February 13 (Friday) appears to have no special coloring - it's a regular white background indicating a normal school day. All other dates in February (1-15, 18-28) appear to have white/no background coloring indicating regular school days."
+    }
+  }
+]

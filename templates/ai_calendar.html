@@ -236,6 +236,15 @@
     font-size: 0.95rem;
     color: var(--gray-800);
     border-bottom: 1px solid var(--gray-200);
+    /* Sticky header - stays at top while scrolling through section */
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0,0,0,0);
+    transition: box-shadow 0.2s ease;
+}
+.holiday-section h3.stuck {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 .holiday-table {
     width: 100%;
@@ -765,9 +774,157 @@ input[type="date"].ai-adjusted {
     100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
+@keyframes gentlePulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(139, 92, 246, 0); }
+}
+
+.pulse-attention {
+    animation: gentlePulse 2s ease-in-out infinite;
+    border-color: #8b5cf6 !important;
+}
+
+/* Special styling for table rows to make pulse animation visible */
+.holiday-table tr.pulse-attention {
+    background-color: rgba(139, 92, 246, 0.15) !important;
+    outline: 2px solid #8b5cf6;
+    outline-offset: -2px;
+}
+
+.disabled-holiday {
+    opacity: 0.5;
+    background-color: #f3f4f6 !important;
+}
+
+.disabled-holiday input[type="radio"] {
+    cursor: not-allowed;
+}
+
+/* Floating Scorekeeper Widget */
+.scorekeeper-widget {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+    color: white;
+    padding: 20px 25px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(124, 58, 237, 0.4);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    text-align: center;
+    min-width: 150px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.scorekeeper-widget.visible {
+    opacity: 1;
+    visibility: visible;
+}
+.scorekeeper-widget.bounce {
+    animation: scoreBounce 0.5s ease;
+}
+@keyframes scoreBounce {
+    0%, 100% { transform: translateY(-50%) scale(1); }
+    50% { transform: translateY(-50%) scale(1.08); }
+}
+
+/* Score increased - vibrant green, fast pulse */
+.scorekeeper-widget.score-up {
+    animation: scoreUp 0.4s ease;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    box-shadow: 0 8px 32px rgba(34, 197, 94, 0.5);
+}
+@keyframes scoreUp {
+    0% { transform: translateY(-50%) scale(1); }
+    25% { transform: translateY(-50%) scale(1.12); }
+    50% { transform: translateY(-50%) scale(1.05); }
+    75% { transform: translateY(-50%) scale(1.10); }
+    100% { transform: translateY(-50%) scale(1); }
+}
+
+/* Score decreased - greyed, slow pulse */
+.scorekeeper-widget.score-down {
+    animation: scoreDown 1.2s ease;
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    box-shadow: 0 8px 32px rgba(107, 114, 128, 0.4);
+}
+@keyframes scoreDown {
+    0% { transform: translateY(-50%) scale(1); }
+    50% { transform: translateY(-50%) scale(0.95); }
+    100% { transform: translateY(-50%) scale(1); }
+}
+
+/* Over 50% error state - red with pulse */
+.scorekeeper-widget.score-error {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    box-shadow: 0 8px 32px rgba(220, 38, 38, 0.5);
+    animation: scoreError 1s ease infinite;
+}
+@keyframes scoreError {
+    0%, 100% { transform: translateY(-50%) scale(1); box-shadow: 0 8px 32px rgba(220, 38, 38, 0.5); }
+    50% { transform: translateY(-50%) scale(1.02); box-shadow: 0 8px 40px rgba(220, 38, 38, 0.7); }
+}
+.scorekeeper-error-msg {
+    font-size: 0.7rem;
+    margin-top: 8px;
+    padding: 6px 8px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 4px;
+    line-height: 1.3;
+}
+
+/* Red pulse for suggestions */
+.pulse-error {
+    animation: pulseError 1s ease infinite !important;
+    outline: 3px solid #dc2626 !important;
+    outline-offset: 2px;
+}
+@keyframes pulseError {
+    0%, 100% { outline-color: #dc2626; box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+    50% { outline-color: #ef4444; box-shadow: 0 0 20px 5px rgba(220, 38, 38, 0.3); }
+}
+
+.scorekeeper-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.9;
+    margin-bottom: 5px;
+}
+.scorekeeper-value {
+    font-size: 2.8rem;
+    font-weight: 800;
+    line-height: 1;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+.scorekeeper-bar {
+    height: 8px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 4px;
+    margin: 12px 0;
+    overflow: hidden;
+}
+.scorekeeper-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #fbbf24, #f59e0b);
+    border-radius: 4px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+}
+.scorekeeper-days {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+.scorekeeper-icon {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
 @media print {
     body { font-size: 9px; margin: 0; padding: 0; }
-    nav, .actions-bar, .document-analyzer, .school-calendar-section, .floating-save-btn, .methodology-section, .definition-box, .faq-section, .step-guide, .step-badge { display: none !important; }
+    nav, .actions-bar, .document-analyzer, .school-calendar-section, .floating-save-btn, .methodology-section, .definition-box, .faq-section, .step-guide, .step-badge, .scorekeeper-widget { display: none !important; }
     .print-only { display: block !important; }
     .screen-only { display: none !important; }
     .ai-calendar-page { max-width: 100%; padding: 10px; }
@@ -826,7 +983,7 @@ input[type="date"].ai-adjusted {
         page-break-after: always !important;
         break-after: page !important;
     }
-    
+
     .calendar-grid { display: block !important; margin-top: 15px; }
     .month-card {
         width: 100% !important;
@@ -945,6 +1102,20 @@ input[type="date"].ai-adjusted {
 </style>
 
 <div class="ai-calendar-page">
+    <!-- Floating Scorekeeper Widget -->
+    <div id="scorekeeper-widget" class="scorekeeper-widget screen-only">
+        <div class="scorekeeper-icon">📊</div>
+        <div class="scorekeeper-label">Noncustodial Parent</div>
+        <div class="scorekeeper-value" id="scorekeeper-percent">--%</div>
+        <div class="scorekeeper-bar">
+            <div class="scorekeeper-fill" id="scorekeeper-fill" style="width: 0%"></div>
+        </div>
+        <div class="scorekeeper-days" id="scorekeeper-days">-- days/year</div>
+        <div class="scorekeeper-error-msg" id="scorekeeper-error" style="display: none;">
+            Designated noncustodial parenting time cannot exceed 50%
+        </div>
+    </div>
+
     <div class="page-header">
         <h1>Georgia Parenting Time Calendar Tool <span style="font-size: 0.6em; color: var(--primary);">v2.0</span></h1>
         <p class="subtitle">Based upon OCGA 19-6-15(b)(5.1) - {{ current_user.custom_h4 if current_user.custom_h4 else '' }}</p>
@@ -992,27 +1163,35 @@ input[type="date"].ai-adjusted {
     <div class="analyzer-cards-container screen-only">
     <div class="school-calendar-section" style="position: relative;">
         <div class="step-badge" style="position: absolute; top: -12px; left: 20px; width: 28px; height: 28px; background: linear-gradient(135deg, #27ae60, #2ecc71); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; box-shadow: 0 2px 6px rgba(0,0,0,0.2); z-index: 1;">1</div>
-        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">School Calendar Settings</h2>
-            <div class="legacy-toggle-inline" style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem;">
-                <span class="toggle-switch-small" id="legacyToggle" style="width: 36px; height: 18px; background: rgba(255,255,255,0.3); border-radius: 9px; cursor: pointer; position: relative; transition: all 0.3s;"></span>
-                <span style="opacity: 0.8;">Legacy Mode</span>
-            </div>
+        <h2 style="margin: 0 0 10px 0;">School Calendar Settings</h2>
+        <p style="margin-bottom: 15px;">Set break dates by selecting your school district or uploading a calendar.</p>
+
+        <div class="county-selector-section" id="countySelectorSection">
+            <label for="school-select" style="font-weight: 600; display: block; margin-bottom: 8px;">Find Your School District:</label>
+            <select id="school-select" style="width: 100%; max-width: 400px; padding: 10px; border: 2px solid #d1d5db; border-radius: 6px; font-size: 1rem;">
+                <option value="">Select a school district...</option>
+            </select>
+            <p id="schoolHolidaysStatus" style="margin-top: 10px; font-size: 0.85rem; color: #059669;"></p>
         </div>
-        <p>Set break dates by uploading a school calendar PDF or image (PNG, JPG).</p>
-        
+
+        <div style="display: flex; align-items: center; gap: 15px; margin: 20px 0;">
+            <hr style="flex: 1; border: none; border-top: 1px solid #d1d5db;">
+            <span style="color: #6b7280; font-size: 0.9rem;">OR</span>
+            <hr style="flex: 1; border: none; border-top: 1px solid #d1d5db;">
+        </div>
+
         <div class="calendar-extractor" id="calendarExtractorSection">
             <div class="upload-area" id="calendarUploadArea">
                 <input type="file" id="calendarPdfUpload" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,image/*">
-                <label for="calendarPdfUpload">Click to upload or drag & drop a school calendar PDF or image (PNG, JPG)</label>
+                <label for="calendarPdfUpload">Upload school calendar (PDF or image)</label>
                 <div class="file-name" id="calendarFileName"></div>
             </div>
-            
+
             <div class="spinner" id="calendarSpinner">
                 <div class="spinner-icon"></div>
                 <p>Extracting calendar dates...</p>
             </div>
-            
+
             <div class="extraction-results" id="extractionResults">
                 <h3>Extracted Holidays & Breaks</h3>
                 <div id="extractionContent"></div>
@@ -1022,15 +1201,6 @@ input[type="date"].ai-adjusted {
                 <p id="omittedHolidaysNote" style="color: #b45309; font-size: 0.85rem;"></p>
             </div>
         </div>
-        
-        
-        <div class="county-selector-section" id="countySelectorSection" style="display: none;">
-            <h4>Select Your School District</h4>
-            <select id="school-select" style="min-width: 280px;">
-                <option value="">Loading schools...</option>
-            </select>
-            <p id="schoolHolidaysStatus" style="margin-top: 10px; font-size: 0.85rem; color: #059669;"></p>
-        </div>
     </div>
 
     <div class="document-analyzer disabled" id="documentAnalyzer" style="position: relative;">
@@ -1039,7 +1209,7 @@ input[type="date"].ai-adjusted {
         <p>Upload your parenting plan PDF to automatically extract and populate the schedule settings below.</p>
         
         <div class="gating-message" id="gatingMessage">
-            Complete School Calendar Settings first (upload a school calendar PDF or enable Legacy Mode) before analyzing your parenting plan.
+            Complete School Calendar Settings first (select a school district or upload a calendar) before analyzing your parenting plan.
         </div>
         
         <div class="date-corrections-banner" id="datesCorrectionsBanner">
@@ -1060,7 +1230,92 @@ input[type="date"].ai-adjusted {
             <div class="spinner-icon"></div>
             <p>Analyzing document...</p>
         </div>
-        
+
+        <div style="display: flex; align-items: center; gap: 15px; margin: 20px 0;">
+            <hr style="flex: 1; border: none; border-top: 1px solid rgba(255,255,255,0.3);">
+            <span style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">OR</span>
+            <hr style="flex: 1; border: none; border-top: 1px solid rgba(255,255,255,0.3);">
+        </div>
+
+        <button type="button" id="manualConfigBtn" class="btn" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); color: white; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: all 0.3s;">
+            Configure Schedule Manually
+        </button>
+
+        <!-- Parent Names Modal -->
+        <div id="parentNamesModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
+            <div style="background: white; border-radius: 12px; padding: 30px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+                <h2 style="margin: 0 0 15px 0; color: var(--gray-900);">Parent Information</h2>
+
+                <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 0.85rem; color: #0369a1;">
+                    <strong>What is a "Noncustodial Parent"?</strong><br>
+                    The noncustodial parent is the parent with whom the child does not primarily reside. This is typically the parent with less than 50% of the parenting time.
+                </div>
+
+                <div style="background: #fefce8; border: 1px solid #fde047; border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 0.85rem; color: #854d0e;">
+                    <strong>Note:</strong> If you select Joint Physical Custody (50/50) later, it becomes irrelevant which parent is labeled "noncustodial" since parenting time will be equal.
+                </div>
+
+                <form id="parentNamesForm">
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--gray-700);">
+                            Noncustodial Parent's Name (Parent B):
+                        </label>
+                        <input type="text" id="parentBName" required placeholder="Enter first name"
+                            style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; box-sizing: border-box;">
+                        <div style="margin-top: 10px;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: #374151;">
+                                <input type="radio" name="parentBHoliday" value="fathers">
+                                Always gets Father's Day
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; margin-top: 5px; color: #374151;">
+                                <input type="radio" name="parentBHoliday" value="mothers">
+                                Always gets Mother's Day
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; margin-top: 5px; color: #374151;">
+                                <input type="radio" name="parentBHoliday" value="none" checked>
+                                No automatic holiday assignment
+                            </label>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--gray-700);">
+                            Custodial Parent's Name (Parent A):
+                        </label>
+                        <input type="text" id="parentAName" required placeholder="Enter first name"
+                            style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; box-sizing: border-box;">
+                        <div style="margin-top: 10px;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: #374151;">
+                                <input type="radio" name="parentAHoliday" value="fathers">
+                                Always gets Father's Day
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; margin-top: 5px; color: #374151;">
+                                <input type="radio" name="parentAHoliday" value="mothers">
+                                Always gets Mother's Day
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; margin-top: 5px; color: #374151;">
+                                <input type="radio" name="parentAHoliday" value="none" checked>
+                                No automatic holiday assignment
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="holidayConflictError" style="display: none; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; margin-bottom: 15px; font-size: 0.85rem; color: #dc2626;">
+                        Both parents cannot be assigned the same holiday. Please select different options.
+                    </div>
+
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button type="button" id="cancelParentNames" style="padding: 10px 20px; border: 1px solid #d1d5db; background: white; color: #374151; border-radius: 6px; cursor: pointer; font-size: 1rem;">
+                            Cancel
+                        </button>
+                        <button type="submit" style="padding: 10px 20px; background: #8b5cf6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;">
+                            Continue
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div class="analysis-results" id="analysisResults">
             <h3>Analysis Results</h3>
             <div id="resultsContent"></div>
@@ -1104,11 +1359,17 @@ input[type="date"].ai-adjusted {
     </div>
     
     <div class="config-section" id="manualConfigSection" style="display: none;">
-        <div class="card">
+        <div class="card" id="schedule-type-card">
             <h3>Schedule Type</h3>
             <div class="radio-group">
-                <label><input type="radio" name="schedule-type" value="weekend" checked> Weekend Parenting Time</label>
+                <label><input type="radio" name="schedule-type" value="weekend"> Weekend Parenting Time</label>
                 <label><input type="radio" name="schedule-type" value="joint"> Joint Physical Custody (50/50)</label>
+            </div>
+            <div id="recurring-daytime-checkbox-wrapper" style="margin-top: 10px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="show-recurring-daytime" style="width: 16px; height: 16px;">
+                    <span style="font-size: 0.9rem; color: var(--gray-700);">Include recurring daytime periods</span>
+                </label>
             </div>
         </div>
 
@@ -1121,7 +1382,7 @@ input[type="date"].ai-adjusted {
                 <label><input type="radio" name="joint-pattern" value="3-3-4-4"> 3-3-4-4</label>
                 <label><input type="radio" name="joint-pattern" value="2-2-3"> 2-2-3</label>
             </div>
-            <div class="form-group" style="margin-top: 15px;">
+            <div class="form-group" id="joint-exchange-day-wrapper" style="margin-top: 15px;">
                 <label><span id="joint-exchange-label">Exchange Day:</span> <select id="joint-exchange-day">
                     <option value="sunday">Sunday</option>
                     <option value="monday">Monday</option>
@@ -1132,7 +1393,7 @@ input[type="date"].ai-adjusted {
                     <option value="saturday">Saturday</option>
                 </select></label>
             </div>
-            <div class="form-group" style="margin-top: 10px;">
+            <div class="form-group" id="joint-first-parent-wrapper" style="margin-top: 10px;">
                 <label>First Period: <select id="joint-first-parent">
                     <option value="A">Parent A</option>
                     <option value="B">Parent B</option>
@@ -1147,12 +1408,15 @@ input[type="date"].ai-adjusted {
             <h3>Regular Weekly Schedule</h3>
             <p>Weekend overnights spent with Parent B:</p>
             <div class="radio-group">
+                <label><input type="radio" name="weekly-schedule" value="every-other"> Every Other</label>
                 <label><input type="radio" name="weekly-schedule" value="first-third"> 1st & 3rd</label>
                 <label><input type="radio" name="weekly-schedule" value="second-fourth"> 2nd & 4th</label>
-                <label><input type="radio" name="weekly-schedule" value="alternating-odd"> Alt Odd</label>
-                <label><input type="radio" name="weekly-schedule" value="alternating-even"> Alt Even</label>
                 <label><input type="radio" name="weekly-schedule" value="every"> Every</label>
                 <label><input type="radio" name="weekly-schedule" value="Omit" checked> Omit</label>
+            </div>
+            <div id="weekly-every-other-options" style="display: none; margin: 10px 0; padding: 8px; background: var(--gray-50); border-radius: 4px;">
+                <label style="margin-right: 15px;"><input type="radio" name="weekly-every-other-type" value="odd" checked> Odd Weeks</label>
+                <label><input type="radio" name="weekly-every-other-type" value="even"> Even Weeks</label>
             </div>
             <div class="form-group">
                 <label>Beginning: <select id="weekend-start">
@@ -1169,7 +1433,7 @@ input[type="date"].ai-adjusted {
             </div>
         </div>
 
-        <div class="card" id="recurring-daytime-card">
+        <div class="card" id="recurring-daytime-card" style="display: none;">
             <h3>Recurring Daytime Periods</h3>
             <div class="radio-group">
                 <label><input type="radio" name="recurring-freq" value="first-third"> 1st & 3rd</label>
@@ -1195,10 +1459,16 @@ input[type="date"].ai-adjusted {
     </div>
 
     <div id="breaksAndHolidaysSection" style="display: none;">
-    <h3 class="screen-only" style="font-size: 1rem; color: var(--gray-700); margin: 20px 0 15px;">School Breaks (Priority over regular schedule)</h3>
+    <div id="mirror-checkbox-card" class="screen-only" style="display: flex; align-items: center; justify-content: center; gap: 30px; margin: 20px 0 15px; padding: 10px; border-radius: 8px;">
+        <h3 style="font-size: 1rem; color: var(--gray-700); margin: 0;">School Breaks (Priority over regular schedule)</h3>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; color: var(--gray-600); background: #f0fdf4; padding: 8px 12px; border-radius: 6px; border: 1px solid #bbf7d0;">
+            <input type="checkbox" id="mirrorOddEven" style="width: 16px; height: 16px;">
+            Mirror all odd/even years <span style="color: #16a34a; font-weight: 500;">(recommended for most)</span>
+        </label>
+    </div>
     
     <div class="break-section">
-        <div class="break-card">
+        <div class="break-card" id="spring-break-even-card">
             <h3>Spring Break - EVEN YEARS</h3>
             <p>Spring Break takes priority over Easter</p>
             <div class="radio-group">
@@ -1211,7 +1481,7 @@ input[type="date"].ai-adjusted {
                 <div><label>Ending:</label><br><input type="date" id="evenSpringBreakEnd"></div>
             </div>
         </div>
-        <div class="break-card">
+        <div class="break-card" id="spring-break-odd-card">
             <h3>Spring Break - ODD YEARS</h3>
             <p>Spring Break takes priority over Easter</p>
             <div class="radio-group">
@@ -1227,7 +1497,7 @@ input[type="date"].ai-adjusted {
     </div>
 
     <div class="break-section">
-        <div class="break-card">
+        <div class="break-card" id="fall-break-even-card">
             <h3>Fall Break - EVEN YEARS</h3>
             <div class="radio-group">
                 <label><input type="radio" name="evenFallBreakParent" value="A"> Parent A</label>
@@ -1239,7 +1509,7 @@ input[type="date"].ai-adjusted {
                 <div><label>Ending:</label><br><input type="date" id="evenFallBreakEnd"></div>
             </div>
         </div>
-        <div class="break-card">
+        <div class="break-card" id="fall-break-odd-card">
             <h3>Fall Break - ODD YEARS</h3>
             <div class="radio-group">
                 <label><input type="radio" name="oddFallBreakParent" value="A"> Parent A</label>
@@ -1254,7 +1524,7 @@ input[type="date"].ai-adjusted {
     </div>
 
     <div class="break-section">
-        <div class="break-card">
+        <div class="break-card" id="thanksgiving-even-card">
             <h3>Thanksgiving Break - EVEN YEARS</h3>
             <div class="radio-group">
                 <label><input type="radio" name="evenThanksgivingBreakParent" value="A" onchange="toggleSplitFields('evenThanksgiving')"> Parent A</label>
@@ -1270,16 +1540,13 @@ input[type="date"].ai-adjusted {
                 <div class="split-row">
                     <div><label>Exchange Date:</label><br><input type="date" id="evenThanksgivingExchangeDate"></div>
                     <div><label>First Half Parent:</label><br>
-                        <select id="evenThanksgivingFirstSplit">
-                            <option value="">Select...</option>
-                            <option value="A">Parent A</option>
-                            <option value="B">Parent B</option>
-                        </select>
+                        <label><input type="radio" name="evenThanksgivingFirstSplit" value="A"> Parent A</label>
+                        <label><input type="radio" name="evenThanksgivingFirstSplit" value="B"> Parent B</label>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="break-card">
+        <div class="break-card" id="thanksgiving-odd-card">
             <h3>Thanksgiving Break - ODD YEARS</h3>
             <div class="radio-group">
                 <label><input type="radio" name="oddThanksgivingBreakParent" value="A" onchange="toggleSplitFields('oddThanksgiving')"> Parent A</label>
@@ -1295,11 +1562,8 @@ input[type="date"].ai-adjusted {
                 <div class="split-row">
                     <div><label>Exchange Date:</label><br><input type="date" id="oddThanksgivingExchangeDate"></div>
                     <div><label>First Half Parent:</label><br>
-                        <select id="oddThanksgivingFirstSplit">
-                            <option value="">Select...</option>
-                            <option value="A">Parent A</option>
-                            <option value="B">Parent B</option>
-                        </select>
+                        <label><input type="radio" name="oddThanksgivingFirstSplit" value="A"> Parent A</label>
+                        <label><input type="radio" name="oddThanksgivingFirstSplit" value="B"> Parent B</label>
                     </div>
                 </div>
             </div>
@@ -1307,7 +1571,7 @@ input[type="date"].ai-adjusted {
     </div>
 
     <div class="break-section">
-        <div class="break-card">
+        <div class="break-card" id="christmas-even-card">
             <h3>Christmas/Winter Break - EVEN YEARS</h3>
             <div class="radio-group">
                 <label><input type="radio" name="evenChristmasBreakParent" value="A" onchange="toggleSplitFields('evenChristmas')"> Parent A</label>
@@ -1323,16 +1587,13 @@ input[type="date"].ai-adjusted {
                 <div class="split-row">
                     <div><label>Exchange Date:</label><br><input type="date" id="evenChristmasExchangeDate"></div>
                     <div><label>First Half Parent:</label><br>
-                        <select id="evenChristmasFirstSplit">
-                            <option value="">Select...</option>
-                            <option value="A">Parent A</option>
-                            <option value="B">Parent B</option>
-                        </select>
+                        <label><input type="radio" name="evenChristmasFirstSplit" value="A"> Parent A</label>
+                        <label><input type="radio" name="evenChristmasFirstSplit" value="B"> Parent B</label>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="break-card">
+        <div class="break-card" id="christmas-odd-card">
             <h3>Christmas/Winter Break - ODD YEARS</h3>
             <div class="radio-group">
                 <label><input type="radio" name="oddChristmasBreakParent" value="A" onchange="toggleSplitFields('oddChristmas')"> Parent A</label>
@@ -1348,11 +1609,8 @@ input[type="date"].ai-adjusted {
                 <div class="split-row">
                     <div><label>Exchange Date:</label><br><input type="date" id="oddChristmasExchangeDate"></div>
                     <div><label>First Half Parent:</label><br>
-                        <select id="oddChristmasFirstSplit">
-                            <option value="">Select...</option>
-                            <option value="A">Parent A</option>
-                            <option value="B">Parent B</option>
-                        </select>
+                        <label><input type="radio" name="oddChristmasFirstSplit" value="A"> Parent A</label>
+                        <label><input type="radio" name="oddChristmasFirstSplit" value="B"> Parent B</label>
                     </div>
                 </div>
             </div>
@@ -1366,7 +1624,7 @@ input[type="date"].ai-adjusted {
     <input type="hidden" id="currentBreakType">
 
     <div class="break-section">
-        <div class="break-card">
+        <div class="break-card" id="winter-even-card">
             <h3>February Winter Break - EVEN YEARS</h3>
             <div class="radio-group">
                 <label><input type="radio" name="evenWinterBreakParent" value="A"> Parent A</label>
@@ -1378,7 +1636,7 @@ input[type="date"].ai-adjusted {
                 <div><label>Ending:</label><br><input type="date" id="evenWinterBreakEnd"></div>
             </div>
         </div>
-        <div class="break-card">
+        <div class="break-card" id="winter-odd-card">
             <h3>February Winter Break - ODD YEARS</h3>
             <div class="radio-group">
                 <label><input type="radio" name="oddWinterBreakParent" value="A"> Parent A</label>
@@ -1393,7 +1651,7 @@ input[type="date"].ai-adjusted {
     </div>
 
     <div class="break-section">
-        <div class="break-card">
+        <div class="break-card" id="other-even-card">
             <h3>March/Other Break - EVEN YEARS</h3>
             <div class="radio-group">
                 <label><input type="radio" name="evenOtherBreakParent" value="A"> Parent A</label>
@@ -1405,7 +1663,7 @@ input[type="date"].ai-adjusted {
                 <div><label>Ending:</label><br><input type="date" id="evenOtherBreakEnd"></div>
             </div>
         </div>
-        <div class="break-card">
+        <div class="break-card" id="other-odd-card">
             <h3>March/Other Break - ODD YEARS</h3>
             <div class="radio-group">
                 <label><input type="radio" name="oddOtherBreakParent" value="A"> Parent A</label>
@@ -1420,9 +1678,9 @@ input[type="date"].ai-adjusted {
     </div>
 
     <h3 class="screen-only" style="font-size: 1rem; color: var(--gray-700); margin: 20px 0 15px;">Summer Schedule</h3>
-    
+
     <div class="break-section">
-        <div class="break-card">
+        <div class="break-card" id="summer-even-card">
             <h3>Summer Schedule - EVEN YEARS</h3>
             <p>Takes priority over regular weekly schedule and July 4th (not Father's Day)</p>
             <div class="radio-group">
@@ -1437,7 +1695,7 @@ input[type="date"].ai-adjusted {
                 <input type="radio" name="evenSummerSchedule" value="All"> Parent B: First Saturday after school release to last Sunday before school resumes
             </label>
         </div>
-        <div class="break-card">
+        <div class="break-card" id="summer-odd-card">
             <h3>Summer Schedule - ODD YEARS</h3>
             <p>Takes priority during June, July, August when selected</p>
             <div class="radio-group">
@@ -1455,7 +1713,7 @@ input[type="date"].ai-adjusted {
     </div>
 
     <div class="holiday-section" id="holiday-even-section">
-        <h3>Holiday Schedule - EVEN YEARS</h3>
+        <h3 class="sticky-header" style="position: sticky; top: 0; background: white; padding: 10px 0; margin: 0; z-index: 10; border-bottom: 2px solid var(--gray-200);">Holiday Schedule - EVEN YEARS</h3>
         <p style="padding: 10px; font-size: 0.85rem; color: var(--gray-600);">Select the parent with whom the child will spend each holiday. Takes priority over regular and summer schedules.</p>
         <table class="holiday-table">
             <thead>
@@ -1466,7 +1724,7 @@ input[type="date"].ai-adjusted {
     </div>
 
     <div class="holiday-section" id="holiday-odd-section">
-        <h3>Holiday Schedule - ODD YEARS</h3>
+        <h3 class="sticky-header" style="position: sticky; top: 0; background: white; padding: 10px 0; margin: 0; z-index: 10; border-bottom: 2px solid var(--gray-200);">Holiday Schedule - ODD YEARS</h3>
         <p style="padding: 10px; font-size: 0.85rem; color: var(--gray-600);">Select the parent with whom the child will spend each holiday. Takes priority over regular and summer schedules.</p>
         <table class="holiday-table">
             <thead>
@@ -1480,6 +1738,9 @@ input[type="date"].ai-adjusted {
         <button class="btn btn-primary" id="populate-btn">Populate Calendars</button>
         <button class="btn btn-secondary" id="reset-btn">Reset</button>
         <button class="btn" id="print-btn" style="background: #166534; color: white; border: none;">Printable Court-Ready Report</button>
+        {% if not is_guest %}
+        <button class="btn" id="save-btn-actions" style="background: #8b5cf6; color: white; border: none;">💾 Save</button>
+        {% endif %}
     </div>
     </div>
 
@@ -1634,13 +1895,13 @@ input[type="date"].ai-adjusted {
         <div id="emailError" style="color:#ef4444; margin-bottom:10px; display:none;"></div>
         <button class="btn btn-primary" onclick="submitGuestEmail()" style="width:100%; padding:12px; background:#8b5cf6; font-size:1rem;">Submit & Continue</button>
 
-        <div style="margin-top:20px; padding-top:20px; border-top:1px solid #e5e7eb;">
+        <form action="/login" method="post" onsubmit="return modalLogin(event, 'email')" style="margin-top:20px; padding-top:20px; border-top:1px solid #e5e7eb;">
             <p style="color:#6b7280; margin-bottom:10px; font-size:0.9rem;">Already have an account? Log in:</p>
             <input type="text" id="modalLoginUsername" name="username" autocomplete="username" placeholder="Username" style="width:100%; padding:10px; border:2px solid #d1d5db; border-radius:8px; font-size:0.95rem; margin-bottom:10px; box-sizing:border-box;">
             <input type="password" id="modalLoginPassword" name="password" autocomplete="current-password" placeholder="Password" style="width:100%; padding:10px; border:2px solid #d1d5db; border-radius:8px; font-size:0.95rem; margin-bottom:10px; box-sizing:border-box;">
             <div id="modalLoginError" style="color:#ef4444; margin-bottom:10px; display:none;"></div>
-            <button class="btn" onclick="modalLogin('email')" style="width:100%; padding:10px; background:#3b82f6; color:white; font-size:0.95rem; border:none; border-radius:8px; cursor:pointer;">Log In</button>
-        </div>
+            <button type="submit" class="btn" style="width:100%; padding:10px; background:#3b82f6; color:white; font-size:0.95rem; border:none; border-radius:8px; cursor:pointer;">Log In</button>
+        </form>
         <p style="margin-top:15px; font-size:0.85rem; color:#9ca3af; text-align:center;">Or <a href="{{ url_for('auth.register') }}" style="color:#8b5cf6;">create a free account</a> for more tokens.</p>
     </div>
 </div>
@@ -1657,13 +1918,13 @@ input[type="date"].ai-adjusted {
         <div id="phoneError" style="color:#ef4444; margin-bottom:10px; display:none;"></div>
         <button class="btn btn-primary" onclick="submitGuestPhone()" style="width:100%; padding:12px; background:#8b5cf6; font-size:1rem;">Submit & Continue</button>
 
-        <div style="margin-top:20px; padding-top:20px; border-top:1px solid #e5e7eb;">
+        <form action="/login" method="post" onsubmit="return modalLogin(event, 'phone')" style="margin-top:20px; padding-top:20px; border-top:1px solid #e5e7eb;">
             <p style="color:#6b7280; margin-bottom:10px; font-size:0.9rem;">Already have an account? Log in:</p>
             <input type="text" id="phoneModalLoginUsername" name="username" autocomplete="username" placeholder="Username" style="width:100%; padding:10px; border:2px solid #d1d5db; border-radius:8px; font-size:0.95rem; margin-bottom:10px; box-sizing:border-box;">
             <input type="password" id="phoneModalLoginPassword" name="password" autocomplete="current-password" placeholder="Password" style="width:100%; padding:10px; border:2px solid #d1d5db; border-radius:8px; font-size:0.95rem; margin-bottom:10px; box-sizing:border-box;">
             <div id="phoneModalLoginError" style="color:#ef4444; margin-bottom:10px; display:none;"></div>
-            <button class="btn" onclick="modalLogin('phone')" style="width:100%; padding:10px; background:#3b82f6; color:white; font-size:0.95rem; border:none; border-radius:8px; cursor:pointer;">Log In</button>
-        </div>
+            <button type="submit" class="btn" style="width:100%; padding:10px; background:#3b82f6; color:white; font-size:0.95rem; border:none; border-radius:8px; cursor:pointer;">Log In</button>
+        </form>
         <p style="margin-top:15px; font-size:0.85rem; color:#9ca3af; text-align:center;">Or <a href="{{ url_for('auth.register') }}" style="color:#8b5cf6;">create a free account</a> for more tokens.</p>
     </div>
 </div>
@@ -1951,7 +2212,7 @@ function generateHolidayTables() {
 
 function createHolidayRow(h, type, idx) {
     // Date values are populated dynamically by populateAllHolidayDates()
-    return `<tr>
+    return `<tr id="${type}-holiday-row-${idx}">
         <td>${h.name}</td>
         <td data-label="Parent A"><input type="radio" name="${type}-holiday-${idx}" value="A"></td>
         <td data-label="Parent B"><input type="radio" name="${type}-holiday-${idx}" value="B"></td>
@@ -1961,28 +2222,456 @@ function createHolidayRow(h, type, idx) {
     </tr>`;
 }
 
-let isLegacyMode = false;
 let extractedCalendarData = null;
 let calendarReady = false;
+
+// Replace "Parent A" and "Parent B" labels with actual names
+function replaceParentLabels(parentAName, parentBName) {
+    // Get first names only (in case full names were entered)
+    const aFirstName = parentAName.split(' ')[0];
+    const bFirstName = parentBName.split(' ')[0];
+
+    // Helper to replace text in text nodes only (preserves event listeners on child elements)
+    function replaceTextInNode(node, search, replace) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            node.textContent = node.textContent.replace(new RegExp(search, 'g'), replace);
+        } else {
+            node.childNodes.forEach(child => replaceTextInNode(child, search, replace));
+        }
+    }
+
+    // Update radio button labels (only text nodes, preserves input elements and their listeners)
+    document.querySelectorAll('label').forEach(label => {
+        if (label.textContent.includes('Parent A')) {
+            replaceTextInNode(label, 'Parent A', aFirstName);
+        }
+        if (label.textContent.includes('Parent B')) {
+            replaceTextInNode(label, 'Parent B', bFirstName);
+        }
+    });
+
+    // Update table headers
+    document.querySelectorAll('th').forEach(th => {
+        if (th.textContent.trim() === 'Parent A') {
+            th.textContent = aFirstName;
+        }
+        if (th.textContent.trim() === 'Parent B') {
+            th.textContent = bFirstName;
+        }
+    });
+
+    // Update the party identifiers at the top
+    const parentAInfo = document.getElementById('parent-a-info');
+    const parentBInfo = document.getElementById('parent-b-info');
+    if (parentAInfo) {
+        parentAInfo.innerHTML = `<strong>${aFirstName}:</strong> --<br><small>Custodial</small>`;
+    }
+    if (parentBInfo) {
+        parentBInfo.innerHTML = `<strong>${bFirstName}:</strong> --<br><small>Non-Custodial</small>`;
+    }
+
+    // Update split field labels
+    document.querySelectorAll('.split-fields select option').forEach(option => {
+        if (option.textContent === 'Parent A') {
+            option.textContent = aFirstName;
+        }
+        if (option.textContent === 'Parent B') {
+            option.textContent = bFirstName;
+        }
+    });
+
+    // Update paragraphs and other text
+    document.querySelectorAll('p').forEach(p => {
+        if (p.textContent.includes('Parent A') || p.textContent.includes('Parent B')) {
+            p.innerHTML = p.innerHTML.replace(/Parent A/g, aFirstName).replace(/Parent B/g, bFirstName);
+        }
+    });
+}
 
 function toggleSplitFields(prefix) {
     const radioName = `${prefix}BreakParent`;
     const selected = document.querySelector(`input[name="${radioName}"]:checked`);
     const splitFieldsDiv = document.getElementById(`${prefix}SplitFields`);
-    
+
     if (splitFieldsDiv) {
         if (selected && selected.value === 'Split') {
             splitFieldsDiv.style.display = 'block';
+
+            // Set default exchange date based on break type
+            const exchangeDateField = document.getElementById(`${prefix}ExchangeDate`);
+            const breakStartField = document.getElementById(`${prefix}BreakStart`);
+
+            if (exchangeDateField && breakStartField && breakStartField.value && !exchangeDateField.value) {
+                const breakStart = new Date(breakStartField.value + 'T00:00:00');
+                const year = breakStart.getFullYear();
+
+                if (prefix.includes('Thanksgiving')) {
+                    // Thanksgiving is 4th Thursday of November
+                    const nov1 = new Date(year, 10, 1); // November 1st
+                    const firstThursday = nov1.getDate() + ((4 - nov1.getDay() + 7) % 7);
+                    const thanksgiving = new Date(year, 10, firstThursday + 21); // 4th Thursday
+                    exchangeDateField.value = thanksgiving.toISOString().split('T')[0];
+                } else if (prefix.includes('Christmas')) {
+                    // Christmas is December 25th
+                    const christmas = new Date(year, 11, 25);
+                    exchangeDateField.value = christmas.toISOString().split('T')[0];
+                }
+            }
         } else {
             splitFieldsDiv.style.display = 'none';
         }
     }
 }
 
+// Pulsing sequence for manual configuration walkthrough
+const PULSE_SEQUENCE = [
+    { radioName: 'schedule-type', cardId: 'schedule-type-card' },
+    { radioName: 'evenSpringBreakParent', cardId: 'spring-break-even-card' },
+    { radioName: 'oddSpringBreakParent', cardId: 'spring-break-odd-card' },
+    { radioName: 'evenFallBreakParent', cardId: 'fall-break-even-card' },
+    { radioName: 'oddFallBreakParent', cardId: 'fall-break-odd-card' },
+    { radioName: 'evenThanksgivingBreakParent', cardId: 'thanksgiving-even-card' },
+    { radioName: 'oddThanksgivingBreakParent', cardId: 'thanksgiving-odd-card' },
+    { radioName: 'evenChristmasBreakParent', cardId: 'christmas-even-card' },
+    { radioName: 'oddChristmasBreakParent', cardId: 'christmas-odd-card' },
+    { radioName: 'evenWinterBreakParent', cardId: 'winter-even-card' },
+    { radioName: 'oddWinterBreakParent', cardId: 'winter-odd-card' },
+    { radioName: 'evenOtherBreakParent', cardId: 'other-even-card' },
+    { radioName: 'oddOtherBreakParent', cardId: 'other-odd-card' },
+    { radioName: 'evenSummerSchedule', cardId: 'summer-even-card' },
+    { radioName: 'oddSummerSchedule', cardId: 'summer-odd-card' },
+    // Even year holidays (0-9: MLK, Presidents, Easter, Mothers, Memorial, Fathers, July4, Labor, Halloween, Veterans)
+    { radioName: 'even-holiday-0', cardId: 'even-holiday-row-0' },
+    { radioName: 'even-holiday-1', cardId: 'even-holiday-row-1' },
+    { radioName: 'even-holiday-2', cardId: 'even-holiday-row-2' },
+    { radioName: 'even-holiday-3', cardId: 'even-holiday-row-3' },
+    { radioName: 'even-holiday-4', cardId: 'even-holiday-row-4' },
+    { radioName: 'even-holiday-5', cardId: 'even-holiday-row-5' },
+    { radioName: 'even-holiday-6', cardId: 'even-holiday-row-6' },
+    { radioName: 'even-holiday-7', cardId: 'even-holiday-row-7' },
+    { radioName: 'even-holiday-8', cardId: 'even-holiday-row-8' },
+    { radioName: 'even-holiday-9', cardId: 'even-holiday-row-9' },
+    // Odd year holidays
+    { radioName: 'odd-holiday-0', cardId: 'odd-holiday-row-0' },
+    { radioName: 'odd-holiday-1', cardId: 'odd-holiday-row-1' },
+    { radioName: 'odd-holiday-2', cardId: 'odd-holiday-row-2' },
+    { radioName: 'odd-holiday-3', cardId: 'odd-holiday-row-3' },
+    { radioName: 'odd-holiday-4', cardId: 'odd-holiday-row-4' },
+    { radioName: 'odd-holiday-5', cardId: 'odd-holiday-row-5' },
+    { radioName: 'odd-holiday-6', cardId: 'odd-holiday-row-6' },
+    { radioName: 'odd-holiday-7', cardId: 'odd-holiday-row-7' },
+    { radioName: 'odd-holiday-8', cardId: 'odd-holiday-row-8' },
+    { radioName: 'odd-holiday-9', cardId: 'odd-holiday-row-9' }
+];
+
+let currentPulseIndex = 0;
+let manualConfigMode = false;
+let populateDebounceTimer = null;
+
+// Debounced auto-populate function
+function debouncedPopulate() {
+    clearTimeout(populateDebounceTimer);
+    populateDebounceTimer = setTimeout(() => {
+        populateCalendars();
+        updateScorekeeper();
+    }, 800);
+}
+
+// Scorekeeper widget functions
+function showScorekeeper() {
+    const widget = document.getElementById('scorekeeper-widget');
+    if (widget) widget.classList.add('visible');
+}
+
+function hideScorekeeper() {
+    const widget = document.getElementById('scorekeeper-widget');
+    if (widget) widget.classList.remove('visible');
+}
+
+function updateScorekeeper() {
+    const widget = document.getElementById('scorekeeper-widget');
+    const percentEl = document.getElementById('scorekeeper-percent');
+    const fillEl = document.getElementById('scorekeeper-fill');
+    const daysEl = document.getElementById('scorekeeper-days');
+    const errorEl = document.getElementById('scorekeeper-error');
+    const printBtn = document.getElementById('print-btn');
+
+    if (!widget || !percentEl || !fillEl || !daysEl) return;
+
+    // Get the yearly average from the display
+    const avgDisplay = document.getElementById('average-days-display');
+    const avgDays = avgDisplay ? parseFloat(avgDisplay.textContent) || 0 : 0;
+
+    // Calculate percentage (365 days in a year)
+    const percent = Math.min(100, Math.max(0, (avgDays / 365) * 100));
+
+    // Get previous value before updating
+    const prevPercent = parseFloat(percentEl.textContent) || 0;
+
+    // Update display
+    percentEl.textContent = percent.toFixed(1) + '%';
+    fillEl.style.width = Math.min(percent, 50) + '%'; // Cap bar at 50%
+    daysEl.textContent = avgDays.toFixed(1) + ' days/year';
+
+    // Check for over 50% error condition
+    const isJointCustody = document.querySelector('input[name="schedule-type"]:checked')?.value === 'joint';
+    const jointFirstParent = document.getElementById('joint-first-parent');
+    const manualConfigBtn = document.getElementById('startManualConfigBtn');
+
+    if (percent > 50) {
+        // Show error state
+        widget.classList.add('score-error');
+        widget.classList.remove('bounce', 'score-up', 'score-down');
+        if (errorEl) errorEl.style.display = 'block';
+
+        // Disable print button
+        if (printBtn) {
+            printBtn.disabled = true;
+            printBtn.style.opacity = '0.5';
+            printBtn.style.cursor = 'not-allowed';
+        }
+
+        // If joint custody, pulse suggestions
+        if (isJointCustody) {
+            if (jointFirstParent) jointFirstParent.classList.add('pulse-error');
+            if (manualConfigBtn) manualConfigBtn.classList.add('pulse-error');
+        }
+    } else {
+        // Clear error state
+        widget.classList.remove('score-error');
+        if (errorEl) errorEl.style.display = 'none';
+
+        // Enable print button
+        if (printBtn) {
+            printBtn.disabled = false;
+            printBtn.style.opacity = '1';
+            printBtn.style.cursor = 'pointer';
+        }
+
+        // Remove suggestion pulses
+        if (jointFirstParent) jointFirstParent.classList.remove('pulse-error');
+        if (manualConfigBtn) manualConfigBtn.classList.remove('pulse-error');
+
+        // Directional animation if value changed significantly
+        if (Math.abs(percent - prevPercent) > 0.5) {
+            // Remove any existing animation classes
+            widget.classList.remove('bounce', 'score-up', 'score-down');
+            void widget.offsetWidth; // Trigger reflow
+
+            if (percent > prevPercent) {
+                // Score increased - vibrant green, fast pulse
+                widget.classList.add('score-up');
+                // Return to purple after animation
+                setTimeout(() => {
+                    widget.classList.remove('score-up');
+                }, 400);
+            } else {
+                // Score decreased - grey, slow pulse
+                widget.classList.add('score-down');
+                // Return to purple after animation
+                setTimeout(() => {
+                    widget.classList.remove('score-down');
+                }, 1200);
+            }
+        }
+    }
+}
+
+// Check if currently in breaks/holidays section for scorekeeper visibility
+function isInBreaksOrHolidays() {
+    // Check if pulse is in breaks or holidays section
+    if (manualConfigMode && currentPulseIndex >= 1) { // After schedule-type
+        return true;
+    }
+    // Also show if breaks section is visible and scrolled to
+    const breaksSection = document.getElementById('breaksAndHolidaysSection');
+    if (breaksSection && breaksSection.style.display !== 'none') {
+        const rect = breaksSection.getBoundingClientRect();
+        return rect.top < window.innerHeight && rect.bottom > 0;
+    }
+    return false;
+}
+
+function startPulsingSequence() {
+    manualConfigMode = true;
+    currentPulseIndex = 0;
+    pulseCurrentSection();
+}
+
+function pulseCurrentSection() {
+    // Remove pulse from all
+    document.querySelectorAll('.pulse-attention').forEach(el =>
+        el.classList.remove('pulse-attention'));
+
+    // Skip fields that already have non-Omit values selected (DocuSign-style)
+    while (currentPulseIndex < PULSE_SEQUENCE.length) {
+        const section = PULSE_SEQUENCE[currentPulseIndex];
+        const selectedRadio = document.querySelector(`input[name="${section.radioName}"]:checked`);
+
+        // If no selection or selection is Omit/omit, this field needs attention
+        if (!selectedRadio || selectedRadio.value === 'Omit' || selectedRadio.value === 'omit') {
+            break; // Found an incomplete field, stop here
+        }
+
+        // This field is already complete, skip to next
+        currentPulseIndex++;
+    }
+
+    if (currentPulseIndex >= PULSE_SEQUENCE.length) {
+        manualConfigMode = false;
+        // Keep scorekeeper visible - don't hide it
+        // Calendars auto-populate via debounce, so go directly to Print button
+        const printBtn = document.getElementById('print-btn');
+        if (printBtn) {
+            printBtn.classList.add('pulse-attention');
+            printBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+    }
+
+    const section = PULSE_SEQUENCE[currentPulseIndex];
+    const card = document.getElementById(section.cardId);
+
+    if (card) {
+        card.classList.add('pulse-attention');
+        // Don't scroll when change is triggered by mirroring
+        if (!window.isMirroring) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+}
+
+function onPulseSelectionMade(radioName) {
+    if (!manualConfigMode) return;
+    // Don't advance pulse when change is triggered by mirroring
+    if (window.isMirroring) return;
+
+    // Special handling for schedule-type: pulse the appropriate next card
+    if (radioName === 'schedule-type') {
+        const isJoint = document.querySelector('input[name="schedule-type"]:checked')?.value === 'joint';
+        const nextCardId = isJoint ? 'joint-options-card' : 'weekend-schedule-card';
+
+        // Remove current pulse
+        document.querySelectorAll('.pulse-attention').forEach(el =>
+            el.classList.remove('pulse-attention'));
+
+        // Pulse the conditional card
+        setTimeout(() => {
+            const card = document.getElementById(nextCardId);
+            if (card) {
+                card.classList.add('pulse-attention');
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 300);
+
+        // Set a flag so we know we're in the conditional step
+        window.pulseConditionalCard = nextCardId;
+        return;
+    }
+
+    // Special handling for joint-pattern or weekend schedule radios (after schedule-type)
+    if (window.pulseConditionalCard &&
+        ((radioName === 'joint-pattern' && window.pulseConditionalCard === 'joint-options-card') ||
+         (radioName === 'weekly-schedule' && window.pulseConditionalCard === 'weekend-schedule-card'))) {
+        window.pulseConditionalCard = null;
+
+        // Pulse the mirror checkbox card next
+        document.querySelectorAll('.pulse-attention').forEach(el =>
+            el.classList.remove('pulse-attention'));
+
+        setTimeout(() => {
+            const mirrorCard = document.getElementById('mirror-checkbox-card');
+            if (mirrorCard) {
+                mirrorCard.classList.add('pulse-attention');
+                mirrorCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 300);
+
+        window.pulseMirrorCheckbox = true;
+        return;
+    }
+
+    // After mirror checkbox interaction, continue to spring break
+    if (window.pulseMirrorCheckbox && radioName === 'mirrorOddEven') {
+        window.pulseMirrorCheckbox = false;
+        currentPulseIndex = PULSE_SEQUENCE.findIndex(s => s.cardId === 'spring-break-even-card');
+        setTimeout(pulseCurrentSection, 300);
+        return;
+    }
+
+    // If user skipped mirror checkbox and selected a break directly, clear the flag
+    if (window.pulseMirrorCheckbox) {
+        window.pulseMirrorCheckbox = false;
+        // Also clear the pulse from mirror card
+        document.querySelectorAll('.pulse-attention').forEach(el =>
+            el.classList.remove('pulse-attention'));
+    }
+
+    // Check if Split was selected - if so, pulse the split fields section
+    if (radioName.endsWith('BreakParent')) {
+        const selectedValue = document.querySelector(`input[name="${radioName}"]:checked`)?.value;
+        if (selectedValue === 'Split') {
+            // Derive split fields ID: e.g., "evenThanksgivingBreakParent" -> "evenThanksgivingSplitFields"
+            const prefix = radioName.replace('BreakParent', '');
+            const splitFieldsId = `${prefix}SplitFields`;
+            const splitFields = document.getElementById(splitFieldsId);
+
+            if (splitFields) {
+                // Remove current pulse
+                document.querySelectorAll('.pulse-attention').forEach(el =>
+                    el.classList.remove('pulse-attention'));
+
+                // Pulse the split fields
+                setTimeout(() => {
+                    splitFields.classList.add('pulse-attention');
+                    splitFields.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+
+                // Set flag to track we're in split fields step
+                window.pulseSplitFields = splitFieldsId;
+                return;
+            }
+        }
+    }
+
+    // If we were in split fields and user interacted with them, advance normally
+    if (window.pulseSplitFields) {
+        window.pulseSplitFields = null;
+    }
+
+    // Find index of this radio in the sequence
+    const selectedIndex = PULSE_SEQUENCE.findIndex(s => s.radioName === radioName);
+
+    if (selectedIndex === -1) return; // Not in sequence
+
+    // Smart advancement: move to next section AFTER the one just selected
+    // This handles both normal progression and skip-ahead cases
+    if (selectedIndex >= currentPulseIndex) {
+        currentPulseIndex = selectedIndex + 1;
+
+        // Skip ODD sections if mirror checkbox is checked
+        if (document.getElementById('mirrorOddEven')?.checked) {
+            while (currentPulseIndex < PULSE_SEQUENCE.length) {
+                const section = PULSE_SEQUENCE[currentPulseIndex];
+                if (section.cardId.includes('-odd-') || section.cardId.includes('odd-') ||
+                    section.radioName.includes('odd') || section.radioName.startsWith('odd')) {
+                    currentPulseIndex++;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        // Small delay before pulsing next section
+        setTimeout(pulseCurrentSection, 300);
+    }
+}
+
 function updateCalendarReadyState() {
     const hasExtractedData = extractedCalendarData && extractedCalendarData.holidays && extractedCalendarData.holidays.length > 0;
-    const hasLegacyData = isLegacyMode;
-    calendarReady = hasExtractedData || hasLegacyData;
+    const schoolSelect = document.getElementById('school-select');
+    const hasSchoolSelected = schoolSelect && schoolSelect.value && schoolSelect.value !== '';
+    calendarReady = hasExtractedData || hasSchoolSelected;
     
     const docAnalyzer = document.getElementById('documentAnalyzer');
     const uploadArea = document.getElementById('uploadArea');
@@ -2108,8 +2797,12 @@ function collectFormSnapshot() {
         });
     });
     
+    const schoolSelect = document.getElementById('school-select');
+    const schoolEntityId = schoolSelect?.value || null;
+
     return {
-        calendarSource: isLegacyMode ? 'legacy' : 'extracted',
+        calendarSource: schoolEntityId ? 'school-district' : 'extracted',
+        schoolEntityId: schoolEntityId,
         schoolCalendar: extractedCalendarData || {},
         form: {
             weeklySchedule: weeklySchedule,
@@ -2123,10 +2816,42 @@ function collectFormSnapshot() {
 }
 
 function setupEventListeners() {
-    document.getElementById('populate-btn')?.addEventListener('click', populateCalendars);
+    document.getElementById('populate-btn')?.addEventListener('click', function() {
+        const wasInGuidedMode = this.classList.contains('pulse-attention');
+        populateCalendars();
+        // After populating (if in guided mode), pulse the Print button
+        if (wasInGuidedMode) {
+            document.querySelectorAll('.pulse-attention').forEach(el =>
+                el.classList.remove('pulse-attention'));
+            const printBtn = document.getElementById('print-btn');
+            if (printBtn) {
+                setTimeout(() => {
+                    printBtn.classList.add('pulse-attention');
+                    printBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+            }
+        }
+    });
     document.getElementById('reset-btn')?.addEventListener('click', resetCalendars);
-    document.getElementById('print-btn')?.addEventListener('click', () => window.print());
+    document.getElementById('print-btn')?.addEventListener('click', function() {
+        const wasInGuidedMode = this.classList.contains('pulse-attention');
+        window.print();
+        // After printing (if in guided mode), pulse the Save button
+        if (wasInGuidedMode) {
+            document.querySelectorAll('.pulse-attention').forEach(el =>
+                el.classList.remove('pulse-attention'));
+            const saveBtn = document.getElementById('save-btn-actions');
+            if (saveBtn) {
+                setTimeout(() => {
+                    saveBtn.classList.add('pulse-attention');
+                    saveBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+            }
+        }
+    });
     document.getElementById('save-btn')?.addEventListener('click', openSaveModal);
+    document.getElementById('save-btn-actions')?.addEventListener('click', openSaveModal);
+    document.getElementById('save-btn-top')?.addEventListener('click', openSaveModal);
     document.getElementById('confirmSaveBtn')?.addEventListener('click', saveConfiguration);
     
     document.getElementById('calendar-container')?.addEventListener('input', e => {
@@ -2159,6 +2884,491 @@ function setupEventListeners() {
         }
     });
 
+    // Manual configuration button - shows parent names modal first
+    document.getElementById('manualConfigBtn')?.addEventListener('click', function() {
+        const modal = document.getElementById('parentNamesModal');
+        modal.style.display = 'flex';
+        // Auto-focus the first input field
+        setTimeout(() => {
+            document.getElementById('parentBName')?.focus();
+        }, 100);
+    });
+
+    // Cancel button closes the modal
+    document.getElementById('cancelParentNames')?.addEventListener('click', function() {
+        document.getElementById('parentNamesModal').style.display = 'none';
+    });
+
+    // Close modal on background click
+    document.getElementById('parentNamesModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.style.display = 'none';
+        }
+    });
+
+    // Parent names form submission
+    document.getElementById('parentNamesForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const parentAName = document.getElementById('parentAName').value.trim();
+        const parentBName = document.getElementById('parentBName').value.trim();
+        const parentAHoliday = document.querySelector('input[name="parentAHoliday"]:checked')?.value;
+        const parentBHoliday = document.querySelector('input[name="parentBHoliday"]:checked')?.value;
+
+        // Validate: both parents can't have the same non-none holiday
+        if (parentAHoliday !== 'none' && parentBHoliday !== 'none' && parentAHoliday === parentBHoliday) {
+            document.getElementById('holidayConflictError').style.display = 'block';
+            return;
+        }
+        document.getElementById('holidayConflictError').style.display = 'none';
+
+        // Store parent names globally
+        window.parentAName = parentAName;
+        window.parentBName = parentBName;
+
+        // Replace "Parent A" and "Parent B" labels throughout the page
+        replaceParentLabels(parentAName, parentBName);
+
+        // Update joint pattern description with actual parent names
+        updateJointPatternDescription();
+
+        // Auto-select Mother's Day and Father's Day based on preferences and disable them
+        if (parentAHoliday === 'mothers' || parentBHoliday === 'mothers') {
+            const mothersParent = parentAHoliday === 'mothers' ? 'A' : 'B';
+            // Mother's Day is index 3 in HOLIDAYS array
+            document.querySelectorAll('input[name="even-holiday-3"][value="' + mothersParent + '"]').forEach(r => r.checked = true);
+            document.querySelectorAll('input[name="odd-holiday-3"][value="' + mothersParent + '"]').forEach(r => r.checked = true);
+            // Disable all Mother's Day radios and grey out the row
+            document.querySelectorAll('input[name="even-holiday-3"], input[name="odd-holiday-3"]').forEach(r => {
+                r.disabled = true;
+                r.closest('tr')?.classList.add('disabled-holiday');
+            });
+        }
+        if (parentAHoliday === 'fathers' || parentBHoliday === 'fathers') {
+            const fathersParent = parentAHoliday === 'fathers' ? 'A' : 'B';
+            // Father's Day is index 5 in HOLIDAYS array
+            document.querySelectorAll('input[name="even-holiday-5"][value="' + fathersParent + '"]').forEach(r => r.checked = true);
+            document.querySelectorAll('input[name="odd-holiday-5"][value="' + fathersParent + '"]').forEach(r => r.checked = true);
+            // Disable all Father's Day radios and grey out the row
+            document.querySelectorAll('input[name="even-holiday-5"], input[name="odd-holiday-5"]').forEach(r => {
+                r.disabled = true;
+                r.closest('tr')?.classList.add('disabled-holiday');
+            });
+        }
+
+        // Close modal
+        document.getElementById('parentNamesModal').style.display = 'none';
+
+        // Show manual config section (Schedule Type, etc.)
+        document.getElementById('manualConfigSection').style.display = 'grid';
+
+        // Show breaks and holidays section
+        document.getElementById('breaksAndHolidaysSection').style.display = 'block';
+
+        // Start pulsing sequence
+        startPulsingSequence();
+    });
+
+    // Add pulse advancement listeners to all break/schedule radio buttons
+    const pulseRadioNames = [
+        'schedule-type',
+        'joint-pattern', 'weekly-schedule',
+        'evenSpringBreakParent', 'oddSpringBreakParent',
+        'evenFallBreakParent', 'oddFallBreakParent',
+        'evenThanksgivingBreakParent', 'oddThanksgivingBreakParent',
+        'evenChristmasBreakParent', 'oddChristmasBreakParent',
+        'evenWinterBreakParent', 'oddWinterBreakParent',
+        'evenOtherBreakParent', 'oddOtherBreakParent',
+        'evenSummerSchedule', 'oddSummerSchedule',
+        // Holiday radios (10 holidays x 2 year types)
+        ...Array.from({length: 10}, (_, i) => `even-holiday-${i}`),
+        ...Array.from({length: 10}, (_, i) => `odd-holiday-${i}`)
+    ];
+
+    // Radios that trigger debounced auto-populate (breaks and holidays)
+    const autoPopulateRadios = [
+        'evenSpringBreakParent', 'oddSpringBreakParent',
+        'evenFallBreakParent', 'oddFallBreakParent',
+        'evenThanksgivingBreakParent', 'oddThanksgivingBreakParent',
+        'evenChristmasBreakParent', 'oddChristmasBreakParent',
+        'evenWinterBreakParent', 'oddWinterBreakParent',
+        'evenOtherBreakParent', 'oddOtherBreakParent',
+        'evenSummerSchedule', 'oddSummerSchedule',
+        ...Array.from({length: 10}, (_, i) => `even-holiday-${i}`),
+        ...Array.from({length: 10}, (_, i) => `odd-holiday-${i}`)
+    ];
+
+    // Radios that trigger scorekeeper to appear (game begins)
+    const scorekeeperTriggerRadios = ['weekly-schedule', 'joint-pattern'];
+
+    pulseRadioNames.forEach(radioName => {
+        document.querySelectorAll(`input[name="${radioName}"]`).forEach(radio => {
+            // Use 'click' so re-selecting an already-selected option still advances pulse
+            radio.addEventListener('click', () => {
+                onPulseSelectionMade(radioName);
+
+                // Show scorekeeper when game begins (schedule configured) or in breaks section
+                if (scorekeeperTriggerRadios.includes(radioName) || autoPopulateRadios.includes(radioName)) {
+                    showScorekeeper();
+                    debouncedPopulate();
+                }
+            });
+        });
+    });
+
+    // Add debounce triggers for schedule configuration inputs
+    // Weekend schedule selects - game begins when these are configured
+    ['weekend-start', 'weekend-end'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', () => {
+            showScorekeeper();
+            debouncedPopulate();
+        });
+    });
+
+    // Joint custody selects
+    ['joint-exchange-day', 'joint-first-parent'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', () => {
+            showScorekeeper();
+            debouncedPopulate();
+        });
+    });
+
+    // Weekly every-other type radios (odd/even weeks)
+    document.querySelectorAll('input[name="weekly-every-other-type"]').forEach(radio => {
+        radio.addEventListener('change', debouncedPopulate);
+    });
+
+    // Recurring daytime frequency radios
+    document.querySelectorAll('input[name="recurring-freq"]').forEach(radio => {
+        radio.addEventListener('change', debouncedPopulate);
+    });
+
+    // Recurring day checkboxes
+    document.querySelectorAll('input[name="recurring-day"]').forEach(checkbox => {
+        checkbox.addEventListener('change', debouncedPopulate);
+    });
+
+    // Recurring hours inputs
+    ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].forEach(day => {
+        document.getElementById(`hours-${day}`)?.addEventListener('input', debouncedPopulate);
+    });
+
+    // Add listeners for split field radio buttons to advance pulse
+    const splitFieldNames = [
+        'evenThanksgivingFirstSplit', 'oddThanksgivingFirstSplit',
+        'evenChristmasFirstSplit', 'oddChristmasFirstSplit'
+    ];
+    splitFieldNames.forEach(name => {
+        document.querySelectorAll(`input[name="${name}"]`).forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (!manualConfigMode || !window.pulseSplitFields) return;
+                if (this.value) {
+                    // User made a selection, advance to next section
+                    window.pulseSplitFields = null;
+                    // Find the corresponding break radio and advance from there
+                    const prefix = name.replace('FirstSplit', '');
+                    const radioName = `${prefix}BreakParent`;
+                    const selectedIndex = PULSE_SEQUENCE.findIndex(s => s.radioName === radioName);
+                    if (selectedIndex !== -1) {
+                        currentPulseIndex = selectedIndex + 1;
+                        setTimeout(pulseCurrentSection, 300);
+                    }
+                }
+            });
+        });
+    });
+
+    // Mirror odd/even years functionality
+    const breakPairs = [
+        ['evenSpringBreakParent', 'oddSpringBreakParent'],
+        ['evenFallBreakParent', 'oddFallBreakParent'],
+        ['evenThanksgivingBreakParent', 'oddThanksgivingBreakParent'],
+        ['evenThanksgivingFirstSplit', 'oddThanksgivingFirstSplit'],
+        ['evenChristmasBreakParent', 'oddChristmasBreakParent'],
+        ['evenChristmasFirstSplit', 'oddChristmasFirstSplit'],
+        ['evenWinterBreakParent', 'oddWinterBreakParent'],
+        ['evenOtherBreakParent', 'oddOtherBreakParent'],
+        ['evenSummerSchedule', 'oddSummerSchedule']
+    ];
+
+    // Also mirror holidays (indices 0-9)
+    for (let i = 0; i < 10; i++) {
+        breakPairs.push([`even-holiday-${i}`, `odd-holiday-${i}`]);
+    }
+
+    function getMirrorValue(value) {
+        if (value === 'A') return 'B';
+        if (value === 'B') return 'A';
+        return value; // For Split, Omit, etc.
+    }
+
+    function setupMirrorListeners() {
+        breakPairs.forEach(([evenName, oddName]) => {
+            // Even -> Odd mirroring
+            document.querySelectorAll(`input[name="${evenName}"]`).forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (!document.getElementById('mirrorOddEven')?.checked) return;
+                    if (this.disabled) return; // Skip disabled (designated holidays)
+                    const mirrorValue = getMirrorValue(this.value);
+                    const oddRadio = document.querySelector(`input[name="${oddName}"][value="${mirrorValue}"]`);
+                    if (oddRadio && !oddRadio.disabled) {
+                        oddRadio.checked = true;
+                        // Handle split fields visibility for break parent radios
+                        if (oddName.endsWith('BreakParent')) {
+                            const prefix = oddName.replace('BreakParent', '');
+                            toggleSplitFields(prefix);
+                        }
+                    }
+                });
+            });
+
+            // Odd -> Even mirroring
+            document.querySelectorAll(`input[name="${oddName}"]`).forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (!document.getElementById('mirrorOddEven')?.checked) return;
+                    if (this.disabled) return; // Skip disabled (designated holidays)
+                    const mirrorValue = getMirrorValue(this.value);
+                    const evenRadio = document.querySelector(`input[name="${evenName}"][value="${mirrorValue}"]`);
+                    if (evenRadio && !evenRadio.disabled) {
+                        evenRadio.checked = true;
+                        // Handle split fields visibility for break parent radios
+                        if (evenName.endsWith('BreakParent')) {
+                            const prefix = evenName.replace('BreakParent', '');
+                            toggleSplitFields(prefix);
+                        }
+                    }
+                });
+            });
+        });
+    }
+
+    // Setup mirror listeners after a short delay to ensure holiday rows are created
+    setTimeout(setupMirrorListeners, 500);
+
+    // Check if split fields are both selected and advance pulse accordingly
+    function checkSplitFieldsAndAdvancePulse(breakType, triggeredBy) {
+        if (!manualConfigMode) return;
+
+        const evenName = `even${breakType}FirstSplit`;
+        const oddName = `odd${breakType}FirstSplit`;
+
+        const evenSelected = document.querySelector(`input[name="${evenName}"]:checked`);
+        const oddSelected = document.querySelector(`input[name="${oddName}"]:checked`);
+
+        if (evenSelected && oddSelected) {
+            window.pulseSplitFields = null;
+
+            // If mirror is checked and EVEN was just selected, pulse ODD split fields
+            // so user can review/set the ODD exchange date
+            const mirrorChecked = document.getElementById('mirrorOddEven')?.checked;
+            if (mirrorChecked && triggeredBy === 'even') {
+                const oddSplitFields = document.getElementById(`odd${breakType}SplitFields`);
+                if (oddSplitFields) {
+                    document.querySelectorAll('.pulse-attention').forEach(el =>
+                        el.classList.remove('pulse-attention'));
+                    oddSplitFields.classList.add('pulse-attention');
+                    oddSplitFields.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Set flag so ODD exchange date change advances to next break
+                    window.pulseOddSplitFields = breakType;
+                    return;
+                }
+            }
+
+            // Determine next section based on break type
+            let nextCardId;
+            if (breakType === 'Thanksgiving') {
+                nextCardId = 'christmas-even-card';
+            } else if (breakType === 'Christmas') {
+                nextCardId = 'winter-even-card';
+            }
+
+            if (nextCardId) {
+                const nextIndex = PULSE_SEQUENCE.findIndex(s => s.cardId === nextCardId);
+                if (nextIndex !== -1 && nextIndex > currentPulseIndex) {
+                    currentPulseIndex = nextIndex;
+                    setTimeout(pulseCurrentSection, 300);
+                }
+            }
+        }
+    }
+
+    // Add listeners to split first-half radio buttons to check for pulse advancement
+    ['Thanksgiving', 'Christmas'].forEach(breakType => {
+        ['even', 'odd'].forEach(yearType => {
+            const radioName = `${yearType}${breakType}FirstSplit`;
+            document.querySelectorAll(`input[name="${radioName}"]`).forEach(radio => {
+                radio.addEventListener('change', () => checkSplitFieldsAndAdvancePulse(breakType, yearType));
+            });
+        });
+    });
+
+    // Add listeners to ODD split fields to advance pulse when user interacts with them
+    ['Thanksgiving', 'Christmas'].forEach(breakType => {
+        const oddSplitFieldsId = `odd${breakType}SplitFields`;
+        const oddSplitFields = document.getElementById(oddSplitFieldsId);
+
+        // Function to advance from ODD split fields to next break
+        function advanceFromOddSplitFields() {
+            if (!manualConfigMode || !window.pulseOddSplitFields) return;
+            if (window.pulseOddSplitFields !== breakType) return;
+
+            window.pulseOddSplitFields = null;
+            document.querySelectorAll('.pulse-attention').forEach(el =>
+                el.classList.remove('pulse-attention'));
+
+            // Advance to next break
+            let nextCardId;
+            if (breakType === 'Thanksgiving') {
+                nextCardId = 'christmas-even-card';
+            } else if (breakType === 'Christmas') {
+                nextCardId = 'winter-even-card';
+            }
+
+            if (nextCardId) {
+                const nextIndex = PULSE_SEQUENCE.findIndex(s => s.cardId === nextCardId);
+                if (nextIndex !== -1) {
+                    currentPulseIndex = nextIndex;
+                    setTimeout(pulseCurrentSection, 300);
+                }
+            }
+        }
+
+        // Advance when exchange date changes
+        const exchangeDateId = `odd${breakType}ExchangeDate`;
+        document.getElementById(exchangeDateId)?.addEventListener('change', advanceFromOddSplitFields);
+
+        // Also advance when clicking anywhere on the ODD split fields (to skip)
+        oddSplitFields?.addEventListener('click', function(e) {
+            // Only advance if not clicking on an input (let inputs handle their own events)
+            if (e.target.tagName !== 'INPUT') {
+                advanceFromOddSplitFields();
+            }
+        });
+    });
+
+    // Weekend schedule dropdowns advance to mirror checkbox
+    ['weekend-start', 'weekend-end'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', function() {
+            if (!manualConfigMode) return;
+
+            // After configuring weekend schedule, advance to mirror checkbox
+            window.pulseMirrorCheckbox = true;
+            document.querySelectorAll('.pulse-attention').forEach(el =>
+                el.classList.remove('pulse-attention'));
+
+            const mirrorCard = document.getElementById('mirror-checkbox-card');
+            if (mirrorCard) {
+                mirrorCard.classList.add('pulse-attention');
+                mirrorCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    });
+
+    // Joint pattern radios - use 'click' to catch re-selection of default
+    document.querySelectorAll('input[name="joint-pattern"]').forEach(radio => {
+        radio.addEventListener('click', function() {
+            if (!manualConfigMode) return;
+
+            window.pulseJointFields = true;
+
+            // Clear any existing pulse
+            document.querySelectorAll('.pulse-attention').forEach(el =>
+                el.classList.remove('pulse-attention'));
+
+            // Pulse the exchange day wrapper
+            const exchangeWrapper = document.getElementById('joint-exchange-day-wrapper');
+            if (exchangeWrapper) {
+                exchangeWrapper.classList.add('pulse-attention');
+                exchangeWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    });
+
+    // Exchange day dropdown advances to first period
+    document.getElementById('joint-exchange-day')?.addEventListener('change', function() {
+        if (!manualConfigMode || !window.pulseJointFields) return;
+
+        document.querySelectorAll('.pulse-attention').forEach(el =>
+            el.classList.remove('pulse-attention'));
+
+        const firstParentWrapper = document.getElementById('joint-first-parent-wrapper');
+        if (firstParentWrapper) {
+            firstParentWrapper.classList.add('pulse-attention');
+            firstParentWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+
+    // First parent dropdown advances to mirror checkbox
+    document.getElementById('joint-first-parent')?.addEventListener('change', function() {
+        if (!manualConfigMode || !window.pulseJointFields) return;
+
+        window.pulseJointFields = false;
+
+        document.querySelectorAll('.pulse-attention').forEach(el =>
+            el.classList.remove('pulse-attention'));
+
+        // Advance to mirror checkbox
+        window.pulseMirrorCheckbox = true;
+        const mirrorCard = document.getElementById('mirror-checkbox-card');
+        if (mirrorCard) {
+            mirrorCard.classList.add('pulse-attention');
+            mirrorCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+
+    // Mirror checkbox click advances pulse to spring break
+    document.getElementById('mirrorOddEven')?.addEventListener('click', function() {
+        // When mirror checkbox is checked, reset all breaks and holidays to Omit
+        if (this.checked) {
+            // Reset breaks
+            const breakPrefixes = ['Spring', 'Fall', 'Thanksgiving', 'Christmas', 'Winter', 'Other'];
+            breakPrefixes.forEach(prefix => {
+                const evenOmit = document.querySelector(`input[name="even${prefix}BreakParent"][value="Omit"]`);
+                const oddOmit = document.querySelector(`input[name="odd${prefix}BreakParent"][value="Omit"]`);
+                if (evenOmit) evenOmit.checked = true;
+                if (oddOmit) oddOmit.checked = true;
+            });
+
+            // Reset summer
+            const evenSummerOmit = document.querySelector('input[name="evenSummerSchedule"][value="Omit"]');
+            const oddSummerOmit = document.querySelector('input[name="oddSummerSchedule"][value="Omit"]');
+            if (evenSummerOmit) evenSummerOmit.checked = true;
+            if (oddSummerOmit) oddSummerOmit.checked = true;
+
+            // Reset holidays (note: value is lowercase "omit" in holiday rows)
+            // Skip disabled holidays (Mother's Day, Father's Day when designated)
+            for (let i = 0; i < 10; i++) {
+                const evenOmit = document.querySelector(`input[name="even-holiday-${i}"][value="omit"]`);
+                const oddOmit = document.querySelector(`input[name="odd-holiday-${i}"][value="omit"]`);
+                if (evenOmit && !evenOmit.disabled) evenOmit.checked = true;
+                if (oddOmit && !oddOmit.disabled) oddOmit.checked = true;
+            }
+
+            // Hide any visible split fields
+            document.querySelectorAll('.split-fields').forEach(el => el.style.display = 'none');
+        }
+
+        if (window.pulseMirrorCheckbox) {
+            window.pulseMirrorCheckbox = false;
+            document.querySelectorAll('.pulse-attention').forEach(el =>
+                el.classList.remove('pulse-attention'));
+            currentPulseIndex = PULSE_SEQUENCE.findIndex(s => s.cardId === 'spring-break-even-card');
+            setTimeout(pulseCurrentSection, 300);
+        }
+    });
+
+    // Clicking anywhere on mirror card also advances (for users who want to skip)
+    document.getElementById('mirror-checkbox-card')?.addEventListener('click', function(e) {
+        // Only if not clicking the checkbox itself (which has its own handler)
+        if (e.target.id !== 'mirrorOddEven' && window.pulseMirrorCheckbox) {
+            window.pulseMirrorCheckbox = false;
+            document.querySelectorAll('.pulse-attention').forEach(el =>
+                el.classList.remove('pulse-attention'));
+            currentPulseIndex = PULSE_SEQUENCE.findIndex(s => s.cardId === 'spring-break-even-card');
+            setTimeout(pulseCurrentSection, 300);
+        }
+    });
+
     // Recalculate holiday dates when weekly schedule beginning/ending changes
     document.getElementById('weekend-start')?.addEventListener('change', populateAllHolidayDates);
     document.getElementById('weekend-end')?.addEventListener('change', populateAllHolidayDates);
@@ -2167,14 +3377,26 @@ function setupEventListeners() {
     document.querySelectorAll('input[name="schedule-type"]').forEach(radio => {
         radio.addEventListener('change', function() {
             const isJoint = this.value === 'joint';
+            const showRecurringCheckbox = document.getElementById('show-recurring-daytime');
 
             // Show/hide Weekend sections
             document.getElementById('weekend-schedule-card').style.display = isJoint ? 'none' : 'block';
-            document.getElementById('recurring-daytime-card').style.display = isJoint ? 'none' : 'block';
+
+            // Show/hide recurring daytime checkbox (only for weekend)
+            document.getElementById('recurring-daytime-checkbox-wrapper').style.display = isJoint ? 'none' : 'block';
+
+            // Show/hide recurring daytime card based on checkbox state (only when weekend mode)
+            const showRecurring = !isJoint && showRecurringCheckbox && showRecurringCheckbox.checked;
+            document.getElementById('recurring-daytime-card').style.display = showRecurring ? 'block' : 'none';
 
             // Show/hide Joint options
             document.getElementById('joint-options-card').style.display = isJoint ? 'block' : 'none';
         });
+    });
+
+    // Recurring daytime checkbox toggle
+    document.getElementById('show-recurring-daytime')?.addEventListener('change', function() {
+        document.getElementById('recurring-daytime-card').style.display = this.checked ? 'block' : 'none';
     });
 
     // Joint pattern change - update description
@@ -2193,6 +3415,14 @@ function setupEventListeners() {
             recurringDays.style.display = this.value === 'Omit' ? 'none' : 'block';
         });
     });
+
+    // Weekly schedule - show/hide odd/even options for "Every Other"
+    document.querySelectorAll('input[name="weekly-schedule"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const weeklyEveryOtherOptions = document.getElementById('weekly-every-other-options');
+            weeklyEveryOtherOptions.style.display = this.value === 'every-other' ? 'block' : 'none';
+        });
+    });
     
     const saveModal = document.getElementById('saveModal');
     if (saveModal) {
@@ -2206,11 +3436,6 @@ function setupEventListeners() {
         saveNameInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') saveConfiguration();
         });
-    }
-    
-    const legacyToggle = document.getElementById('legacyToggle');
-    if (legacyToggle) {
-        legacyToggle.addEventListener('click', toggleLegacyMode);
     }
     
     const calendarUploadArea = document.getElementById('calendarUploadArea');
@@ -2253,30 +3478,6 @@ function setupEventListeners() {
 function handleCalendarFileSelect(file) {
     document.getElementById('calendarFileName').textContent = file.name;
     extractSchoolCalendar();
-}
-
-function toggleLegacyMode() {
-    isLegacyMode = !isLegacyMode;
-    const toggle = document.getElementById('legacyToggle');
-    const countySection = document.getElementById('countySelectorSection');
-    const extractorSection = document.getElementById('calendarExtractorSection');
-
-    if (isLegacyMode) {
-        toggle.classList.add('active');
-        countySection.style.display = 'block';
-        extractorSection.style.display = 'none';
-        // Load holidays for currently selected school
-        const schoolSelect = document.getElementById('school-select');
-        if (schoolSelect && schoolSelect.value) {
-            loadSchoolHolidays(schoolSelect.value);
-        }
-    } else {
-        toggle.classList.remove('active');
-        countySection.style.display = 'none';
-        extractorSection.style.display = 'block';
-        resetHolidayDates();
-    }
-    updateCalendarReadyState();
 }
 
 function resetHolidayDates() {
@@ -3014,7 +4215,17 @@ function updateJointPatternDescription() {
     const pattern = document.querySelector('input[name="joint-pattern"]:checked')?.value || 'week-to-week';
     const descEl = document.querySelector('#joint-options-card p');
     if (descEl) {
-        descEl.innerHTML = JOINT_PATTERN_DESCRIPTIONS[pattern] || '';
+        let description = JOINT_PATTERN_DESCRIPTIONS[pattern] || '';
+        // Replace Parent A/B with actual names if they've been entered
+        if (window.parentAName) {
+            const aFirstName = window.parentAName.split(' ')[0];
+            description = description.replace(/Parent A/g, aFirstName);
+        }
+        if (window.parentBName) {
+            const bFirstName = window.parentBName.split(' ')[0];
+            description = description.replace(/Parent B/g, bFirstName);
+        }
+        descEl.innerHTML = description;
     }
 }
 
@@ -3325,12 +4536,10 @@ function populateCalendars() {
                 if (weeklySchedule === 'first-third') isParentBWeekend = weekOfMonth === 1 || weekOfMonth === 3;
                 else if (weeklySchedule === 'second-fourth') isParentBWeekend = weekOfMonth === 2 || weekOfMonth === 4;
                 else if (weeklySchedule === 'every') isParentBWeekend = true;
-                else if (weeklySchedule === 'alternating-odd') {
+                else if (weeklySchedule === 'every-other') {
                     const weekNum = Math.ceil((date.getDate() + new Date(date.getFullYear(), date.getMonth(), 1).getDay()) / 7);
-                    isParentBWeekend = weekNum % 2 === 1;
-                } else if (weeklySchedule === 'alternating-even') {
-                    const weekNum = Math.ceil((date.getDate() + new Date(date.getFullYear(), date.getMonth(), 1).getDay()) / 7);
-                    isParentBWeekend = weekNum % 2 === 0;
+                    const everyOtherType = document.querySelector('input[name="weekly-every-other-type"]:checked')?.value || 'odd';
+                    isParentBWeekend = everyOtherType === 'odd' ? weekNum % 2 === 1 : weekNum % 2 === 0;
                 }
 
                 if (isParentBWeekend) {
@@ -3395,7 +4604,7 @@ async function analyzeDocument() {
     if (!fileInput.files[0]) return;
     
     if (!calendarReady) {
-        alert('Please complete School Calendar Settings first (upload a school calendar PDF or enable Legacy Mode) before analyzing your parenting plan.');
+        alert('Please complete School Calendar Settings first (select a school district or upload a calendar) before analyzing your parenting plan.');
         return;
     }
     
@@ -3550,14 +4759,28 @@ function applyAnalysisResults() {
         if (pattern) {
             // Normalize pattern to match form values
             let patternLower = pattern.toLowerCase();
+            let weeklyEveryOtherType = null;
             if (patternLower === 'omit') pattern = 'Omit';
             else if (patternLower === 'first-third') pattern = 'first-third';
             else if (patternLower === 'second-fourth') pattern = 'second-fourth';
-            else if (patternLower === 'alternating-odd') pattern = 'alternating-odd';
-            else if (patternLower === 'alternating-even') pattern = 'alternating-even';
-            else if (patternLower === 'every') pattern = 'every';
+            else if (patternLower === 'every-other' || patternLower === 'every-other-odd' || patternLower === 'alternating-odd') {
+                pattern = 'every-other';
+                weeklyEveryOtherType = 'odd';
+            } else if (patternLower === 'every-other-even' || patternLower === 'alternating-even') {
+                pattern = 'every-other';
+                weeklyEveryOtherType = 'even';
+            } else if (patternLower === 'every') pattern = 'every';
             const radio = document.querySelector(`input[name="weekly-schedule"][value="${pattern}"]`);
-            if (radio) radio.checked = true;
+            if (radio) {
+                radio.checked = true;
+                if (pattern === 'every-other') {
+                    document.getElementById('weekly-every-other-options').style.display = 'block';
+                    if (weeklyEveryOtherType) {
+                        const typeRadio = document.querySelector(`input[name="weekly-every-other-type"][value="${weeklyEveryOtherType}"]`);
+                        if (typeRadio) typeRadio.checked = true;
+                    }
+                }
+            }
         }
         if (data.regularWeeklySchedule.beginDay) {
             const startSelect = document.getElementById('weekend-start');
@@ -4372,6 +5595,7 @@ function showSaveNotification(message, isError = false) {
 function collectFormState() {
     const state = {
         weeklySchedule: document.querySelector('input[name="weekly-schedule"]:checked')?.value || 'Omit',
+        weeklyEveryOtherType: document.querySelector('input[name="weekly-every-other-type"]:checked')?.value || 'odd',
         weekendStart: document.getElementById('weekend-start').value,
         weekendEnd: document.getElementById('weekend-end').value,
         recurringFreq: document.querySelector('input[name="recurring-freq"]:checked')?.value || 'Omit',
@@ -4438,16 +5662,23 @@ function collectFormState() {
 
 function restoreFormState(state) {
     if (!state) return;
-    
+
     const weeklyRadio = document.querySelector(`input[name="weekly-schedule"][value="${state.weeklySchedule}"]`);
     if (weeklyRadio) weeklyRadio.checked = true;
-    
+
+    // Show weekly every-other options if needed
+    if (state.weeklySchedule === 'every-other') {
+        document.getElementById('weekly-every-other-options').style.display = 'block';
+    }
+    const weeklyEveryOtherRadio = document.querySelector(`input[name="weekly-every-other-type"][value="${state.weeklyEveryOtherType}"]`);
+    if (weeklyEveryOtherRadio) weeklyEveryOtherRadio.checked = true;
+
     if (state.weekendStart) document.getElementById('weekend-start').value = state.weekendStart;
     if (state.weekendEnd) document.getElementById('weekend-end').value = state.weekendEnd;
-    
+
     const recurringRadio = document.querySelector(`input[name="recurring-freq"][value="${state.recurringFreq}"]`);
     if (recurringRadio) recurringRadio.checked = true;
-    
+
     if (state.recurringFreq === 'every-other') {
         document.getElementById('every-other-options').style.display = 'block';
     }
@@ -4667,7 +5898,9 @@ async function submitGuestPhone() {
     }
 }
 
-async function modalLogin(modalType) {
+async function modalLogin(event, modalType) {
+    event.preventDefault();
+
     let usernameInput, passwordInput, errorDiv;
 
     if (modalType === 'phone') {
@@ -4686,7 +5919,7 @@ async function modalLogin(modalType) {
     if (!username || !password) {
         errorDiv.textContent = 'Please enter both username and password.';
         errorDiv.style.display = 'block';
-        return;
+        return false;
     }
 
     try {
@@ -4711,6 +5944,7 @@ async function modalLogin(modalType) {
         errorDiv.textContent = 'Error logging in. Please try again.';
         errorDiv.style.display = 'block';
     }
+    return false;
 }
 
 document.addEventListener('DOMContentLoaded', function() {

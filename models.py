@@ -139,6 +139,10 @@ class VerifiedHoliday(db.Model):
     name = db.Column(db.String(100), nullable=False)  # "Labor Day", "Spring Break"
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
+    # Verification status fields
+    is_verified = db.Column(db.Boolean, default=True)  # True for human-verified, False for AI-detected
+    source = db.Column(db.String(20), default='manual')  # 'manual', 'ai_detected', 'imported'
+    confidence = db.Column(db.Float, nullable=True)  # AI confidence score (0.0-1.0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -156,7 +160,9 @@ class VerifiedHoliday(db.Model):
             'name': self.name,
             'startDate': self.start_date.isoformat() if self.start_date else None,
             'endDate': self.end_date.isoformat() if self.end_date else None,
-            'verified': True
+            'verified': self.is_verified,
+            'source': self.source,
+            'confidence': self.confidence
         }
 
 

@@ -1,0 +1,226 @@
+[
+  {
+    "test_name": "Baseline (DPI 200, PNG)",
+    "dpi": 200,
+    "format": "PNG",
+    "contrast": null,
+    "image_size_bytes": 431754,
+    "detection": {
+      "feb_13": false,
+      "feb_16": true,
+      "feb_17": true,
+      "all_detected": false,
+      "raw_dates": [
+        "Feb 16",
+        "Feb 17"
+      ]
+    },
+    "raw_result": {
+      "february_colored_dates": [
+        {
+          "date": "Feb 16",
+          "color": "blue",
+          "label": "Presidents Day"
+        },
+        {
+          "date": "Feb 17",
+          "color": "light yellow",
+          "label": "Teacher Workday"
+        }
+      ],
+      "notes": "February 16th is highlighted in blue indicating Presidents Day holiday, and February 17th has light yellow shading indicating it's a Teacher Workday. All other dates in February appear to be white/unshaded."
+    }
+  },
+  {
+    "test_name": "Higher DPI (300, PNG)",
+    "dpi": 300,
+    "format": "PNG",
+    "contrast": null,
+    "image_size_bytes": 601793,
+    "detection": {
+      "feb_13": false,
+      "feb_16": true,
+      "feb_17": true,
+      "all_detected": false,
+      "raw_dates": [
+        "Feb 16",
+        "Feb 17"
+      ]
+    },
+    "raw_result": {
+      "february_colored_dates": [
+        {
+          "date": "Feb 16",
+          "color": "blue",
+          "label": "Presidents Day"
+        },
+        {
+          "date": "Feb 17",
+          "color": "light yellow",
+          "label": "Teacher Workday"
+        }
+      ],
+      "notes": "February 16th is highlighted in blue indicating Presidents Day holiday, and February 17th has light yellow shading indicating it's a Teacher Workday. All other dates in February appear to be white/unshaded."
+    }
+  },
+  {
+    "test_name": "JPEG format (DPI 200)",
+    "dpi": 200,
+    "format": "JPEG",
+    "contrast": null,
+    "image_size_bytes": 556404,
+    "detection": {
+      "feb_13": false,
+      "feb_16": true,
+      "feb_17": true,
+      "all_detected": false,
+      "raw_dates": [
+        "Feb 16",
+        "Feb 17"
+      ]
+    },
+    "raw_result": {
+      "february_colored_dates": [
+        {
+          "date": "Feb 16",
+          "color": "blue",
+          "label": "Presidents Day"
+        },
+        {
+          "date": "Feb 17",
+          "color": "light yellow",
+          "label": "Teacher Workday"
+        }
+      ],
+      "notes": "February 16th appears in blue shading indicating it's a holiday (Presidents Day), and February 17th has light yellow shading indicating it's a Teacher Workday. All other dates in February appear to be white/unshaded."
+    }
+  },
+  {
+    "test_name": "JPEG + Higher DPI (300)",
+    "dpi": 300,
+    "format": "JPEG",
+    "contrast": null,
+    "image_size_bytes": 946751,
+    "detection": {
+      "feb_13": false,
+      "feb_16": true,
+      "feb_17": true,
+      "all_detected": false,
+      "raw_dates": [
+        "Feb 16",
+        "Feb 17"
+      ]
+    },
+    "raw_result": {
+      "february_colored_dates": [
+        {
+          "date": "Feb 16",
+          "color": "blue",
+          "label": "Presidents Day"
+        },
+        {
+          "date": "Feb 17",
+          "color": "light yellow",
+          "label": "Teacher Workday"
+        }
+      ],
+      "notes": "February 16th is shaded in blue indicating Presidents Day holiday, and February 17th has light yellow shading indicating a Teacher Workday. All other dates in February appear to be white/unshaded."
+    }
+  },
+  {
+    "test_name": "Contrast 1.3x (DPI 200, PNG)",
+    "dpi": 200,
+    "format": "PNG",
+    "contrast": 1.3,
+    "image_size_bytes": 366088,
+    "detection": {
+      "feb_13": false,
+      "feb_16": true,
+      "feb_17": true,
+      "all_detected": false,
+      "raw_dates": [
+        "Feb 16",
+        "Feb 17"
+      ]
+    },
+    "raw_result": {
+      "february_colored_dates": [
+        {
+          "date": "Feb 16",
+          "color": "dark blue",
+          "label": "Presidents Day"
+        },
+        {
+          "date": "Feb 17",
+          "color": "light yellow",
+          "label": "Teacher Workday"
+        }
+      ],
+      "notes": "February 16th has dark blue shading indicating it's Presidents Day holiday. February 17th has light yellow shading indicating it's a Teacher Workday. All other dates in February appear to have white/no background color."
+    }
+  },
+  {
+    "test_name": "Contrast 1.5x (DPI 200, PNG)",
+    "dpi": 200,
+    "format": "PNG",
+    "contrast": 1.5,
+    "image_size_bytes": 338349,
+    "detection": {
+      "feb_13": false,
+      "feb_16": true,
+      "feb_17": true,
+      "all_detected": false,
+      "raw_dates": [
+        "Feb 16",
+        "Feb 17"
+      ]
+    },
+    "raw_result": {
+      "february_colored_dates": [
+        {
+          "date": "Feb 16",
+          "color": "dark blue/navy",
+          "label": "Presidents Day"
+        },
+        {
+          "date": "Feb 17",
+          "color": "light yellow",
+          "label": "Teacher Workday"
+        }
+      ],
+      "notes": "February 16th is shaded in dark blue/navy blue indicating it's a holiday (Presidents Day). February 17th has light yellow shading indicating it's a Teacher Workday. All other dates in February appear to have white/no background color."
+    }
+  },
+  {
+    "test_name": "Contrast 1.3x + DPI 300",
+    "dpi": 300,
+    "format": "PNG",
+    "contrast": 1.3,
+    "image_size_bytes": 512985,
+    "detection": {
+      "feb_13": false,
+      "feb_16": true,
+      "feb_17": true,
+      "all_detected": false,
+      "raw_dates": [
+        "Feb 16",
+        "Feb 17"
+      ]
+    },
+    "raw_result": {
+      "february_colored_dates": [
+        {
+          "date": "Feb 16",
+          "color": "blue",
+          "label": "Presidents Day"
+        },
+        {
+          "date": "Feb 17",
+          "color": "light yellow",
+          "label": "Teacher Workday"
+        }
+      ],
+      "notes": "February 16th appears in blue shading indicating it's Presidents Day holiday, and February 17th has light yellow shading indicating it's a Teacher Workday. All other dates in February appear to be white/unshaded."
+    }
+  }
+]

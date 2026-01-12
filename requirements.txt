@@ -1,5 +1,6 @@
 alembic==1.13.3
 annotated-types==0.7.0
+anthropic>=0.40.0
 anyio==4.12.0
 blinker==1.8.2
 certifi==2024.8.30
