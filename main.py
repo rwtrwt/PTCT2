@@ -519,7 +519,6 @@ def profile():
 
 
 @main.route('/subscription')
-@login_required
 def subscription():
     return render_template('subscription.html')
 

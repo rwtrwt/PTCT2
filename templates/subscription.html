@@ -4,16 +4,21 @@
 <h1>Subscription</h1>
 <div class="subscription-container">
     <div class="subscription-info">
-        <h2>Your Current Plan: {{ current_user.subscription_type.capitalize() }}</h2>
-        {% if current_user.subscription_type == 'free' %}
-            <p>Upgrade to our Premium plan to unlock advanced features!</p>
+        {% if current_user.is_authenticated %}
+            <h2>Your Current Plan: {{ current_user.subscription_type.capitalize() }}</h2>
+            {% if current_user.subscription_type == 'free' %}
+                <p>Upgrade to our Premium plan to unlock advanced features!</p>
+            {% else %}
+                <p>Thank you for being a premium subscriber!</p>
+            {% endif %}
         {% else %}
-            <p>Thank you for being a premium subscriber!</p>
+            <h2>Choose Your Plan</h2>
+            <p>Upgrade to our Premium plan to unlock advanced features!</p>
         {% endif %}
     </div>
 
     <div class="subscription-plans">
-        {% if current_user.subscription_type == 'free' %}
+        {% if not current_user.is_authenticated or current_user.subscription_type == 'free' %}
         <div class="plan free">
             <h3>Free Plan</h3>
             <ul>
@@ -24,12 +29,20 @@
                 <li>The Calendar Tool will give attorney Russell Taylor credit for developing this software.</li>
             </ul>
             <p class="price">$0 / month</p>
-            <button disabled>Current Plan</button>
+            {% if current_user.is_authenticated %}
+                <button disabled>Current Plan</button>
+            {% else %}
+                <a href="{{ url_for('auth.register') }}" class="upgrade-button" style="display: inline-block; text-decoration: none; padding: 10px 20px; background: #6b7280; color: white; border-radius: 6px;">Register Free</a>
+            {% endif %}
             
             <div style="margin-top: 20px; padding: 15px; background: #f0f9ff; border-radius: 8px; text-align: left;">
                 <h4 style="margin: 0 0 10px 0; color: #1f2937; font-size: 1em;">Ways to Get More Tokens:</h4>
                 <ul style="margin: 0; padding-left: 20px; color: #4b5563; font-size: 0.9em;">
+                    {% if current_user.is_authenticated %}
                     <li><strong>Refer a Friend:</strong> Earn 20 tokens for each signup via your <a href="{{ url_for('main.profile') }}">referral link</a></li>
+                    {% else %}
+                    <li><strong>Refer a Friend:</strong> Earn 20 tokens for each signup via your referral link (after registering)</li>
+                    {% endif %}
                     <li><strong>Purchase Tokens:</strong> Buy 10 tokens for $50</li>
                     <li><strong>Subscribe to Premium:</strong> Unlimited access with Premium Attorney Plan</li>
                 </ul>
@@ -38,7 +51,7 @@
         {% endif %}
 
 
-        {% if current_user.subscription_type == 'free' %}
+        {% if current_user.is_authenticated and current_user.subscription_type == 'free' %}
         <div class="plan free">
             <h3>Purchase Token</h3>
             <ul>
@@ -64,7 +77,9 @@
                 <span style="color: #22c55e; font-weight: bold;">First month only $0.99!</span><br>
                 <small style="color: #666;">Limited to first 50 subscribers</small>
             </p>
-            {% if current_user.subscription_type == 'free' %}
+            {% if not current_user.is_authenticated %}
+                <button id="checkout-button" class="upgrade-button">Upgrade Now</button>
+            {% elif current_user.subscription_type == 'free' %}
                 <button id="checkout-button" class="upgrade-button">Upgrade Now</button>
             {% elif current_user.subscription_type == 'government' %}
                 <button disabled>Government Account</button>
@@ -75,7 +90,7 @@
     </div>
 </div>
 
-{% if current_user.subscription_type == 'paid' %}
+{% if current_user.is_authenticated and current_user.subscription_type == 'paid' %}
 <div class="manage-subscription">
     <a href="{{ url_for('payments.payment_cancel') }}" class="btn btn-secondary">Cancel Subscription</a>
 </div>
