@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, session
+from markupsafe import Markup
 from flask_login import login_required, current_user
 from models import User, CalendarSave, GuestToken, SchoolEntity, VerifiedHoliday, CalendarFile
 from extensions import db, mail
@@ -342,7 +343,7 @@ def calendar_generator():
             db.session.commit()  # Save the updated token count
             return render_template('calendar_generator.html')
         else:
-            flash('You need more tokens to access this feature.', 'warning')
+            flash(Markup('You need more tokens to access this feature. <a href="/subscription" style="color: #22c55e; font-weight: bold;">Subscribe now</a> for unlimited access!'), 'warning')
             return redirect(url_for('main.home'))  # Redirect to a different page if no tokens
     else:
         flash('Invalid subscription type.', 'danger')
@@ -362,7 +363,7 @@ def ai_calendar():
                     db.session.commit()
                 return render_template('ai_calendar.html', is_guest=False)
             else:
-                flash('You need more tokens to access this feature.', 'warning')
+                flash(Markup('You need more tokens to access this feature. <a href="/subscription" style="color: #22c55e; font-weight: bold;">Subscribe now</a> for unlimited access!'), 'warning')
                 return redirect(url_for('main.home'))
         else:
             flash('Invalid subscription type.', 'danger')
@@ -383,7 +384,7 @@ def ai_calendar():
             return render_template('ai_calendar.html', is_guest=True, guest_tokens=0,
                                    needs_email=False, needs_phone=True)
         else:
-            flash('You have used all available tokens. Please register for more access.', 'warning')
+            flash(Markup('You have used all available tokens. <a href="/register" style="color: #22c55e; font-weight: bold;">Register now</a> to get more tokens or <a href="/subscription" style="color: #22c55e; font-weight: bold;">subscribe</a> for unlimited access!'), 'warning')
             return redirect(url_for('auth.register'))
 
 
