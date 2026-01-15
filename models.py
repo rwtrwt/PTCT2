@@ -13,6 +13,8 @@ class User(UserMixin, db.Model):
     is_super_admin = db.Column(db.Boolean, default=False)
     is_blocked = db.Column(db.Boolean, default=False)
     subscription_type = db.Column(db.String(20), default='free')
+    stripe_customer_id = db.Column(db.String(255), nullable=True, index=True)
+    stripe_subscription_id = db.Column(db.String(255), nullable=True, index=True)
     custom_h4 = db.Column(db.String(255))
     token = db.Column(db.Integer, nullable=False, default=10)
     confirmed = db.Column(db.Boolean, default=False)
