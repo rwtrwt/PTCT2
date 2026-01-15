@@ -147,6 +147,18 @@
 .btn-unblock { background: #d1fae5; color: #065f46; }
 .btn-admin { background: #dbeafe; color: #1e40af; }
 .btn-credits { background: #fef3c7; color: #92400e; }
+.btn-subscription { background: #e0e7ff; color: #3730a3; }
+
+.subscription-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; }
+.subscription-paid { background: #d1fae5; color: #065f46; }
+.subscription-free { background: #f3f4f6; color: #6b7280; }
+
+.subscription-select {
+    padding: 4px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
 
 .credits-input {
     width: 60px;
@@ -232,6 +244,7 @@
                     <th>ID</th>
                     <th>Username</th>
                     <th>Email</th>
+                    <th>Subscription</th>
                     <th>Credits</th>
                     <th>Status</th>
                     <th>Role</th>
@@ -244,6 +257,15 @@
                     <td>{{ user.id }}</td>
                     <td>{{ user.username }}</td>
                     <td>{{ user.email }}</td>
+                    <td>
+                        <select class="subscription-select" id="sub-{{ user.id }}" onchange="updateSubscription({{ user.id }})">
+                            <option value="free" {% if user.subscription_type == 'free' %}selected{% endif %}>Free</option>
+                            <option value="paid" {% if user.subscription_type == 'paid' %}selected{% endif %}>Paid</option>
+                        </select>
+                        {% if user.stripe_customer_id %}
+                        <a href="https://dashboard.stripe.com/customers/{{ user.stripe_customer_id }}" target="_blank" style="font-size: 0.7rem; color: #667eea; margin-left: 5px;">Stripe</a>
+                        {% endif %}
+                    </td>
                     <td>
                         <input type="number" class="credits-input" value="{{ user.token }}" id="credits-{{ user.id }}" min="0">
                         <button class="update-credits-btn" onclick="updateCredits({{ user.id }})">Save</button>
@@ -359,6 +381,25 @@ async function updateCredits(userId) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user_id: userId, credits: parseInt(credits) })
+        });
+        const data = await response.json();
+        if (data.success) {
+            showNotification(data.message);
+        } else {
+            showNotification(data.error, true);
+        }
+    } catch (err) {
+        showNotification('Error: ' + err.message, true);
+    }
+}
+
+async function updateSubscription(userId) {
+    const subscriptionType = document.getElementById('sub-' + userId).value;
+    try {
+        const response = await fetch('/admin/update_subscription', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, subscription_type: subscriptionType })
         });
         const data = await response.json();
         if (data.success) {

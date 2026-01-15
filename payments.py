@@ -172,6 +172,7 @@ def create_payments_blueprint(db):
     @payments.route('/payment_success_1')
     @login_required
     def payment_success_1():
+        """Handle one-time token purchase success (not a subscription)."""
         session_id = request.args.get('session_id')
         if not session_id:
             return "Invalid session ID", 400
@@ -182,7 +183,8 @@ def create_payments_blueprint(db):
             if session.payment_status == "paid" and str(
                     session.client_reference_id) == str(current_user.id):
                 current_user.token += 10
-                current_user.stripe_subscription_id = session.subscription
+                if session.customer:
+                    current_user.stripe_customer_id = session.customer
                 db.session.commit()
                 return render_template('payment_success1.html')
             else:
@@ -204,11 +206,16 @@ def create_payments_blueprint(db):
             if session.payment_status == "paid" and str(
                     session.client_reference_id) == str(current_user.id):
                 current_user.subscription_type = 'paid'
-                current_user.stripe_subscription_id = session.subscription
+                current_user.stripe_customer_id = session.customer
+                subscription = session.subscription
+                if hasattr(subscription, 'id'):
+                    current_user.stripe_subscription_id = subscription.id
+                else:
+                    current_user.stripe_subscription_id = subscription
                 
                 is_promo = False
-                if session.subscription and hasattr(session.subscription, 'metadata'):
-                    is_promo = session.subscription.metadata.get('promo_first_month') == 'true'
+                if subscription and hasattr(subscription, 'metadata'):
+                    is_promo = subscription.metadata.get('promo_first_month') == 'true'
                 
                 if is_promo:
                     SubscriptionMetrics.increment_promo_subscribers()
@@ -247,5 +254,99 @@ def create_payments_blueprint(db):
             flash(f'An error occurred: {str(e)}', 'danger')
 
         return render_template('payment_cancel.html')
+
+    @payments.route('/stripe-webhook', methods=['POST'])
+    def stripe_webhook():
+        """Handle Stripe webhook events to keep subscription status in sync."""
+        from models import User
+        import logging
+        
+        stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+        webhook_secret = os.getenv('STRIPE_WEBHOOK_SECRET')
+        payload = request.get_data()
+        sig_header = request.headers.get('Stripe-Signature')
+        
+        try:
+            if webhook_secret:
+                event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
+            else:
+                event = stripe.Event.construct_from(
+                    request.get_json(), stripe.api_key
+                )
+        except ValueError as e:
+            logging.error(f"Invalid webhook payload: {e}")
+            return jsonify(error="Invalid payload"), 400
+        except stripe.error.SignatureVerificationError as e:
+            logging.error(f"Invalid webhook signature: {e}")
+            return jsonify(error="Invalid signature"), 400
+        
+        event_type = event['type']
+        data = event['data']['object']
+        
+        logging.info(f"Received Stripe webhook: {event_type}")
+        
+        if event_type == 'customer.subscription.deleted':
+            subscription_id = data.get('id')
+            customer_id = data.get('customer')
+            
+            user = User.query.filter(
+                (User.stripe_subscription_id == subscription_id) | 
+                (User.stripe_customer_id == customer_id)
+            ).first()
+            
+            if user:
+                user.subscription_type = 'free'
+                user.stripe_subscription_id = None
+                db.session.commit()
+                logging.info(f"Subscription canceled for user {user.id} ({user.email})")
+        
+        elif event_type == 'customer.subscription.updated':
+            subscription_id = data.get('id')
+            customer_id = data.get('customer')
+            status = data.get('status')
+            
+            user = User.query.filter(
+                (User.stripe_subscription_id == subscription_id) | 
+                (User.stripe_customer_id == customer_id)
+            ).first()
+            
+            if user:
+                if status in ['active', 'trialing']:
+                    user.subscription_type = 'paid'
+                    user.stripe_subscription_id = subscription_id
+                    user.stripe_customer_id = customer_id
+                elif status in ['canceled', 'unpaid', 'past_due']:
+                    user.subscription_type = 'free'
+                    if status == 'canceled':
+                        user.stripe_subscription_id = None
+                db.session.commit()
+                logging.info(f"Subscription updated for user {user.id}: status={status}")
+        
+        elif event_type == 'invoice.payment_failed':
+            customer_id = data.get('customer')
+            
+            user = User.query.filter_by(stripe_customer_id=customer_id).first()
+            
+            if user:
+                user.subscription_type = 'free'
+                db.session.commit()
+                logging.info(f"Payment failed for user {user.id} ({user.email})")
+        
+        elif event_type == 'checkout.session.completed':
+            session = data
+            customer_id = session.get('customer')
+            subscription_id = session.get('subscription')
+            client_ref_id = session.get('client_reference_id')
+            
+            if client_ref_id:
+                user = User.query.get(int(client_ref_id))
+                if user:
+                    user.stripe_customer_id = customer_id
+                    user.stripe_subscription_id = subscription_id
+                    user.subscription_type = 'paid'
+                    db.session.commit()
+                    logging.info(f"Checkout completed for user {user.id}")
+        
+        return jsonify(success=True), 200
 
     return payments

@@ -328,6 +328,22 @@ def update_credits():
     db.session.commit()
     return jsonify({'success': True, 'message': f'Credits updated to {user.token}'})
 
+@main.route('/admin/update_subscription', methods=['POST'])
+@login_required
+def update_subscription():
+    if not current_user.is_admin:
+        return jsonify({'error': 'Access denied'}), 403
+    data = request.get_json()
+    user = User.query.get(data.get('user_id'))
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    subscription_type = data.get('subscription_type', 'free')
+    if subscription_type not in ['free', 'paid']:
+        return jsonify({'error': 'Invalid subscription type'}), 400
+    user.subscription_type = subscription_type
+    db.session.commit()
+    return jsonify({'success': True, 'message': f'Subscription updated to {subscription_type}'})
+
 
 
 @main.route('/calendar_generator')

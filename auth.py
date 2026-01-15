@@ -47,12 +47,13 @@ def login():
                     user.subscription_type = 'free'
 
                     if customers.data:
-                        customer = customers.data[0]  # Get the first matching customer
+                        customer = customers.data[0]
+                        user.stripe_customer_id = customer.id
                         subscriptions = stripe.Subscription.list(customer=customer.id, status='active')
 
-                        # If an active subscription exists, set subscription_type to 'paid'
                         if subscriptions.data:
                             user.subscription_type = 'paid'
+                            user.stripe_subscription_id = subscriptions.data[0].id
 
                     db.session.commit()
                 except Exception as e:
