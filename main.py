@@ -520,7 +520,10 @@ def profile():
 
 @main.route('/subscription')
 def subscription():
-    return render_template('subscription.html')
+    from models import SubscriptionMetrics
+    promo_count = SubscriptionMetrics.get_promo_subscriber_count()
+    promo_remaining = max(0, 50 - promo_count)
+    return render_template('subscription.html', promo_remaining=promo_remaining)
 
 
 @main.route('/saves')

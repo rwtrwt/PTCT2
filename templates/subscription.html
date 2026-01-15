@@ -75,7 +75,13 @@
             <p class="price">
                 <span style="text-decoration: line-through; color: #999;">$19.84 / month</span><br>
                 <span style="color: #22c55e; font-weight: bold;">First month only $0.99!</span><br>
+                {% if promo_remaining is defined and promo_remaining > 0 %}
+                <small style="color: #e74c3c; font-weight: bold; font-size: 0.95em;">Only {{ promo_remaining }} discount{{ 's' if promo_remaining != 1 else '' }} remaining!</small>
+                {% elif promo_remaining is defined and promo_remaining == 0 %}
+                <small style="color: #666;">Promotional pricing has ended</small>
+                {% else %}
                 <small style="color: #666;">Limited to first 50 subscribers</small>
+                {% endif %}
             </p>
             {% if not current_user.is_authenticated %}
                 <button id="checkout-button" class="upgrade-button">Upgrade Now</button>
