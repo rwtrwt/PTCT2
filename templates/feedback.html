@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}User Feedback - Parenting Time Pro{% endblock %}
+
+{% block content %}
+<div class="feedback-container" style="max-width: 900px; margin: 0 auto; padding: 20px;">
+    <h1>User Feedback Forum</h1>
+    <p style="color: #666; margin-bottom: 30px;">Share your thoughts, suggestions, and feedback with our community. Registered users can post and vote on feedback.</p>
+
+    {% if current_user.is_authenticated %}
+    <div class="new-post-form" style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+        <h3 style="margin-top: 0;">Submit Feedback</h3>
+        <form id="feedback-form">
+            <div style="margin-bottom: 15px;">
+                <label for="post-title" style="display: block; margin-bottom: 5px; font-weight: 600;">Title</label>
+                <input type="text" id="post-title" maxlength="200" required 
+                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em;"
+                    placeholder="Brief summary of your feedback">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="post-body" style="display: block; margin-bottom: 5px; font-weight: 600;">Details</label>
+                <textarea id="post-body" rows="4" required
+                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; resize: vertical;"
+                    placeholder="Describe your feedback, suggestion, or idea in detail..."></textarea>
+            </div>
+            <button type="submit" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; border: none; padding: 12px 24px; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                Submit Feedback
+            </button>
+        </form>
+    </div>
+    {% else %}
+    <div style="background: #f0f9ff; border-radius: 8px; padding: 20px; margin-bottom: 30px; text-align: center;">
+        <p style="margin: 0;"><a href="{{ url_for('auth.login') }}" style="color: #22c55e; font-weight: 600;">Login</a> or <a href="{{ url_for('auth.register') }}" style="color: #22c55e; font-weight: 600;">Register</a> to submit feedback and vote on posts.</p>
+    </div>
+    {% endif %}
+
+    <div class="posts-list" id="posts-container">
+        {% if posts %}
+        {% for post in posts %}
+        <div class="feedback-post" data-post-id="{{ post.id }}" data-user-vote="{{ post.user_vote or 0 }}" style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 15px;">
+            <div style="display: flex; gap: 15px;">
+                <div class="vote-buttons" style="display: flex; flex-direction: column; align-items: center; min-width: 50px;">
+                    <button class="vote-btn upvote" data-vote="1" 
+                        style="background: none; border: none; font-size: 1.5em; cursor: pointer; padding: 5px; color: {% if post.user_vote == 1 %}#22c55e{% else %}#999{% endif %};"
+                        {% if not current_user.is_authenticated %}disabled title="Login to vote"{% endif %}>
+                        &#9650;
+                    </button>
+                    <span class="score" style="font-weight: bold; font-size: 1.2em;">{{ post.score }}</span>
+                    <button class="vote-btn downvote" data-vote="-1"
+                        style="background: none; border: none; font-size: 1.5em; cursor: pointer; padding: 5px; color: {% if post.user_vote == -1 %}#e74c3c{% else %}#999{% endif %};"
+                        {% if not current_user.is_authenticated %}disabled title="Login to vote"{% endif %}>
+                        &#9660;
+                    </button>
+                </div>
+                <div class="post-content" style="flex: 1;">
+                    <h3 style="margin: 0 0 10px 0; color: #333;">{{ post.title }}</h3>
+                    <p style="color: #555; margin: 0 0 10px 0; white-space: pre-wrap;">{{ post.body }}</p>
+                    <div style="font-size: 0.85em; color: #888;">
+                        Posted by <strong>{{ post.username }}</strong> on {{ post.created_at[:10] if post.created_at else 'Unknown date' }}
+                        {% if current_user.is_authenticated and current_user.is_admin %}
+                        <button class="delete-btn" data-post-id="{{ post.id }}" 
+                            style="margin-left: 15px; background: #e74c3c; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9em;">
+                            Delete
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div style="text-align: center; padding: 40px; color: #666;">
+            <p>No feedback posts yet. Be the first to share your thoughts!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('feedback-form');
+    if (form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const title = document.getElementById('post-title').value;
+            const body = document.getElementById('post-body').value;
+            
+            try {
+                const response = await fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, body })
+                });
+                
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Failed to submit feedback');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to submit feedback');
+            }
+        });
+    }
+    
+    document.querySelectorAll('.vote-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const postEl = this.closest('.feedback-post');
+            const postId = postEl.dataset.postId;
+            const voteValue = parseInt(this.dataset.vote);
+            
+            const upBtn = postEl.querySelector('.upvote');
+            const downBtn = postEl.querySelector('.downvote');
+            const currentUpColor = upBtn.style.color;
+            const currentDownColor = downBtn.style.color;
+            
+            let newVote = voteValue;
+            if (voteValue === 1 && currentUpColor === 'rgb(34, 197, 94)') {
+                newVote = 0;
+            } else if (voteValue === -1 && currentDownColor === 'rgb(231, 76, 60)') {
+                newVote = 0;
+            }
+            
+            try {
+                const response = await fetch(`/api/feedback/${postId}/vote`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ vote: newVote })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    postEl.querySelector('.score').textContent = data.score;
+                    
+                    upBtn.style.color = data.user_vote === 1 ? '#22c55e' : '#999';
+                    downBtn.style.color = data.user_vote === -1 ? '#e74c3c' : '#999';
+                }
+            } catch (error) {
+                console.error('Error voting:', error);
+            }
+        });
+    });
+    
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const postId = this.dataset.postId;
+            if (!confirm('Are you sure you want to delete this post?')) return;
+            
+            try {
+                const response = await fetch(`/api/feedback/${postId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to delete post');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to delete post');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

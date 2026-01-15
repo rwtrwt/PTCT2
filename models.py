@@ -288,3 +288,66 @@ class SubscriptionMetrics(db.Model):
         db.session.commit()
         return metric.metric_value
 
+
+class FeedbackPost(db.Model):
+    """User feedback posts for the forum."""
+    __tablename__ = 'feedback_post'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    is_deleted = db.Column(db.Boolean, default=False)
+
+    user = db.relationship('User', backref=db.backref('feedback_posts', lazy=True))
+    votes = db.relationship('FeedbackVote', backref='post', lazy=True, cascade='all, delete-orphan')
+
+    @property
+    def upvotes(self):
+        return sum(1 for v in self.votes if v.vote_value == 1)
+
+    @property
+    def downvotes(self):
+        return sum(1 for v in self.votes if v.vote_value == -1)
+
+    @property
+    def score(self):
+        return self.upvotes - self.downvotes
+
+    def to_dict(self, current_user_id=None):
+        user_vote = None
+        if current_user_id:
+            for v in self.votes:
+                if v.user_id == current_user_id:
+                    user_vote = v.vote_value
+                    break
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'username': self.user.username if self.user else 'Unknown',
+            'title': self.title,
+            'body': self.body,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'upvotes': self.upvotes,
+            'downvotes': self.downvotes,
+            'score': self.score,
+            'user_vote': user_vote
+        }
+
+
+class FeedbackVote(db.Model):
+    """User votes on feedback posts."""
+    __tablename__ = 'feedback_vote'
+
+    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.Integer, db.ForeignKey('feedback_post.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    vote_value = db.Column(db.Integer, nullable=False)  # 1 for upvote, -1 for downvote
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (db.UniqueConstraint('post_id', 'user_id', name='unique_user_post_vote'),)
+
+    user = db.relationship('User', backref=db.backref('feedback_votes', lazy=True))
+

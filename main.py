@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, session
 from markupsafe import Markup
 from flask_login import login_required, current_user
-from models import User, CalendarSave, GuestToken, SchoolEntity, VerifiedHoliday, CalendarFile
+from models import User, CalendarSave, GuestToken, SchoolEntity, VerifiedHoliday, CalendarFile, FeedbackPost, FeedbackVote
 from extensions import db, mail
 from flask_mail import Message
 from datetime import datetime
@@ -3778,3 +3778,103 @@ Sitemap: {base_url}/sitemap.xml
     response = make_response(content)
     response.headers['Content-Type'] = 'text/plain'
     return response
+
+
+@main.route('/feedback')
+def feedback():
+    """User feedback forum page."""
+    from sqlalchemy.orm import joinedload
+    posts = FeedbackPost.query.filter_by(is_deleted=False).options(
+        joinedload(FeedbackPost.user),
+        joinedload(FeedbackPost.votes)
+    ).order_by(FeedbackPost.created_at.desc()).all()
+    current_user_id = current_user.id if current_user.is_authenticated else None
+    posts_data = [p.to_dict(current_user_id) for p in posts]
+    return render_template('feedback.html', posts=posts_data)
+
+
+@main.route('/api/feedback', methods=['GET'])
+def get_feedback_posts():
+    """API endpoint to get all feedback posts."""
+    from sqlalchemy.orm import joinedload
+    posts = FeedbackPost.query.filter_by(is_deleted=False).options(
+        joinedload(FeedbackPost.user),
+        joinedload(FeedbackPost.votes)
+    ).order_by(FeedbackPost.created_at.desc()).all()
+    current_user_id = current_user.id if current_user.is_authenticated else None
+    return jsonify([p.to_dict(current_user_id) for p in posts])
+
+
+@main.route('/api/feedback', methods=['POST'])
+@login_required
+def create_feedback_post():
+    """Create a new feedback post."""
+    data = request.get_json()
+    if not data or 'title' not in data or 'body' not in data:
+        return jsonify({'error': 'Title and body are required'}), 400
+    
+    title = data['title'].strip()
+    body = data['body'].strip()
+    
+    if not title or not body:
+        return jsonify({'error': 'Title and body cannot be empty'}), 400
+    
+    if len(title) > 200:
+        return jsonify({'error': 'Title must be 200 characters or less'}), 400
+    
+    post = FeedbackPost(
+        user_id=current_user.id,
+        title=title,
+        body=body
+    )
+    db.session.add(post)
+    db.session.commit()
+    return jsonify(post.to_dict(current_user.id)), 201
+
+
+@main.route('/api/feedback/<int:post_id>/vote', methods=['POST'])
+@login_required
+def vote_feedback_post(post_id):
+    """Vote on a feedback post."""
+    post = FeedbackPost.query.get_or_404(post_id)
+    if post.is_deleted:
+        return jsonify({'error': 'Post not found'}), 404
+    
+    data = request.get_json()
+    vote_value = data.get('vote')  # 1 for upvote, -1 for downvote, 0 to remove
+    
+    if vote_value not in [1, -1, 0]:
+        return jsonify({'error': 'Invalid vote value'}), 400
+    
+    existing_vote = FeedbackVote.query.filter_by(post_id=post_id, user_id=current_user.id).first()
+    
+    if vote_value == 0:
+        if existing_vote:
+            db.session.delete(existing_vote)
+            db.session.commit()
+    else:
+        if existing_vote:
+            existing_vote.vote_value = vote_value
+        else:
+            new_vote = FeedbackVote(
+                post_id=post_id,
+                user_id=current_user.id,
+                vote_value=vote_value
+            )
+            db.session.add(new_vote)
+        db.session.commit()
+    
+    return jsonify(post.to_dict(current_user.id))
+
+
+@main.route('/api/feedback/<int:post_id>', methods=['DELETE'])
+@login_required
+def delete_feedback_post(post_id):
+    """Delete a feedback post (admin only)."""
+    if not current_user.is_admin:
+        return jsonify({'error': 'Admin access required'}), 403
+    
+    post = FeedbackPost.query.get_or_404(post_id)
+    post.is_deleted = True
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'Post deleted'})
