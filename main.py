@@ -93,12 +93,37 @@ def get_client_ip():
         return request.headers.get('X-Forwarded-For').split(',')[0].strip()
     return request.remote_addr or '0.0.0.0'
 
+def get_ip_location(ip_address):
+    """Fetch location data from IP address using free ip-api.com service."""
+    import requests
+    try:
+        if ip_address in ('127.0.0.1', 'localhost', '0.0.0.0') or ip_address.startswith('192.168.') or ip_address.startswith('10.'):
+            return None, None, None
+        response = requests.get(f'https://ipapi.co/{ip_address}/json/', timeout=3)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('city') and not data.get('error'):
+                return data.get('city'), data.get('region'), data.get('country_name')
+    except Exception as e:
+        logger.warning(f"Failed to get IP location for {ip_address}: {e}")
+    return None, None, None
+
 def get_or_create_guest_token(ip_address):
     """Get existing guest token or create new one with 10 tokens."""
     guest = GuestToken.query.filter_by(ip_address=ip_address).first()
     if not guest:
-        guest = GuestToken(ip_address=ip_address, tokens=10)
+        city, region, country = get_ip_location(ip_address)
+        guest = GuestToken(ip_address=ip_address, tokens=10, usage_count=1, city=city, region=region, country=country)
         db.session.add(guest)
+        db.session.commit()
+    else:
+        guest.usage_count = (guest.usage_count or 0) + 1
+        if not guest.city and not guest.region:
+            city, region, country = get_ip_location(ip_address)
+            if city:
+                guest.city = city
+                guest.region = region
+                guest.country = country
         db.session.commit()
     return guest
 

@@ -2,6 +2,8 @@
 
 {% block content %}
 <h1>Admin Panel</h1>
+
+<h2>Registered Users</h2>
 <table>
     <thead>
         <tr>
@@ -27,4 +29,48 @@
         {% endfor %}
     </tbody>
 </table>
+
+<h2 style="margin-top: 2rem;">Unregistered Users (Guests)</h2>
+<p style="color: #666; margin-bottom: 1rem;">Showing {{ guests|length }} guests who haven't registered yet.</p>
+<div style="overflow-x: auto;">
+<table>
+    <thead>
+        <tr>
+            <th>IP Address</th>
+            <th>Location</th>
+            <th>First Visit</th>
+            <th>Last Visit</th>
+            <th>Usage Count</th>
+            <th>Tokens Left</th>
+            <th>Email</th>
+            <th>Phone</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for guest in guests %}
+        <tr>
+            <td>{{ guest.ip_address }}</td>
+            <td>
+                {% if guest.city or guest.region %}
+                    {{ guest.city or '' }}{% if guest.city and guest.region %}, {% endif %}{{ guest.region or '' }}
+                    {% if guest.country %}<br><small style="color: #888;">{{ guest.country }}</small>{% endif %}
+                {% else %}
+                    <span style="color: #999;">Unknown</span>
+                {% endif %}
+            </td>
+            <td>{{ guest.created_at.strftime('%Y-%m-%d %H:%M') if guest.created_at else 'N/A' }}</td>
+            <td>{{ guest.updated_at.strftime('%Y-%m-%d %H:%M') if guest.updated_at else 'N/A' }}</td>
+            <td>{{ guest.usage_count or 0 }}</td>
+            <td>{{ guest.tokens }}</td>
+            <td>{{ guest.email or '-' }}</td>
+            <td>{{ guest.phone or '-' }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="8" style="text-align: center; color: #666;">No unregistered guests yet.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
 {% endblock %}

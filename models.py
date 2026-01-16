@@ -71,6 +71,10 @@ class GuestToken(db.Model):
     phone = db.Column(db.String(20), nullable=True)
     contact_permission = db.Column(db.Boolean, default=False)
     linked_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    usage_count = db.Column(db.Integer, default=0)
+    city = db.Column(db.String(100), nullable=True)
+    region = db.Column(db.String(100), nullable=True)
+    country = db.Column(db.String(100), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -84,7 +88,12 @@ class GuestToken(db.Model):
             'email': self.email,
             'phone': self.phone,
             'contact_permission': self.contact_permission,
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'usage_count': self.usage_count,
+            'city': self.city,
+            'region': self.region,
+            'country': self.country,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
 
 

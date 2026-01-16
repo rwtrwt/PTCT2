@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, make_response, current_app
 from flask_login import login_required, current_user
-from models import User, SchoolEntity, VerifiedHoliday, CalendarFile
+from models import User, SchoolEntity, VerifiedHoliday, CalendarFile, GuestToken
 from extensions import db
 from datetime import datetime
 from werkzeug.utils import secure_filename
@@ -16,7 +16,8 @@ def admin_page():
         flash('You do not have permission to access this page.')
         return redirect(url_for('main.home'))
     users = User.query.all()
-    return render_template('admin.html', users=users)
+    guests = GuestToken.query.filter(GuestToken.linked_user_id == None).order_by(GuestToken.updated_at.desc()).all()
+    return render_template('admin.html', users=users, guests=guests)
 
 @admin.route('/admin/toggle_admin/<int:user_id>')
 @login_required
