@@ -312,6 +312,52 @@
             </tbody>
         </table>
     </div>
+
+    <div class="users-table-container" style="margin-top: 30px;">
+        <div class="users-table-header">
+            <h2>Unregistered Users (Guests)</h2>
+            <span style="color: #6b7280; font-size: 0.9rem;">{{ guests|length }} guests</span>
+        </div>
+        <table class="users-table" id="guestsTable">
+            <thead>
+                <tr>
+                    <th>IP Address</th>
+                    <th>Location</th>
+                    <th>First Visit</th>
+                    <th>Last Visit</th>
+                    <th>Usage</th>
+                    <th>Tokens</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for guest in guests %}
+                <tr>
+                    <td style="font-family: monospace; font-size: 0.85rem;">{{ guest.ip_address }}</td>
+                    <td>
+                        {% if guest.city or guest.region %}
+                            {{ guest.city or '' }}{% if guest.city and guest.region %}, {% endif %}{{ guest.region or '' }}
+                            {% if guest.country %}<br><small style="color: #9ca3af;">{{ guest.country }}</small>{% endif %}
+                        {% else %}
+                            <span style="color: #9ca3af;">Unknown</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ guest.created_at.strftime('%Y-%m-%d %H:%M') if guest.created_at else '-' }}</td>
+                    <td>{{ guest.updated_at.strftime('%Y-%m-%d %H:%M') if guest.updated_at else '-' }}</td>
+                    <td>{{ guest.usage_count or 0 }}</td>
+                    <td>{{ guest.tokens }}</td>
+                    <td>{{ guest.email or '-' }}</td>
+                    <td>{{ guest.phone or '-' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" style="text-align: center; color: #9ca3af; padding: 30px;">No unregistered guests yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <div class="notification" id="notification"></div>

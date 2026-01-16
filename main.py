@@ -308,7 +308,8 @@ def admin_dashboard():
         flash('Access denied. Admin privileges required.', 'danger')
         return redirect(url_for('main.dashboard'))
     users = User.query.all()
-    return render_template('admin_dashboard.html', users=users)
+    guests = GuestToken.query.filter(GuestToken.linked_user_id == None).order_by(GuestToken.updated_at.desc()).all()
+    return render_template('admin_dashboard.html', users=users, guests=guests)
 
 @main.route('/admin/toggle_block', methods=['POST'])
 @login_required
