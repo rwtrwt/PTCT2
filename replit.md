@@ -113,6 +113,23 @@ Users can earn free tokens by referring friends:
 - `referral_count`: Number of successful referrals
 - `referral_tokens_earned`: Total tokens earned from referrals
 
+#### Admin Dashboard - Guest Tracking (Jan 2026)
+The admin dashboard now includes an "Unregistered Users" table showing guest activity:
+
+**Tracked Data:**
+- IP Address
+- Location (City, Region, Country) - fetched via IP geolocation on first visit
+- First Visit date
+- Last Visit date  
+- Usage Count - incremented each time they access the tool
+- Remaining Tokens
+- Email (if provided for bonus tokens)
+- Phone (if provided for bonus tokens)
+
+**Database Fields (GuestToken model):**
+- `usage_count`: Number of times guest accessed the tool
+- `city`, `region`, `country`: Location derived from IP address
+
 #### Drafting Audit Report
 Generates detailed audit reports for parenting plans, identifying novel provisions, ambiguities, drafting errors, omissions, and areas for clarity, with categorized findings and suggested revisions.
 
