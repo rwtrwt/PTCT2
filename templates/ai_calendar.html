@@ -1209,7 +1209,7 @@ input[type="date"].ai-adjusted {
         </div>
     </div>
 
-    <div class="document-analyzer{% if not current_user.is_authenticated or (current_user.subscription_type != 'paid' and current_user.subscription_type != 'government') %} disabled{% endif %}" id="documentAnalyzer" style="position: relative;">
+    <div class="document-analyzer disabled" id="documentAnalyzer" style="position: relative;">
         <div class="step-badge" style="position: absolute; top: -12px; left: 20px; width: 28px; height: 28px; background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; box-shadow: 0 2px 6px rgba(0,0,0,0.2); z-index: 1;">2</div>
         <h2>Parenting Plan Analyzer</h2>
         <p>Upload your parenting plan PDF to automatically extract and populate the schedule settings below.</p>
