@@ -98,7 +98,7 @@ input[type="password"] {
     margin-bottom: 1rem;
 }
 
-button {
+button:not([class*="btn-hero"]):not([class*="upload-btn"]):not([class*="show-more"]):not([class*="see-more"]) {
     display: inline-block;
     background: #333;
     color: #fff;
@@ -107,7 +107,7 @@ button {
     cursor: pointer;
 }
 
-button:hover {
+button:not([class*="btn-hero"]):not([class*="upload-btn"]):not([class*="show-more"]):not([class*="see-more"]):hover {
     background: #555;
 }
 
