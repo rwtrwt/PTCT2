@@ -84,13 +84,13 @@
                 {% endif %}
             </p>
             {% if not current_user.is_authenticated %}
-                <button id="checkout-button" class="upgrade-button">Upgrade Now</button>
+                <a href="{{ url_for('auth.register') }}" class="upgrade-button" style="display: inline-block; text-decoration: none;">Register to Subscribe</a>
             {% elif current_user.subscription_type == 'free' %}
                 <button id="checkout-button" class="upgrade-button">Upgrade Now</button>
             {% elif current_user.subscription_type == 'government' %}
-                <button disabled>Government Account</button>
+                <p style="color: #22c55e; font-weight: bold; margin-top: 1rem;">Government Account - Full Access</p>
             {% else %}
-                <button disabled>Current Plan</button>
+                <p style="color: #22c55e; font-weight: bold; margin-top: 1rem;">You're Subscribed!</p>
             {% endif %}
         </div>
     </div>
