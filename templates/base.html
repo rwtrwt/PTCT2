@@ -325,7 +325,7 @@
                 <ul>
                     <li><a href="{{ url_for('main.home') }}"><img src="{{ url_for('static', filename='images/calendar-tool-icon.png') }}" alt="Home" class="nav-icon" /></a></li>
                     {% if current_user.is_authenticated %}
-                        <li><a href="{{ url_for('main.ai_calendar') }}">AI Calendar Tool</a></li>
+                        <li><a href="{{ url_for('main.ai_calendar') }}">Parenting Days Calculator</a></li>
                         <li><a href="{{ url_for('main.saves') }}">Saves</a></li>
                         <li><a href="{{ url_for('main.user_guide') }}">User Guide</a></li>
                         <li><a href="{{ url_for('main.feedback') }}">Feedback</a></li>
@@ -333,7 +333,7 @@
                         <li><a href="{{ url_for('main.subscription') }}" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600;">Subscribe</a></li>
                         {% endif %}
                     {% else %}
-                        <li><a href="{{ url_for('main.ai_calendar') }}">AI Calendar Tool</a></li>
+                        <li><a href="{{ url_for('main.ai_calendar') }}">Parenting Days Calculator</a></li>
                         <li><a href="{{ url_for('main.user_guide') }}">User Guide</a></li>
                         <li><a href="{{ url_for('auth.login') }}">Login</a></li>
                         <li><a href="{{ url_for('auth.register') }}">Register</a></li>
