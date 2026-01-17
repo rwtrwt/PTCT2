@@ -98,7 +98,7 @@
 
 {% if current_user.is_authenticated and current_user.subscription_type == 'paid' %}
 <div class="manage-subscription">
-    <a href="{{ url_for('payments.payment_cancel') }}" class="btn btn-secondary">Cancel Subscription</a>
+    <a href="{{ url_for('payments.payment_cancel') }}" class="btn-hero-secondary">Cancel Subscription</a>
 </div>
 {% endif %}
 
