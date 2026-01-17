@@ -4,17 +4,114 @@
 {% block meta_description %}Georgia Automatic Parenting Time Calendar Tool - The leading AI-powered calculator for Georgia custody schedules. Automatically calculate parenting time percentages and generate court-ready calendars.{% endblock %}
 
 {% block content %}
-<h1>Georgia Automatic Parenting Time Calendar Tool</h1>
 {% if current_user.is_authenticated %}
-    <p>Hello, {{ current_user.username }}!</p>
-    <a href="{{ url_for('main.ai_calendar') }}">Go to AI Calendar Tool</a>
+    <!-- Logged-in User View -->
+    <section class="welcome-hero">
+        <h1>Welcome back, {{ current_user.username }}!</h1>
+        <p>Ready to calculate parenting time?</p>
+        <a href="{{ url_for('main.ai_calendar') }}" class="btn-hero-primary">Go to Parenting Days Calculator</a>
+    </section>
 {% else %}
-    <p>The first ever Automatic Online Georgia Parenting Time Calendar Tool - try it with no registration required!</p>
-    <a href="{{ url_for('main.ai_calendar') }}" style="display: inline-block; padding: 12px 24px; background: #8b5cf6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 10px 5px;">Try AI Calendar Tool</a>
-    <a href="{{ url_for('auth.login') }}" style="display: inline-block; padding: 12px 24px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 10px 5px;">Login</a>
-    <a href="{{ url_for('auth.register') }}" style="display: inline-block; padding: 12px 24px; background: #10b981; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 10px 5px;">Register</a>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="hero-badge-icon">&#9889;</span>
+                <span>Georgia's #1 Parenting Time Calculator</span>
+            </div>
+            <h1>Calculate Parenting Time<br>Percentages Automatically</h1>
+            <p class="hero-subtitle">
+                The first AI-powered tool for Georgia custody schedules.
+                Generate court-ready calendars with accurate parenting time percentages in minutes, not hours.
+            </p>
+            <div class="hero-buttons">
+                <a href="{{ url_for('main.ai_calendar') }}" class="btn-hero-primary">
+                    Try It Free &rarr;
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn-hero-secondary">
+                    Login
+                </a>
+                <a href="{{ url_for('auth.register') }}" class="btn-hero-accent">
+                    Create Account
+                </a>
+            </div>
+        </div>
+    </section>
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/2FQXY-1FZc8?si=pQ5LCRBuIN4kBRwx" title="Georgia Automatic Parenting Time Calendar Tool Demo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <!-- Features Section -->
+    <section class="features-section">
+        <h2>Why Attorneys &amp; Parents Trust Us</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">&#128197;</div>
+                <h3>Automatic Calculations</h3>
+                <p>Input your parenting schedule and watch as our AI automatically counts days for each parent across any date range. No more manual counting.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#9878;</div>
+                <h3>Court-Ready Documents</h3>
+                <p>Generate professional calendars formatted for Georgia family courts, complete with accurate percentage breakdowns that judges expect to see.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128200;</div>
+                <h3>Precise Percentages</h3>
+                <p>Get exact parenting time percentages calculated to the decimal point. Essential for accurate child support determinations under Georgia law.</p>
+            </div>
+        </div>
+    </section>
 
+    <!-- How It Works Section -->
+    <section class="steps-section">
+        <h2>How It Works</h2>
+        <div class="steps-container">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Enter Your Schedule</h3>
+                <p>Input your custody arrangement using our simple interface or paste text directly from your parenting plan.</p>
+            </div>
+            <div class="step-arrow">&#8594;</div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Review the Calendar</h3>
+                <p>See your schedule visualized on a color-coded calendar with automatic day counts and percentage calculations.</p>
+            </div>
+            <div class="step-arrow">&#8594;</div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Download &amp; Share</h3>
+                <p>Export your calendar as a PDF or Excel file, ready for court filings, mediation, or attorney review.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Section -->
+    <section class="video-section">
+        <h2>See It In Action</h2>
+        <p class="section-subtitle">Watch a quick demo of how the Georgia Parenting Time Calculator saves you time.</p>
+        <div class="video-container">
+            <iframe
+                src="https://www.youtube.com/embed/2FQXY-1FZc8?si=pQ5LCRBuIN4kBRwx"
+                title="Georgia Automatic Parenting Time Calendar Tool Demo"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen>
+            </iframe>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="cta-section">
+        <h2>Ready to Save Hours of Work?</h2>
+        <p>Try our calculator free with no registration required. Create an account to save your work and unlock premium features.</p>
+        <div class="cta-buttons">
+            <a href="{{ url_for('main.ai_calendar') }}" class="btn-hero-primary">
+                Try It Free &rarr;
+            </a>
+            <a href="{{ url_for('auth.register') }}" class="btn-hero-accent">
+                Create Free Account
+            </a>
+        </div>
+    </section>
 {% endif %}
 {% endblock %}
