@@ -340,7 +340,7 @@
             </div>
             {% if current_user.is_authenticated %}
             <div class="nav-right" style="display: flex; align-items: center;">
-                {% if current_user.is_admin %}
+                {% if current_user.is_admin and request.endpoint == 'main.ai_calendar' %}
                 <div class="admin-date-override" id="adminDateOverride">
                     <label for="overrideDate">Test Date:</label>
                     <input type="date" id="overrideDate" />
