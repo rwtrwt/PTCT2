@@ -1166,9 +1166,19 @@ input[type="date"].ai-adjusted {
 
         <div class="county-selector-section" id="countySelectorSection">
             <label for="school-select" style="font-weight: 600; display: block; margin-bottom: 8px;">Find Your School District:</label>
-            <select id="school-select" style="width: 100%; max-width: 400px; padding: 10px; border: 2px solid #d1d5db; border-radius: 6px; font-size: 1rem;">
-                <option value="">Select a school district...</option>
-            </select>
+            <input type="hidden" id="school-select" value="">
+            <div class="school-dropdown-container" style="position: relative; width: 100%; max-width: 400px;">
+                <div class="school-dropdown-trigger" id="schoolDropdownTrigger" style="width: 100%; padding: 10px 35px 10px 10px; border: 2px solid #d1d5db; border-radius: 6px; font-size: 1rem; background: white; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                    <span id="selectedSchoolText" style="flex: 1; color: #6b7280;">Select a school district...</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; right: 10px;"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+                <div class="school-dropdown-menu" id="schoolDropdownMenu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #d1d5db; border-top: none; border-radius: 0 0 6px 6px; max-height: 350px; overflow-y: auto; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <div style="padding: 8px; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; background: white;">
+                        <input type="text" id="schoolSearchInput" placeholder="Search schools..." style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 0.9rem;">
+                    </div>
+                    <div id="schoolDropdownList"></div>
+                </div>
+            </div>
             <p id="schoolHolidaysStatus" style="margin-top: 10px; font-size: 0.85rem; color: #059669;"></p>
         </div>
 
@@ -2898,14 +2908,9 @@ function setupEventListeners() {
     document.getElementById('showMoreHolidaysBtn')?.addEventListener('click', toggleHolidaysShowMore);
     document.getElementById('showMoreAnalysisBtn')?.addEventListener('click', toggleAnalysisShowMore);
 
-    // Load school entities for legacy mode dropdown
+    // Load school entities for dropdown and initialize custom dropdown
     loadSchoolEntities();
-
-    document.getElementById('school-select')?.addEventListener('change', function() {
-        if (this.value) {
-            loadSchoolHolidays(this.value);
-        }
-    });
+    initSchoolDropdown();
 
     // Manual configuration button - shows parent names modal first
     document.getElementById('manualConfigBtn')?.addEventListener('click', function() {
@@ -5070,45 +5075,223 @@ function populateCountyDates(county) {
     setWinterBreakDates(today, county);
 }
 
+// School entities data cache
+let schoolEntitiesCache = [];
+const isUserLoggedIn = {{ 'true' if current_user.is_authenticated else 'false' }};
+
 // Load school entities for the dropdown
 async function loadSchoolEntities() {
-    const select = document.getElementById('school-select');
-    if (!select) return;
+    const dropdownList = document.getElementById('schoolDropdownList');
+    if (!dropdownList) return;
 
     try {
         const response = await fetch('/api/school-entities');
         const data = await response.json();
 
         if (data.success && data.entities.length > 0) {
-            select.innerHTML = '<option value="">-- Select School District --</option>';
-
-            // Group by county
-            const byCounty = {};
-            data.entities.forEach(entity => {
-                const county = entity.county || 'Other';
-                if (!byCounty[county]) byCounty[county] = [];
-                byCounty[county].push(entity);
-            });
-
-            // Create optgroups by county
-            Object.keys(byCounty).sort().forEach(county => {
-                const optgroup = document.createElement('optgroup');
-                optgroup.label = county + ' County';
-                byCounty[county].forEach(entity => {
-                    const option = document.createElement('option');
-                    option.value = entity.id;
-                    option.textContent = entity.district_name;
-                    optgroup.appendChild(option);
-                });
-                select.appendChild(optgroup);
-            });
+            schoolEntitiesCache = data.entities;
+            renderSchoolDropdown(data.entities);
         } else {
-            select.innerHTML = '<option value="">No schools with verified data</option>';
+            dropdownList.innerHTML = '<div style="padding: 12px; color: #6b7280;">No schools with verified data</div>';
         }
     } catch (err) {
         console.error('Error loading school entities:', err);
-        select.innerHTML = '<option value="">Error loading schools</option>';
+        dropdownList.innerHTML = '<div style="padding: 12px; color: #ef4444;">Error loading schools</div>';
     }
+}
+
+function renderSchoolDropdown(entities, searchTerm = '') {
+    const dropdownList = document.getElementById('schoolDropdownList');
+    if (!dropdownList) return;
+
+    // Filter by search term
+    let filtered = entities;
+    if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        filtered = entities.filter(e => 
+            e.district_name.toLowerCase().includes(term) || 
+            (e.county && e.county.toLowerCase().includes(term))
+        );
+    }
+
+    // Separate favorites and non-favorites
+    const favorites = filtered.filter(e => e.is_favorite);
+    const others = filtered.filter(e => !e.is_favorite);
+
+    let html = '';
+
+    // Favorites section
+    if (favorites.length > 0 && isUserLoggedIn) {
+        html += '<div style="padding: 6px 12px; background: #fef3c7; color: #92400e; font-size: 0.8rem; font-weight: 600; border-bottom: 1px solid #fcd34d;">Your Favorites</div>';
+        favorites.forEach(entity => {
+            html += createSchoolItemHTML(entity);
+        });
+        if (others.length > 0) {
+            html += '<div style="padding: 6px 12px; background: #f3f4f6; color: #6b7280; font-size: 0.8rem; font-weight: 600; border-bottom: 1px solid #e5e7eb;">All Districts</div>';
+        }
+    }
+
+    // Group others by county
+    const byCounty = {};
+    others.forEach(entity => {
+        const county = entity.county || 'Other';
+        if (!byCounty[county]) byCounty[county] = [];
+        byCounty[county].push(entity);
+    });
+
+    Object.keys(byCounty).sort().forEach(county => {
+        html += `<div style="padding: 6px 12px; background: #f9fafb; color: #374151; font-size: 0.8rem; font-weight: 600; border-bottom: 1px solid #e5e7eb;">${county} County</div>`;
+        byCounty[county].forEach(entity => {
+            html += createSchoolItemHTML(entity);
+        });
+    });
+
+    if (filtered.length === 0) {
+        html = '<div style="padding: 12px; color: #6b7280; text-align: center;">No matching schools found</div>';
+    }
+
+    dropdownList.innerHTML = html;
+}
+
+function createSchoolItemHTML(entity) {
+    const starIcon = entity.is_favorite ? '★' : '☆';
+    const starColor = entity.is_favorite ? '#f59e0b' : '#d1d5db';
+    const starTitle = entity.is_favorite ? 'Remove from favorites' : 'Add to favorites';
+    const loginHint = isUserLoggedIn ? '' : ' (login to save)';
+    
+    return `
+        <div class="school-item" data-id="${entity.id}" data-name="${entity.district_name}" style="display: flex; align-items: center; padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f3f4f6; transition: background 0.15s;">
+            <span class="favorite-star" data-id="${entity.id}" style="font-size: 1.2rem; color: ${starColor}; cursor: ${isUserLoggedIn ? 'pointer' : 'default'}; margin-right: 10px; transition: transform 0.15s;" title="${starTitle}${loginHint}">${starIcon}</span>
+            <span class="school-name" style="flex: 1;">${entity.district_name}</span>
+        </div>
+    `;
+}
+
+async function toggleFavorite(schoolId, starElement) {
+    if (!isUserLoggedIn) {
+        alert('Please log in to save favorite schools');
+        return;
+    }
+
+    const entity = schoolEntitiesCache.find(e => e.id === schoolId);
+    if (!entity) return;
+
+    const isFavorite = entity.is_favorite;
+    const method = isFavorite ? 'DELETE' : 'POST';
+
+    try {
+        const response = await fetch(`/api/favorite-school/${schoolId}`, { method });
+        const data = await response.json();
+
+        if (data.success) {
+            // Update cache
+            entity.is_favorite = data.is_favorite;
+            
+            // Update star visually
+            starElement.textContent = data.is_favorite ? '★' : '☆';
+            starElement.style.color = data.is_favorite ? '#f59e0b' : '#d1d5db';
+            starElement.title = data.is_favorite ? 'Remove from favorites' : 'Add to favorites';
+            
+            // Animate
+            starElement.style.transform = 'scale(1.3)';
+            setTimeout(() => { starElement.style.transform = 'scale(1)'; }, 150);
+            
+            // Re-sort the list after a brief delay
+            setTimeout(() => {
+                // Re-sort cache: favorites first
+                schoolEntitiesCache.sort((a, b) => {
+                    if (a.is_favorite !== b.is_favorite) return b.is_favorite ? 1 : -1;
+                    return (a.county || '').localeCompare(b.county || '') || a.district_name.localeCompare(b.district_name);
+                });
+                const searchInput = document.getElementById('schoolSearchInput');
+                renderSchoolDropdown(schoolEntitiesCache, searchInput?.value || '');
+            }, 300);
+        }
+    } catch (err) {
+        console.error('Error toggling favorite:', err);
+    }
+}
+
+// Initialize school dropdown event listeners
+function initSchoolDropdown() {
+    const trigger = document.getElementById('schoolDropdownTrigger');
+    const menu = document.getElementById('schoolDropdownMenu');
+    const searchInput = document.getElementById('schoolSearchInput');
+    const dropdownList = document.getElementById('schoolDropdownList');
+    const hiddenSelect = document.getElementById('school-select');
+    const selectedText = document.getElementById('selectedSchoolText');
+
+    if (!trigger || !menu) return;
+
+    // Toggle dropdown on trigger click
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = menu.style.display !== 'none';
+        menu.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen && searchInput) {
+            searchInput.focus();
+        }
+    });
+
+    // Search functionality
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            renderSchoolDropdown(schoolEntitiesCache, e.target.value);
+        });
+        searchInput.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    // Handle clicks on dropdown items
+    if (dropdownList) {
+        dropdownList.addEventListener('click', (e) => {
+            const star = e.target.closest('.favorite-star');
+            const item = e.target.closest('.school-item');
+            
+            if (star) {
+                e.stopPropagation();
+                const schoolId = parseInt(star.dataset.id);
+                toggleFavorite(schoolId, star);
+                return;
+            }
+            
+            if (item) {
+                const schoolId = item.dataset.id;
+                const schoolName = item.dataset.name;
+                
+                // Update hidden select value
+                if (hiddenSelect) hiddenSelect.value = schoolId;
+                
+                // Update display text
+                if (selectedText) {
+                    selectedText.textContent = schoolName;
+                    selectedText.style.color = '#1f2937';
+                }
+                
+                // Close dropdown
+                menu.style.display = 'none';
+                
+                // Trigger change event and load holidays
+                loadSchoolHolidays(schoolId);
+            }
+        });
+        
+        // Hover effect
+        dropdownList.addEventListener('mouseover', (e) => {
+            const item = e.target.closest('.school-item');
+            if (item) item.style.background = '#f3f4f6';
+        });
+        dropdownList.addEventListener('mouseout', (e) => {
+            const item = e.target.closest('.school-item');
+            if (item) item.style.background = '';
+        });
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!trigger.contains(e.target) && !menu.contains(e.target)) {
+            menu.style.display = 'none';
+        }
+    });
 }
 
 // Load verified holidays for a school and populate the form
@@ -5710,8 +5893,15 @@ function restoreFormState(state) {
     
     if (state.schoolEntityId) {
         const schoolSelect = document.getElementById('school-select');
+        const selectedText = document.getElementById('selectedSchoolText');
         if (schoolSelect) {
             schoolSelect.value = state.schoolEntityId;
+            // Update the dropdown display text
+            const entity = schoolEntitiesCache.find(e => e.id == state.schoolEntityId);
+            if (entity && selectedText) {
+                selectedText.textContent = entity.district_name;
+                selectedText.style.color = '#1f2937';
+            }
             // Load the holidays for this school
             loadSchoolHolidays(state.schoolEntityId);
         }
