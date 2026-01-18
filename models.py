@@ -225,6 +225,23 @@ class CalendarFile(db.Model):
         }
 
 
+class UserFavoriteSchool(db.Model):
+    """User's favorite school districts for quick access."""
+    __tablename__ = 'user_favorite_school'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    school_entity_id = db.Column(db.Integer, db.ForeignKey('school_entity.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref=db.backref('favorite_schools', lazy='dynamic'))
+    school_entity = db.relationship('SchoolEntity', backref=db.backref('favorited_by', lazy='dynamic'))
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'school_entity_id', name='uix_user_school_favorite'),
+    )
+
+
 class GovernmentDomain(db.Model):
     """Approved government email domains for automatic verification."""
     __tablename__ = 'government_domain'
