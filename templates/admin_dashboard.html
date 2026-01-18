@@ -261,6 +261,7 @@
                         <select class="subscription-select" id="sub-{{ user.id }}" onchange="updateSubscription({{ user.id }})">
                             <option value="free" {% if user.subscription_type == 'free' %}selected{% endif %}>Free</option>
                             <option value="paid" {% if user.subscription_type == 'paid' %}selected{% endif %}>Paid</option>
+                            <option value="government" {% if user.subscription_type == 'government' %}selected{% endif %}>Government</option>
                         </select>
                         {% if user.stripe_customer_id %}
                         <a href="https://dashboard.stripe.com/customers/{{ user.stripe_customer_id }}" target="_blank" style="font-size: 0.7rem; color: #667eea; margin-left: 5px;">Stripe</a>
