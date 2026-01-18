@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, session
 from markupsafe import Markup
 from flask_login import login_required, current_user
-from models import User, CalendarSave, GuestToken, SchoolEntity, VerifiedHoliday, CalendarFile, FeedbackPost, FeedbackVote
+from models import User, CalendarSave, GuestToken, SchoolEntity, VerifiedHoliday, CalendarFile, FeedbackPost, FeedbackVote, UserFavoriteSchool
 from extensions import db, mail
 from flask_mail import Message
 from datetime import datetime
@@ -3724,6 +3724,12 @@ def api_school_entities():
         SchoolEntity.district_name
     ).all()
 
+    # Get user's favorite school IDs if logged in
+    favorite_ids = set()
+    if current_user.is_authenticated:
+        favorites = UserFavoriteSchool.query.filter_by(user_id=current_user.id).all()
+        favorite_ids = {f.school_entity_id for f in favorites}
+
     result = []
     for entity in entities:
         # Check if this entity has any verified holidays
@@ -3733,13 +3739,58 @@ def api_school_entities():
                 'id': entity.id,
                 'district_name': entity.district_name,
                 'county': entity.county,
-                'holiday_count': holiday_count
+                'holiday_count': holiday_count,
+                'is_favorite': entity.id in favorite_ids
             })
+
+    # Sort: favorites first, then by county/name
+    result.sort(key=lambda x: (not x['is_favorite'], x['county'] or '', x['district_name']))
 
     return jsonify({
         'success': True,
         'entities': result
     })
+
+
+@main.route('/api/favorite-school/<int:school_id>', methods=['POST'])
+@login_required
+def add_favorite_school(school_id):
+    """Add a school to user's favorites."""
+    entity = SchoolEntity.query.get_or_404(school_id)
+    
+    # Check if already favorited
+    existing = UserFavoriteSchool.query.filter_by(
+        user_id=current_user.id,
+        school_entity_id=school_id
+    ).first()
+    
+    if existing:
+        return jsonify({'success': True, 'message': 'Already favorited', 'is_favorite': True})
+    
+    favorite = UserFavoriteSchool(
+        user_id=current_user.id,
+        school_entity_id=school_id
+    )
+    db.session.add(favorite)
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': 'Added to favorites', 'is_favorite': True})
+
+
+@main.route('/api/favorite-school/<int:school_id>', methods=['DELETE'])
+@login_required
+def remove_favorite_school(school_id):
+    """Remove a school from user's favorites."""
+    favorite = UserFavoriteSchool.query.filter_by(
+        user_id=current_user.id,
+        school_entity_id=school_id
+    ).first()
+    
+    if favorite:
+        db.session.delete(favorite)
+        db.session.commit()
+    
+    return jsonify({'success': True, 'message': 'Removed from favorites', 'is_favorite': False})
 
 
 @main.route('/sitemap.xml', endpoint='sitemap_xml')
