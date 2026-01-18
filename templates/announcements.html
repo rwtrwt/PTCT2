@@ -155,6 +155,59 @@
 
     <div class="announcement-card">
         <span class="announcement-date">January 18, 2026</span>
+        <h2 class="announcement-title">New: Favorite Schools Feature</h2>
+        
+        <div class="announcement-content">
+            <p>
+                Finding your client's school district just got easier! We've added a 
+                <span class="highlight-stat">Favorite Schools</span> feature that lets you 
+                save your most-used school districts for quick access.
+            </p>
+            
+            <p><strong>How It Works:</strong></p>
+            <ul>
+                <li>Click the <strong>star icon</strong> next to any school district to save it as a favorite</li>
+                <li>Your favorites appear at the top of the dropdown under "Your Favorites"</li>
+                <li>Use the <strong>search box</strong> to quickly filter through all 67 districts</li>
+                <li>Your favorites are saved to your account and persist across sessions</li>
+            </ul>
+            
+            <p>
+                Perfect for attorneys who regularly work with clients from the same counties - 
+                no more scrolling through the full list every time!
+            </p>
+            
+            <p style="background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 15px; margin-top: 20px;">
+                <strong>Note:</strong> You must be logged in to save favorites. 
+                <a href="{{ url_for('auth.register') }}">Create a free account</a> to use this feature.
+            </p>
+        </div>
+
+        <div class="social-copy-box">
+            <span class="social-copy-label">Copy for Social Media</span>
+            <div class="social-copy-text" id="socialCopy2">NEW FEATURE for Georgia family law attorneys!
+
+Just added: Favorite Schools - save your most-used school districts for instant access.
+
+Working with clients from Fulton, Cobb, or Gwinnett regularly? Star those districts and they'll appear at the top of your dropdown every time.
+
+Plus: New searchable dropdown makes finding any of our 67 Georgia school districts a breeze.
+
+Try it free: parentingtimecalendartool.com
+
+#GeorgiaLaw #FamilyLaw #ChildCustody #DivorceAttorney #LegalTech #ParentingTime</div>
+            <button class="copy-btn" onclick="copyToClipboard('socialCopy2', this)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Copy Text
+            </button>
+        </div>
+    </div>
+
+    <div class="announcement-card">
+        <span class="announcement-date">January 18, 2026</span>
         <h2 class="announcement-title">35 Additional Georgia School Districts Now Available</h2>
         
         <div class="announcement-content">
