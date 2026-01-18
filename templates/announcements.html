@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+{% block title %}Release Notes - Georgia Parenting Time Calculator{% endblock %}
+
+{% block content %}
+<style>
+.announcements-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.announcements-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.announcements-header h1 {
+    font-size: 2rem;
+    color: #1f2937;
+    margin-bottom: 10px;
+}
+
+.announcements-header p {
+    color: #6b7280;
+    font-size: 1.1rem;
+}
+
+.announcement-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.announcement-date {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+
+.announcement-title {
+    font-size: 1.5rem;
+    color: #1f2937;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.announcement-content {
+    color: #4b5563;
+    line-height: 1.7;
+}
+
+.announcement-content p {
+    margin-bottom: 15px;
+}
+
+.announcement-content ul {
+    margin: 15px 0;
+    padding-left: 25px;
+}
+
+.announcement-content li {
+    margin-bottom: 8px;
+}
+
+.social-copy-box {
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 25px;
+    position: relative;
+}
+
+.social-copy-label {
+    position: absolute;
+    top: -12px;
+    left: 15px;
+    background: #f8fafc;
+    padding: 0 8px;
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.social-copy-text {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 0.95rem;
+    color: #334155;
+    white-space: pre-wrap;
+    line-height: 1.6;
+}
+
+.copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 15px;
+    padding: 8px 16px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.copy-btn:hover {
+    background: #5a6fd6;
+}
+
+.copy-btn.copied {
+    background: #10b981;
+}
+
+.county-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+    margin: 20px 0;
+}
+
+.county-item {
+    background: #f0f4ff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #4338ca;
+}
+
+.highlight-stat {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    font-size: 1.1em;
+}
+</style>
+
+<div class="announcements-page">
+    <div class="announcements-header">
+        <h1>Release Notes</h1>
+        <p>Latest updates and improvements to the Georgia Parenting Time Calculator</p>
+    </div>
+
+    <div class="announcement-card">
+        <span class="announcement-date">January 18, 2026</span>
+        <h2 class="announcement-title">35 Georgia School Districts Now Available</h2>
+        
+        <div class="announcement-content">
+            <p>
+                We're excited to announce a major expansion of our school calendar database! 
+                <span class="highlight-stat">35 Georgia school districts</span> with 
+                <span class="highlight-stat">739 verified holidays</span> spanning 
+                <span class="highlight-stat">2025-2029</span> are now integrated into the 
+                Georgia Parenting Time Calculator.
+            </p>
+            
+            <p>
+                This means attorneys and parents across Georgia can now automatically import 
+                official school break dates directly into their parenting time calculations - 
+                no more manual date entry or guessing when Spring Break falls.
+            </p>
+
+            <p><strong>Newly Added Counties/Districts:</strong></p>
+            
+            <div class="county-list">
+                <div class="county-item">Baldwin County</div>
+                <div class="county-item">Barrow County</div>
+                <div class="county-item">Bartow County</div>
+                <div class="county-item">Bibb County</div>
+                <div class="county-item">Bryan County</div>
+                <div class="county-item">Bulloch County</div>
+                <div class="county-item">Carroll County</div>
+                <div class="county-item">Catoosa County</div>
+                <div class="county-item">Cherokee County</div>
+                <div class="county-item">Clarke County</div>
+                <div class="county-item">Clayton County</div>
+                <div class="county-item">Cobb County</div>
+                <div class="county-item">Columbia County</div>
+                <div class="county-item">Coweta County</div>
+                <div class="county-item">DeKalb County</div>
+                <div class="county-item">Dougherty County</div>
+                <div class="county-item">Douglas County</div>
+                <div class="county-item">Fayette County</div>
+                <div class="county-item">Floyd County</div>
+                <div class="county-item">Forsyth County</div>
+                <div class="county-item">Fulton County</div>
+                <div class="county-item">Gwinnett County</div>
+                <div class="county-item">Hall County</div>
+                <div class="county-item">Henry County</div>
+                <div class="county-item">Houston County</div>
+                <div class="county-item">Laurens County</div>
+                <div class="county-item">Lowndes County</div>
+                <div class="county-item">Muscogee County</div>
+                <div class="county-item">Newton County</div>
+                <div class="county-item">Paulding County</div>
+                <div class="county-item">Richmond County</div>
+                <div class="county-item">Rockdale County</div>
+                <div class="county-item">Savannah-Chatham</div>
+                <div class="county-item">Troup County</div>
+                <div class="county-item">Whitfield County</div>
+            </div>
+
+            <p>
+                Each district includes verified dates for Fall Break, Thanksgiving Break, 
+                Christmas Break, Winter Break, Spring Break, and other school holidays 
+                through the 2028-2029 school year.
+            </p>
+        </div>
+
+        <div class="social-copy-box">
+            <span class="social-copy-label">Copy for Social Media</span>
+            <div class="social-copy-text" id="socialCopy1">BIG UPDATE for Georgia family law attorneys! 
+
+The Georgia Parenting Time Calculator now includes verified school calendars for 35 Georgia school districts with 739+ holidays through 2029.
+
+No more manually entering Spring Break, Christmas Break, or Fall Break dates - just select your client's school district and the dates auto-populate.
+
+Counties include: Fulton, Cobb, DeKalb, Gwinnett, Cherokee, Forsyth, Henry, Columbia, Richmond, Savannah-Chatham, and 25 more.
+
+Try it free: parentingtimecalendartool.com
+
+#GeorgiaLaw #FamilyLaw #ChildCustody #DivorceAttorney #GeorgiaAttorney #ParentingTime</div>
+            <button class="copy-btn" onclick="copyToClipboard('socialCopy1', this)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Copy Text
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(elementId, button) {
+    const text = document.getElementById(elementId).innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        button.classList.add('copied');
+        button.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!';
+        setTimeout(() => {
+            button.classList.remove('copied');
+            button.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Text';
+        }, 2000);
+    });
+}
+</script>
+{% endblock %}

@@ -3571,6 +3571,12 @@ def extract_school_calendar():
         return jsonify({'error': str(e), 'failed_at_step': step}), 500
 
 
+@main.route('/announcements')
+def announcements():
+    """Release announcements page - formatted for social media sharing."""
+    return render_template('announcements.html')
+
+
 @main.route('/privacy-policy')
 def privacy_policy():
     """Privacy Policy page."""
